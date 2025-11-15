@@ -1,0 +1,1 @@
+Acest proiect reprezintă dezvoltarea unei aplicații web moderne destinată unei cafenele. Platforma oferă funcționalități pentru prezentarea produselor, facilitarea interacțiunii cu clienții și administrarea internă de către personalul cafenelei.
