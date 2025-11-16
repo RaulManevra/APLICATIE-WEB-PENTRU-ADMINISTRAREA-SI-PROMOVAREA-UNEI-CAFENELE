@@ -1,0 +1,62 @@
+body{
+    margin:0;
+    font-family: sans-serif;
+}
+main{
+  margin-left: 20%;
+    padding: 0;
+    margin-top: 0;
+}
+.bgimg{
+    width: 90%;
+    min-height: 100vh;
+    margin-left:10%;
+    background-image: url("images/sny01074.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+.text{
+     position: absolute;
+    top: 0;
+    right: 0;           
+    width: 45%;          
+    height: 100%;        
+    background-color: rgba(255,165,0,0.5);
+    padding: 20px;
+    box-sizing: border-box;
+
+}
+.navbar h1{
+    color:white;
+    margin:0;
+    text-align: center;
+    padding-top:50px;
+}
+.navbar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:15%;
+    height:100vh;
+    float: left;
+    background-color: rgb(42, 14, 2);
+    padding:20px;
+    z-index:1;
+}
+.navbar ul{
+    list-style: none;
+    margin: 0;
+    padding-top:100px;
+}
+.navbar li a{
+    display:block;
+    padding:15px;
+    color:rgba(255, 255, 255, 0.67);
+    text-decoration:none;
+}
+.navbar li a:hover,.navbar a.active{
+    font-weight: bold;
+    color:white;
+}
