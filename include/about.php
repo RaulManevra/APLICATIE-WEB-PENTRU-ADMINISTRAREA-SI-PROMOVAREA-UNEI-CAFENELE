@@ -1,0 +1,3 @@
+<h2>This is the About page</h2>
+                <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laboriosam expedita fugit, eveniet consequuntur, ducimus distinctio voluptatem ratione a qui esse enim ipsa similique vel minus delectus. Neque corrupti animi voluptatum?</p>
+                <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laboriosam expedita fugit, eveniet consequuntur, ducimus distinctio voluptatem ratione a qui esse enim ipsa similique vel minus delectus. Neque corrupti animi voluptatum?</p>
