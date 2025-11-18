@@ -1,9 +1,10 @@
-<nav class="navbar">
+<div class="navbar">
     <h1>Mazi Coffee</h1>
+
     <ul>
-        <li><a href="?page=home" class="<?php echo ($page=='home') ? 'active' : '' ?>">Home</a></li>
-        <li><a href="?page=about" class="<?php echo ($page=='about') ? 'active' : '' ?>">About</a></li>
-        <li><a href="?page=menu" class="<?php echo ($page=='menu') ? 'active' : '' ?>">Menu</a></li>
-        <li><a href="?page=contact" class="<?php echo ($page=='contact') ? 'active' : '' ?>">Contact</a></li>
+        <li><a href="?page=home" class="nav-link" data-page="home">Home</a></li>
+        <li><a href="?page=about" class="nav-link" data-page="about">About</a></li>
+        <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
+        <li><a href="?page=contact" class="nav-link" data-page="contact">Contact</a></li>
     </ul>
-</nav>
+</div>
