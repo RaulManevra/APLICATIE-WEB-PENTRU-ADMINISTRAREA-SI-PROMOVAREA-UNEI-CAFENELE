@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Mazi Coffee</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -68,6 +68,6 @@
         loadPage(urlParams.get("page") || "home", false);
     });
     </script>
-<script src="script.js"></script>
+<script src="scripts/script.js"></script>
 </body>
 </html>
