@@ -1,7 +1,11 @@
-    <h2>Logare</h2>
+<form action="include/login_handler.php" method="post">
+    <input type="hidden" name="type" value="login">
 
-    <input id="email" type="email" placeholder="Email" required><br><br>
-    <input id="password" type="password" placeholder="Parola" required><br><br>
-    <button id="loginBtn">Login</button>
+    <label>Username or Email</label>
+    <input type="text" name="uname" required>
 
-    <p>Nu ai cont? <a href="register.html">Creează cont</a></p>
+    <label>Password</label>
+    <input type="password" name="psw" required>
+
+    <button type="submit">Login</button>
+</form>
