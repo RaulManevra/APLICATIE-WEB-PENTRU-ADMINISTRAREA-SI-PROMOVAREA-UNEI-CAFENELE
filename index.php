@@ -1,6 +1,3 @@
-<?php
-    
-?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,7 +8,7 @@
 
 <body>
 
-    <?php include 'header.php'; ?>
+    <?php include 'include/header.php'; ?>
 
     <div id="hero"></div>
 
