@@ -1,5 +1,5 @@
 <div class="navbar">
-    <h1>Mazi Coffee</h1>
+    <h1>Cafenea</h1>
 
     <ul>
         <li><a href="?page=home" class="nav-link" data-page="home">Home</a></li>
