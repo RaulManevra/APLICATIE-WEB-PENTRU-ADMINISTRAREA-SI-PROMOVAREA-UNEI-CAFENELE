@@ -2,19 +2,29 @@
 const app = document.getElementById("app");
 const hero = document.getElementById("hero");
 
+// CURRENT_USER is set initially by index.php as window.CURRENT_USER
+// It may be null or a string username.
+
 // ===== HERO SECTION UPDATE =====
 function updateHero(page) {
+    // ===== PLACEHOLDER: start hero transition (e.g. fade out) =====
+    // Example: hero.classList.add('fade-out');
+
     if (page === "home") {
+        let userText = window.CURRENT_USER ? `Welcome back, ${escapeHtml(window.CURRENT_USER)}!` : "Welcome to Mazi Coffee";
         hero.innerHTML = `
             <div class="content-wrapper">
                 <div class="bgimg">
-                    <div class="text">Welcome to Mazi Coffee </div>
+                    <div class="text">${userText}</div>
                 </div>
             </div>
         `;
     } else {
         hero.innerHTML = "";
     }
+
+    // ===== PLACEHOLDER: end hero transition (e.g. fade in) =====
+    // Example: setTimeout(() => hero.classList.remove('fade-out'), 200);
 }
 
 // ===== NAV LINK ACTIVE STATE =====
@@ -24,14 +34,28 @@ function setActiveLink(page) {
     });
 }
 
-// ===== LOAD PAGE VIA AJAX =====
+// ===== SAFE HTML ESCAPE (for client-side) =====
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
+
+// ===== LOAD PAGE VIA AJAX (returns a Promise) =====
 function loadPage(page, pushState = true) {
     return new Promise((resolve, reject) => {
         // ===== PLACEHOLDER: Start page transition / spinner animation here =====
-        // e.g., fade out current content or show loading spinner
+        // e.g. showSpinner();
 
         fetch(`include/${page}.php`)
-            .then(res => res.text())
+            .then(res => {
+                if (!res.ok) throw new Error('Network response was not ok');
+                return res.text();
+            })
             .then(html => {
                 app.innerHTML = html;
                 updateHero(page);
@@ -42,13 +66,13 @@ function loadPage(page, pushState = true) {
                 }
 
                 // ===== PLACEHOLDER: End page transition / fade-in animation here =====
-                // e.g., fade in new content, hide spinner
+                // e.g. hideSpinner();
 
-                resolve(); // resolves when page is fully loaded and updated
+                resolve();
             })
             .catch(() => {
                 app.innerHTML = "<h2>404 Page not found</h2>";
-                reject(); // reject on failure
+                reject();
             });
     });
 }
@@ -67,11 +91,6 @@ function showModal(message) {
         document.body.appendChild(modal);
         modal.querySelector(".close").onclick = () => modal.style.display = "none";
 
-        modal.addEventListener("click", e => {
-        if (e.target === modal) modal.style.display = "none";
-        });
-
-        // Basic modal styling (adjust in CSS)
         Object.assign(modal.style, {
             position: "fixed",
             top: 0,
@@ -85,7 +104,9 @@ function showModal(message) {
             zIndex: 9999,
             display: "none"
         });
-        Object.assign(modal.querySelector(".modal-content").style, {
+
+        const content = modal.querySelector(".modal-content");
+        Object.assign(content.style, {
             background: "#fff",
             padding: "20px",
             borderRadius: "8px",
@@ -93,17 +114,41 @@ function showModal(message) {
             textAlign: "center",
             position: "relative"
         });
-        Object.assign(modal.querySelector(".close").style, {
+
+        const closeBtn = modal.querySelector(".close");
+        Object.assign(closeBtn.style, {
             position: "absolute",
             top: "5px",
             right: "10px",
             cursor: "pointer",
             fontSize: "20px"
         });
+
+        // Close when clicking outside the content
+        modal.addEventListener("click", e => {
+            if (e.target === modal) modal.style.display = "none";
+        });
     }
 
     document.getElementById("modal-msg").innerText = message;
     modal.style.display = "flex";
+}
+
+// ===== REFRESH CURRENT USER FROM SERVER (updates window.CURRENT_USER and hero) =====
+async function refreshCurrentUser() {
+    try {
+        const res = await fetch('include/session.php', { cache: 'no-store' });
+        if (!res.ok) return; // keep existing user if request fails
+        const data = await res.json();
+        window.CURRENT_USER = data.username ?? null;
+        // Update hero immediately if on home
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentPage = urlParams.get("page") || 'home';
+        updateHero(currentPage);
+    } catch (err) {
+        // silently ignore; do not break UX
+        console.error('refreshCurrentUser error', err);
+    }
 }
 
 // ===== HANDLE FORM SUBMISSION VIA AJAX =====
@@ -121,7 +166,12 @@ document.addEventListener("submit", async e => {
             const data = await res.json();
 
             if (data.success) {
-                loadPage(data.redirect);
+                // Refresh server session info (username) before rendering hero
+                await refreshCurrentUser();
+
+                // ===== PLACEHOLDER: optional animation before navigation =====
+                await loadPage(data.redirect);
+                // ===== PLACEHOLDER: optional animation after navigation =====
             } else {
                 showModal(data.message);
             }
@@ -140,20 +190,25 @@ document.addEventListener("click", async e => {
 
         if (page === "logout") {
             try {
-                const res = await fetch('include/logout.php');
+                const res = await fetch('include/logout.php', { method: 'GET' });
                 const data = await res.json();
                 if (data.success) {
-                    // ===== PLACEHOLDER: Optional animation before redirect =====
+                    // Refresh user (should become null)
+                    await refreshCurrentUser();
+                    // ===== PLACEHOLDER: optional logout animation =====
                     await loadPage(data.redirect);
-                    // ===== PLACEHOLDER: Optional animation after redirect =====
+                } else {
+                    showModal("Logout failed.");
                 }
             } catch (err) {
+                console.error(err);
                 showModal("Logout failed. Try again.");
             }
-        } else {
-            // You can await this if you want chained animations
-            await loadPage(page);
+            return;
         }
+
+        // normal navigation
+        await loadPage(page);
     }
 });
 

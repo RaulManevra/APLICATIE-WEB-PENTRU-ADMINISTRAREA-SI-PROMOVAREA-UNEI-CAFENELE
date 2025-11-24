@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 23, 2025 at 03:01 PM
+-- Generation Time: Nov 24, 2025 at 10:23 AM
 -- Server version: 8.0.31
 -- PHP Version: 7.4.33
 
@@ -29,19 +29,19 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `users` (
   `id` int NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `username` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `role` enum('user','admin') COLLATE utf8mb4_general_ci DEFAULT 'user',
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` enum('user','admin') COLLATE utf8mb4_unicode_ci DEFAULT 'user',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `email`, `username`, `password`, `role`, `created_at`) VALUES
-(1, 'zarnescuraul@gmail.com', 'Raul', '$2y$10$vC3zPcBHRx2ixStjjYZjVuzu/BP3NptDEhs7sVu9wxYUyzNSI2CxO', 'admin', '2025-11-23 13:42:54');
+(1, 'zarnescuraul@gmail.com', NULL, '$2y$12$j09C55tliX7bS9ZCNMLFJuerVS.0DZ0pG/pgqVzLaFcFtYosnA8Iq', 'user', '2025-11-24 10:19:31');
 
 --
 -- Indexes for dumped tables

@@ -1,11 +1,15 @@
 <?php
-session_start();
-header('Content-Type: application/json');
-
+// include/login_handler.php
+declare(strict_types=1);
+require_once __DIR__ . '/security.php';
 require_once __DIR__ . '/db_config.php';
+require_once __DIR__ . '/csrf.php';
+require_once __DIR__ . '/output.php';
 
-function sendError($msg) {
-    echo json_encode(['success' => false, 'message' => $msg]);
+header('Content-Type: application/json; charset=utf-8');
+
+function sendError(string $msg) {
+    echo json_encode(['success' => false, 'message' => $msg], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -13,19 +17,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendError("Invalid request method.");
 }
 
+if (!verify_csrf()) {
+    sendError("Invalid session token (CSRF). Refresh page and try again.");
+}
+
 $uname = trim($_POST['uname'] ?? '');
 $psw = $_POST['psw'] ?? '';
 
-if (empty($uname) || empty($psw)) {
+if ($uname === '' || $psw === '') {
     sendError("All fields are required.");
 }
 
-// Try to find user by email or username
+// Find user by email or username using prepared statement
 $stmt = $conn->prepare("SELECT id, email, username, password, role FROM users WHERE email = ? OR username = ? LIMIT 1");
 $stmt->bind_param("ss", $uname, $uname);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
+$stmt->close();
 
 if (!$user) {
     sendError("User not found.");
@@ -35,13 +44,13 @@ if (!password_verify($psw, $user['password'])) {
     sendError("Incorrect password.");
 }
 
-// Login successful
+// Successful login
+session_regenerate_id(true);
 $_SESSION['user_id'] = $user['id'];
 $_SESSION['email'] = $user['email'];
 $_SESSION['username'] = $user['username'] ?? '';
-$_SESSION['role'] = $user['role'];
+$_SESSION['role'] = $user['role'] ?? 'user';
 
-echo json_encode(['success' => true, 'redirect' => 'home']);
-
-$stmt->close();
+echo json_encode(['success' => true, 'redirect' => 'home'], JSON_UNESCAPED_UNICODE);
 $conn->close();
+exit;

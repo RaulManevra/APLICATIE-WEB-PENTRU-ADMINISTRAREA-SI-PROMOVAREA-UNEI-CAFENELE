@@ -1,12 +1,12 @@
 <?php
+declare(strict_types=1);
+
 $host = "localhost";
-$user = "root";       
-$pass = "mysql";           
+$user = "root";
+$pass = "mysql";
 $dbname = "mazi_coffee";
 
-$conn = new mysqli($host, $user, $pass, $dbname);
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-if ($conn->connect_error) {
-    die("Conexiune esuata: " . $conn->connect_error);
-}
-?>
+$conn = new mysqli($host, $user, $pass, $dbname);
+$conn->set_charset('utf8mb4'); // important for XSS prevention and proper unicode
