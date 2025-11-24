@@ -8,6 +8,10 @@ Vezi de ce nu merge linia 14 din script.js\
 
 baga meniul in baza de date si fa sa se afiseze elementele in pagina de meniu (daca exista alta metoda mai buna, fa-o)
 
+.htaccess root — force HTTPS
+
+include/.htaccess — restrict direct access
+
 
 Ianis si Erwin:
 Design paginile de login si register
