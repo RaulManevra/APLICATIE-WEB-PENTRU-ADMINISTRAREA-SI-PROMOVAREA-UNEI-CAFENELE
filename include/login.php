@@ -2,7 +2,8 @@
 require_once __DIR__ . '/csrf.php';
 require_once __DIR__ . '/output.php';
 ?>
-<form action="include/login_handler.php" method="post" autocomplete="on">
+<div class="login-wrapper">
+<form class="login-box" action="include/login_handler.php" method="post" autocomplete="on">
     <input type="hidden" name="csrf_token" value="<?php echo e(csrf_token()); ?>">
 
     <label for="uname"><b>Username or Email</b></label>
@@ -13,3 +14,4 @@ require_once __DIR__ . '/output.php';
 
     <button type="submit">Login</button>
 </form>
+</div>

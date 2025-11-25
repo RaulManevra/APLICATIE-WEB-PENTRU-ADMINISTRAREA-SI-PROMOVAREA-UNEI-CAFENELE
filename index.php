@@ -9,6 +9,9 @@ $currentUser = $_SESSION['username'] ?? null;
     <meta charset="UTF-8">
     <title>Mazi Coffee</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="icons/css/fontawesome.min.css">
+    <link rel="stylesheet" href="icons/css/brands.min.css">
+
 </head>
 
 <body>
