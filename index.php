@@ -11,6 +11,8 @@ $currentUser = $_SESSION['username'] ?? null;
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="icons/css/fontawesome.min.css">
     <link rel="stylesheet" href="icons/css/brands.min.css">
+    <link rel="stylesheet" href="icons/css2/fontawesome.min.css">
+    <link rel="stylesheet" href="icons/css2/solid.min.css">
 
 </head>
 

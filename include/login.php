@@ -13,5 +13,8 @@ require_once __DIR__ . '/output.php';
     <input id="psw" type="password" name="psw" autocomplete="current-password" required>
 
     <button type="submit">Login</button>
+    <p style="margin-top:12px; color:#eaeaea;">
+        Don't have an account? <a href="?page=register">Register here</a>
+    </p>
 </form>
 </div>

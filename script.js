@@ -222,3 +222,70 @@ window.addEventListener("popstate", e => {
 // ===== INITIAL PAGE LOAD =====
 const urlParams = new URLSearchParams(window.location.search);
 loadPage(urlParams.get("page") || "home", false);
+
+function initProfilePopup() {
+    const btn = document.getElementById('profile-btn');
+    const popup = document.getElementById('profile-popup');
+    const loginBtn = document.getElementById('popup-login');
+    const registerBtn = document.getElementById('popup-register');
+    const closeBtn = document.getElementById('profile-close');
+
+    if (!btn || !popup) return;
+
+    const isHidden = (el) => el.hasAttribute('hidden');
+
+    function openPopup() {
+        popup.removeAttribute('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+    }
+    function closePopup() {
+        popup.setAttribute('hidden', '');
+        btn.setAttribute('aria-expanded', 'false');
+    }
+    function togglePopup(e) {
+        if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+        isHidden(popup) ? openPopup() : closePopup();
+    }
+
+    if (!btn._profileInit) {
+        btn.addEventListener('click', togglePopup);
+
+        // close when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!popup.contains(e.target) && e.target !== btn) closePopup();
+        });
+
+        // close on Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closePopup();
+        });
+
+        // Redirect actions
+        if (loginBtn) {
+            loginBtn.addEventListener('click', function () {
+                window.location.href = '?page=login';
+            });
+        }
+        if (registerBtn) {
+            registerBtn.addEventListener('click', function () {
+                window.location.href = '?page=register';
+            });
+        }
+
+        // Close button inside popup
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                closePopup();
+            });
+        }
+
+        btn._profileInit = true;
+    }
+}
+
+// call on DOMContentLoaded and also immediately if DOM already parsed
+document.addEventListener('DOMContentLoaded', initProfilePopup);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initProfilePopup();
+}
