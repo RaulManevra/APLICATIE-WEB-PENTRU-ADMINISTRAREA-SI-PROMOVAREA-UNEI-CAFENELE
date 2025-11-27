@@ -223,6 +223,7 @@ window.addEventListener("popstate", e => {
 const urlParams = new URLSearchParams(window.location.search);
 loadPage(urlParams.get("page") || "home", false);
 
+// ===== POP UP PROFILE MENU =====
 function initProfilePopup() {
     const btn = document.getElementById('profile-btn');
     const popup = document.getElementById('profile-popup');
@@ -232,15 +233,26 @@ function initProfilePopup() {
 
     if (!btn || !popup) return;
 
+    let backdrop = document.getElementById('profile-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = 'profile-backdrop';
+        document.body.appendChild(backdrop);
+    }
+
     const isHidden = (el) => el.hasAttribute('hidden');
 
     function openPopup() {
         popup.removeAttribute('hidden');
+        backdrop.classList.add('active');
         btn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
     }
     function closePopup() {
         popup.setAttribute('hidden', '');
+        backdrop.classList.remove('active');
         btn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
     }
     function togglePopup(e) {
         if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
@@ -249,6 +261,8 @@ function initProfilePopup() {
 
     if (!btn._profileInit) {
         btn.addEventListener('click', togglePopup);
+
+        backdrop.addEventListener('click', closePopup);
 
         // close when clicking outside
         document.addEventListener('click', function (e) {

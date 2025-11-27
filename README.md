@@ -19,3 +19,7 @@ Design paginile de login si register
 Design modal de erori
 
 Unde am pus PLACEHOLDER, puneti ce animatii simiti ca e nevoie (daca simitit ca e nevoie)
+
+SupaBase host
+Postgres 
+Laravel
