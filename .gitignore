@@ -1,0 +1,21 @@
+# Dependencies
+/vendor/
+
+# Environment and Config
+.env
+.env.local
+# config/db.php # Uncomment this if you want to ignore your local DB config
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+/logs/
+
+# System
+.DS_Store
+Thumbs.db

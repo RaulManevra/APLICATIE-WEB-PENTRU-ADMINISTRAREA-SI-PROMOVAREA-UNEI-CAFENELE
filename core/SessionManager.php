@@ -8,13 +8,15 @@ class SessionManager {
     public static function start(): void {
         if (session_status() === PHP_SESSION_NONE) {
             // Session cookie params — must be set before session_start()
-            $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
+            // Allow secure cookies if HTTPS OR if explicitly on localhost for testing (though browsers might block secure cookies on http://localhost)
+            // Better approach: Only set secure=true if actually on HTTPS.
+            $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
             
             session_set_cookie_params([
                 'lifetime' => 0,          // session cookie
                 'path' => '/',
                 'domain' => '',           // set if needed for subdomains
-                'secure' => $secure,      // true only on HTTPS
+                'secure' => $isHttps,     // true only on HTTPS
                 'httponly' => true,       // not accessible from JS
                 'samesite' => 'Lax'       // Lax is a reasonable default for SPA forms
             ]);

@@ -26,9 +26,21 @@ $currentUser = SessionManager::getCurrentUser();
     <main id="app"></main>
 
     <!-- Expose current user to JS safely -->
+    <!-- Expose app config to JS safely -->
     <script>
-        // CURRENT_USER is null when not logged in, or a string username when logged in
-        window.CURRENT_USER = <?php echo json_encode($currentUser, JSON_UNESCAPED_UNICODE); ?>;
+        window.APP_CONFIG = {
+            currentUser: <?php echo json_encode($currentUser, JSON_UNESCAPED_UNICODE); ?>,
+            routes: <?php echo json_encode([
+                'home' => 'views/pages/home.php',
+                'about' => 'views/pages/about.php',
+                'menu' => 'views/pages/menu.php',
+                'contact' => 'views/pages/contact.php',
+                'login' => 'views/auth/login.php',
+                'register' => 'views/auth/register.php'
+            ], JSON_UNESCAPED_UNICODE); ?>
+        };
+        // Backwards compatibility if needed, or just use APP_CONFIG.currentUser
+        window.CURRENT_USER = window.APP_CONFIG.currentUser; 
     </script>
 
     <script src="assets/js/script.js"></script>

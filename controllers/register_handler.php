@@ -22,7 +22,7 @@ if (!verify_csrf()) {
 }
 
 // Retrieve and validate
-// NOU: Preluam si username-ul
+// NEW: Retrieve username as well
 $username = trim($_POST['username'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $psw = $_POST['psw'] ?? '';
@@ -32,7 +32,7 @@ if ($username === '' || $email === '' || $psw === '' || $psw_repeat === '') {
     sendError("All fields are required.");
 }
 
-// NOU: Validam formatul username-ului (acelasi regex ca in HTML)
+// NEW: Validate username format (same regex as in HTML)
 if (!preg_match('/^[a-z_.]{3,15}$/', $username)) {
     sendError("Username invalid. Must be 3-15 lowercase characters (letters, dots, underscores).");
 }
@@ -45,14 +45,14 @@ if ($psw !== $psw_repeat) {
 }
 
 // Check existing email OR username
-// NOU: Verificam daca exista deja email-ul SAU username-ul
+// NEW: Check if email OR username already exists
 $stmt = $conn->prepare("SELECT id, email, username FROM users WHERE email = ? OR username = ?");
 $stmt->bind_param("ss", $email, $username);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($row = $result->fetch_assoc()) {
-    // Verificam care dintre ele exista deja pentru a da un mesaj clar
+    // Check which one already exists to give a clear message
     if ($row['email'] === $email) {
         $stmt->close();
         sendError("Email already registered.");
@@ -69,7 +69,7 @@ $options = ['cost' => 12];
 $hashedPassword = password_hash($psw, PASSWORD_BCRYPT, $options);
 
 // Insert user
-// NOU: Introducem si username-ul in baza de date
+// NEW: Insert username into database
 $stmt = $conn->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')");
 $stmt->bind_param("sss", $username, $email, $hashedPassword);
 
@@ -77,7 +77,7 @@ if ($stmt->execute()) {
     session_regenerate_id(true);
     $_SESSION['user_id'] = $stmt->insert_id;
     $_SESSION['email'] = $email;
-    // NOU: Salvam username-ul in sesiune
+    // NEW: Save username in session
     $_SESSION['username'] = $username;
     $_SESSION['role'] = 'user';
 

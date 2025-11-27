@@ -6,6 +6,9 @@ $user = "root";
 $pass = "mysql";
 $dbname = "mazi_coffee";
 
+// WARNING: Hardcoding credentials is not recommended for production.
+// Consider using environment variables or a separate config file outside the web root.
+
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $conn = new mysqli($host, $user, $pass, $dbname);

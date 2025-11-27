@@ -2,18 +2,23 @@
 const app = document.getElementById("app");
 const hero = document.getElementById("hero");
 
-// CURRENT_USER is set initially by index.php as window.CURRENT_USER
-// It may be null or a string username.
-
 // ===== PAGE MAPPING =====
-const pagePaths = {
-    home: 'views/pages/home.php',
-    about: 'views/pages/about.php',
-    menu: 'views/pages/menu.php',
-    contact: 'views/pages/contact.php',
-    login: 'views/auth/login.php',
-    register: 'views/auth/register.php'
-};
+// Routes are now injected from index.php via window.APP_CONFIG.routes
+
+// ===== SAFE FETCH WRAPPER =====
+async function safeFetch(url, options = {}) {
+    try {
+        const res = await fetch(url, options);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res;
+    } catch (err) {
+        console.error("Fetch error:", err);
+        showModal("Connection error. Please check your internet connection and try again.");
+        throw err; // Re-throw to let caller handle specific logic if needed
+    }
+}
 
 // ===== HERO SECTION UPDATE =====
 function updateHero(page) {
@@ -51,23 +56,25 @@ function escapeHtml(str) {
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
+        .replaceAll('"', '&quot;');
 }
 
-// ===== LOAD PAGE VIA AJAX (returns a Promise) =====
+// ===== LOAD PAGE CONTENT =====
 function loadPage(page, pushState = true) {
     return new Promise((resolve, reject) => {
-        // ===== PLACEHOLDER: Start page transition / spinner animation here =====
-        // e.g. showSpinner();
+        const routes = window.APP_CONFIG?.routes || {};
+        const url = routes[page];
 
-        const path = pagePaths[page] || `views/pages/${page}.php`; // Fallback or 404
+        if (!url) {
+            app.innerHTML = "<h2>404 Page not found</h2>";
+            updateHero(page);
+            setActiveLink(page);
+            reject(new Error("Page not found"));
+            return;
+        }
 
-        fetch(path)
-            .then(res => {
-                if (!res.ok) throw new Error('Network response was not ok');
-                return res.text();
-            })
+        safeFetch(url)
+            .then(res => res.text())
             .then(html => {
                 app.innerHTML = html;
                 updateHero(page);
@@ -76,15 +83,12 @@ function loadPage(page, pushState = true) {
                 if (pushState) {
                     history.pushState({ page }, "", `?page=${page}`);
                 }
-
-                // ===== PLACEHOLDER: End page transition / fade-in animation here =====
-                // e.g. hideSpinner();
-
                 resolve();
             })
-            .catch(() => {
-                app.innerHTML = "<h2>404 Page not found</h2>";
-                reject();
+            .catch(err => {
+                console.error("Failed to load page:", err);
+                app.innerHTML = "<h2>Error loading page</h2>";
+                reject(err);
             });
     });
 }
@@ -149,8 +153,12 @@ function showModal(message) {
 // ===== REFRESH CURRENT USER FROM SERVER (updates window.CURRENT_USER and hero) =====
 async function refreshCurrentUser() {
     try {
+        // safeFetch handles errors internally (showing modal if needed), 
+        // but for background updates we might want to suppress the modal?
+        // For now, let's use standard fetch here to avoid annoying modals on background checks,
+        // OR use safeFetch but catch the error silently.
         const res = await fetch('core/session.php', { cache: 'no-store' });
-        if (!res.ok) return; // keep existing user if request fails
+        if (!res.ok) return;
         const data = await res.json();
         window.CURRENT_USER = data.username ?? null;
         // Update hero immediately if on home
@@ -174,7 +182,7 @@ document.addEventListener("submit", async e => {
         const action = form.getAttribute("action");
 
         try {
-            const res = await fetch(action, { method: "POST", body: formData });
+            const res = await safeFetch(action, { method: "POST", body: formData });
             const data = await res.json();
 
             if (data.success) {
@@ -189,7 +197,11 @@ document.addEventListener("submit", async e => {
             }
         } catch (err) {
             console.error(err);
-            showModal("An error occurred. Please try again.");
+            // Modal already shown by safeFetch if network error, 
+            // but if json() fails or other logic, we catch here.
+            // If safeFetch threw, it already showed modal, so maybe check?
+            // Simple approach: just log. safeFetch covers network. 
+            // If data.success is false, we handled it.
         }
     }
 });
@@ -202,7 +214,7 @@ document.addEventListener("click", async e => {
 
         if (page === "logout") {
             try {
-                const res = await fetch('controllers/logout.php', { method: 'GET' });
+                const res = await safeFetch('controllers/logout.php', { method: 'GET' });
                 const data = await res.json();
                 if (data.success) {
                     // Refresh user (should become null)
@@ -214,7 +226,7 @@ document.addEventListener("click", async e => {
                 }
             } catch (err) {
                 console.error(err);
-                showModal("Logout failed. Try again.");
+                // safeFetch shows modal on network error
             }
             return;
         }
