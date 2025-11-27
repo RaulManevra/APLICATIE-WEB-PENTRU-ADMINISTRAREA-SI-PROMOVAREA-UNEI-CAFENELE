@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/include/security.php'; // starts session and sets secure cookie params
+require_once __DIR__ . '/core/security.php'; // starts session and sets secure cookie params
 
 
 $currentUser = SessionManager::getCurrentUser();
@@ -9,17 +9,17 @@ $currentUser = SessionManager::getCurrentUser();
 <head>
     <meta charset="UTF-8">
     <title>Mazi Coffee</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="icons/css/fontawesome.min.css">
-    <link rel="stylesheet" href="icons/css/brands.min.css">
-    <link rel="stylesheet" href="icons/css2/fontawesome.min.css">
-    <link rel="stylesheet" href="icons/css2/solid.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/icons/css/fontawesome.min.css">
+    <link rel="stylesheet" href="assets/icons/css/brands.min.css">
+    <link rel="stylesheet" href="assets/icons/css2/fontawesome.min.css">
+    <link rel="stylesheet" href="assets/icons/css2/solid.min.css">
 
 </head>
 
 <body>
 
-    <?php include 'include/header.php'; ?>
+    <?php include 'views/partials/header.php'; ?>
 
     <div id="hero"></div>
 
@@ -31,6 +31,6 @@ $currentUser = SessionManager::getCurrentUser();
         window.CURRENT_USER = <?php echo json_encode($currentUser, JSON_UNESCAPED_UNICODE); ?>;
     </script>
 
-    <script src="script.js"></script>
+    <script src="assets/js/script.js"></script>
 </body>
 </html>
