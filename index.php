@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/include/security.php'; // starts session and sets secure cookie params
 
-$currentUser = $_SESSION['username'] ?? null;
+
+$currentUser = SessionManager::getCurrentUser();
 ?>
 <!DOCTYPE html>
 <html>
