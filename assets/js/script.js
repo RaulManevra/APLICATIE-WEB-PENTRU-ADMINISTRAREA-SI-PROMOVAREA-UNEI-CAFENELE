@@ -308,30 +308,32 @@ function initProfilePopup() {
         popup.removeAttribute('hidden');
         backdrop.classList.add('active');
         btn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
     }
 
     const sbw = getScrollbarWidth();
-        if (sbw > 0) {
-            previousBodyPaddingRight = document.body.style.paddingRight || '';
-            document.body.style.paddingRight = `${sbw}px`;
-            scrollCompApplied = true;
-        }
-        // disable scroll on root element to avoid jump
-        document.documentElement.style.overflow = 'hidden';
-    
+    if (sbw > 0) {
+        previousBodyPaddingRight = document.body.style.paddingRight || '';
+        document.body.style.paddingRight = `${sbw}px`;
+        scrollCompApplied = true;
+    }
+    // disable scroll on root element to avoid jump
+    document.documentElement.style.overflow = 'hidden';
+
     function closePopup() {
         popup.setAttribute('hidden', '');
         backdrop.classList.remove('active');
         btn.setAttribute('aria-expanded', 'false');
-    
 
-    // restore padding if applied and re-enable scroll
+
+        // restore padding if applied and re-enable scroll
         if (scrollCompApplied) {
             document.body.style.paddingRight = previousBodyPaddingRight;
             scrollCompApplied = false;
             previousBodyPaddingRight = '';
         }
         document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
     }
 
     function togglePopup(e) {
