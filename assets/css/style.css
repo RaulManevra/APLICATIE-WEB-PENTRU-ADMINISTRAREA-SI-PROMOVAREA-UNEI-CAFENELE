@@ -637,15 +637,13 @@ profile-li {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9;
-    /* under .profile-popup (9999) */
+    background: rgba(0,0,0,0.5);
+    z-index: 9; /* under .profile-popup (9999) */
     display: none;
     transition: opacity 180ms ease;
     opacity: 0;
     pointer-events: none;
 }
-
 #profile-backdrop.active {
     display: block;
     opacity: 1;
@@ -654,32 +652,20 @@ profile-li {
 
 /* small-screen adjustments */
 @media screen and (max-width: 768px) {
-    .profile-li {
-        margin-bottom: 6px;
-    }
-
-    .profile-popup {
-        left: 50%;
-        transform: translateX(-50%);
-    }
-
+    .profile-li { margin-bottom: 6px; }
+    .profile-popup { left: 50%; transform: translateX(-50%); }
     #profile-backdrop {
         left: 0;
         width: 100%;
-        z-index: 9;
-        /* behind navbar (10) so navbar is not darkened */
+        z-index: 9; /* behind navbar (10) so navbar is not darkened */
     }
-
+    
 }
-
 @media screen and (min-width: 769px) and (max-width: 900px) {
     .navbar {
-        width: 20%;
-        /* increase from 15% to give more room */
-        min-width: 160px;
-        /* ensure it never becomes too small for items */
+        width: 20%;         /* increase from 15% to give more room */
+        min-width: 160px;   /* ensure it never becomes too small for items */
     }
-
     #profile-backdrop {
         left: 15%;
         width: calc(100% - 15%);

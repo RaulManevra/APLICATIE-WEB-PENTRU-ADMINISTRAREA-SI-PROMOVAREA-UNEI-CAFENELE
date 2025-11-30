@@ -144,7 +144,40 @@ function showModal(message) {
         modal.addEventListener("click", e => {
             if (e.target === modal) modal.style.display = "none";
         });
+        // attach close button behavior (will use closeModal defined below)
+        closeBtn.addEventListener("click", closeModal);
     }
+
+    // centralized close handler that also removes the Escape listener
+    function closeModal() {
+        if (!modal) return;
+        modal.style.display = "none";
+        // remove escape listener if attached
+        if (modal._escHandler) {
+            document.removeEventListener("keydown", modal._escHandler);
+            modal._escHandler = null;
+        }
+    }
+
+    // attach Escape handler (ensure only one listener is active)
+    if (!modal._escHandler) {
+        modal._escHandler = function (e) {
+            if (e.key === "Escape" || e.key === "Esc") {
+                closeModal();
+            }
+        };
+        document.addEventListener("keydown", modal._escHandler);
+    }
+
+    // set message and show
+    const msgEl = document.getElementById("modal-msg");
+    if (msgEl) msgEl.innerText = message;
+    modal.style.display = "flex";
+
+    // move focus into modal for accessibility
+    const content = modal.querySelector(".modal-content");
+    if (content) content.focus?.();
+
 
     document.getElementById("modal-msg").innerText = message;
     modal.style.display = "flex";
@@ -264,20 +297,43 @@ function initProfilePopup() {
         document.body.appendChild(backdrop);
     }
 
+    let scrollCompApplied = false;
+    let previousBodyPaddingRight = '';
+
+    const getScrollbarWidth = () => window.innerWidth - document.documentElement.clientWidth;
+
     const isHidden = (el) => el.hasAttribute('hidden');
 
     function openPopup() {
         popup.removeAttribute('hidden');
         backdrop.classList.add('active');
         btn.setAttribute('aria-expanded', 'true');
-        document.body.style.overflow = 'hidden';
     }
+
+    const sbw = getScrollbarWidth();
+        if (sbw > 0) {
+            previousBodyPaddingRight = document.body.style.paddingRight || '';
+            document.body.style.paddingRight = `${sbw}px`;
+            scrollCompApplied = true;
+        }
+        // disable scroll on root element to avoid jump
+        document.documentElement.style.overflow = 'hidden';
+    
     function closePopup() {
         popup.setAttribute('hidden', '');
         backdrop.classList.remove('active');
         btn.setAttribute('aria-expanded', 'false');
-        document.body.style.overflow = '';
+    
+
+    // restore padding if applied and re-enable scroll
+        if (scrollCompApplied) {
+            document.body.style.paddingRight = previousBodyPaddingRight;
+            scrollCompApplied = false;
+            previousBodyPaddingRight = '';
+        }
+        document.documentElement.style.overflow = '';
     }
+
     function togglePopup(e) {
         if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
         isHidden(popup) ? openPopup() : closePopup();
