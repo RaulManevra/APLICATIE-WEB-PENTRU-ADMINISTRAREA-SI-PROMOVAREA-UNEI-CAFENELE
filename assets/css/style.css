@@ -20,19 +20,25 @@ body {
 }
 
 main {
-    margin-left: 15%;
-    padding-left: 0px;
-
+    margin-top: 0; /* already accounted for by .content-wrapper */
+    padding-left: 0;
 }
 
 .bgimg {
-    position: relative;
+    position:relative;
     width: 100%;
-    height: 100vh;
+    height:100hv;   /* fill screen UNDER navbar */
+    margin-top:0;            /* push hero below fixed navbar */
     background-image: url("../img/sny01074_.jpeg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    background-attachment: scroll;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;          /* normal flow */
+    z-index: 0;
 }
 
 .text {
@@ -41,10 +47,56 @@ main {
     right: 0;
     width: 45%;
     height: 100%;
+    max-width: 680px;
+    min-width: 280px;
     background-color: rgba(255, 165, 0, 0.5);
     padding: 20px;
     box-sizing: border-box;
     overflow: auto;
+    border-radius: 8px;
+}
+.home-box {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+#app h2 {
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2a0e02;           /* coffee brown */
+    letter-spacing: 1px;
+}
+
+#app p {
+    max-width: 900px;
+    margin: 0 auto 18px;
+    font-size: 18px;
+    line-height: 1.7;
+    color: #333;
+}
+@media screen and (max-width: 900px) {
+    .bgimg {
+        min-height: calc(100vh - 72px); /* allow for fixed top navbar on mobile */
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+
+    .content-wrapper {
+        margin-top: 88px;
+    }
+}
+@media screen and (min-width: 901px) {
+    .bgimg {
+        position: fixed;
+        top: 72px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 72px);
+        min-height: auto;
+        z-index: -1;
+    }
 }
 
 

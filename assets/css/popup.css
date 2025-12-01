@@ -41,12 +41,9 @@ span.psw {
 }
 
 .profile-li {
-    width: 100%;
-    display: flex;
-    justify-content: center;
+    display: inline-flex;
+    align-items: center;
     position: relative;
-    /* anchor for popup */
-    padding-bottom: 6px;
 }
 
 .profile-icon {
@@ -230,6 +227,22 @@ span.psw {
         z-index: 9;
         /* behind navbar (10) so navbar is not darkened */
     }
+    .navbar {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+    .navbar ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        order: 3;
+        padding-top: 8px;
+    }
+    .social-icons { order: 2; width: auto; }
+    .navbar h1 { order: 1; width: 100%; text-align: center; margin-bottom: 6px; }
+    .profile-popup { right: 12px; top: calc(100% + 8px); position: absolute; }
 
 }
 

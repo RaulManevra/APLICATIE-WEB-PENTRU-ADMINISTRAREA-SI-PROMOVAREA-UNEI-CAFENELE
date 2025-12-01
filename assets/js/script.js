@@ -2,6 +2,7 @@
 const app = document.getElementById("app");
 const hero = document.getElementById("hero");
 
+
 // ===== PAGE MAPPING =====
 // Routes are now injected from index.php via window.APP_CONFIG.routes
 
@@ -379,3 +380,7 @@ document.addEventListener('DOMContentLoaded', initProfilePopup);
 if (document.readyState === 'interactive' || document.readyState === 'complete') {
     initProfilePopup();
 }
+document.addEventListener('DOMContentLoaded', function () {
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+});
