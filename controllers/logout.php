@@ -1,6 +1,6 @@
 <?php
 // include/logout.php
-require_once __DIR__ . '/security.php';
+require_once __DIR__ . '/../core/security.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $_SESSION = [];

@@ -1,6 +1,5 @@
-
 body {
-    margin:0;
+    margin: 0;
     font-family: sans-serif;
     display: flex;
     height: 100vh;
@@ -8,16 +7,19 @@ body {
     overflow-x: hidden;
     box-sizing: border-box;
 }
-*{
+
+* {
     box-sizing: inherit;
 }
-.social-icons{
-  display:flex;
-  flex-direction: row;
-  gap:15px;
-  padding-bottom:10px;
+
+.social-icons {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    padding-bottom: 10px;
 
 }
+
 .social-icons a {
     font-size: 25px;
     color: #eaeaea;
@@ -25,6 +27,7 @@ body {
     display: inline-block;
     transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
 .social-icons a:hover {
     transform: scale(1.3);
 }
@@ -38,39 +41,40 @@ body {
 .navbar {
     width: 15%;
     height: 100vh;
-    background-color: rgb(42,14,2);
+    background-color: rgb(42, 14, 2);
     padding: 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    position:fixed;
+    position: fixed;
     z-index: 10;
 }
 
 .navbar h1 {
-    color: rgb(231,231,231);
+    color: rgb(231, 231, 231);
     margin: 0;
     padding-top: 50px;
     text-align: center;
 }
 
 .navbar ul {
-    display:flex;
+    display: flex;
     flex-direction: column;
     align-items: center;
     list-style: none;
     padding: 80px 0 0 0;
     width: 100%;
-    gap:10px;
+    gap: 10px;
     flex-grow: 1;
-    margin:0;
+    margin: 0;
 }
-.navbar li{
-    width:100%;
-    display:flex;
-    justify-content:center;
+
+.navbar li {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .navbar li a {
@@ -79,7 +83,7 @@ body {
     align-items: center;
     width: auto;
     padding: 12px 25px;
-    color: rgba(255,255,255,0.67);
+    color: rgba(255, 255, 255, 0.67);
     text-decoration: none;
     transition: color 0.2s ease, transform 0.3s ease, background-color 0.25s ease;
     font-size: 16px;
@@ -88,14 +92,14 @@ body {
     min-width: 120px;
     box-sizing: border-box;
     will-change: transform;
-    -webkit-font-smoothing:antialiased;
+    -webkit-font-smoothing: antialiased;
 }
 
 .navbar li a:not(.active):hover {
     font-weight: bold;
-    background:rgb(87, 52, 14);
-    border-radius:20px;
-    min-width:120px;
+    background: rgb(87, 52, 14);
+    border-radius: 20px;
+    min-width: 120px;
     color: rgb(219, 219, 219);
     transform: translateX(10px);
     transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
@@ -109,27 +113,28 @@ body {
     box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
     display: flex;
     justify-content: center;
-    align-items:center;
-    min-width:120px;
+    align-items: center;
+    min-width: 120px;
 }
-.content-wrapper{
-    display:flex;
+
+.content-wrapper {
+    display: flex;
     flex-direction: column;
-    margin-left:15%;
+    margin-left: 15%;
     width: 85%;
 }
 
 main {
-    margin-left:15%;
-    padding-left:0px;
-   
+    margin-left: 15%;
+    padding-left: 0px;
+
 }
 
 .bgimg {
     position: relative;
     width: 100%;
     height: 100vh;
-    background-image: url("images/sny01074_.jpeg");
+    background-image: url("../img/sny01074_.jpeg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -141,11 +146,12 @@ main {
     right: 0;
     width: 45%;
     height: 100%;
-    background-color: rgba(255,165,0,0.5);
+    background-color: rgba(255, 165, 0, 0.5);
     padding: 20px;
     box-sizing: border-box;
     overflow: auto;
 }
+
 @media (hover: hover) and (pointer: fine) {
     .navbar li a:not(.active):hover {
         /* avoid font-weight changes (keeps glyph width stable) */
@@ -169,8 +175,8 @@ main {
     }
 
     .navbar {
-        position:relative;
-        display:flex;
+        position: relative;
+        display: flex;
         flex-direction: column;
         width: 100%;
         height: auto;
@@ -182,16 +188,18 @@ main {
     .navbar ul {
         display: flex;
         flex-wrap: wrap;
-        flex-direction:row;
+        flex-direction: row;
         justify-content: center;
-        gap:8px;
+        gap: 8px;
         padding-top: 10px;
     }
+
     .navbar li {
         width: auto;
         display: inline-flex;
         justify-self: center;
     }
+
     .navbar li a,
     .navbar li a:not(.active):hover,
     .profile-icon:hover {
@@ -207,8 +215,8 @@ main {
     .bgimg {
         width: 100vw;
         height: 60vh;
-        margin-left:0;
-        position:relative;
+        margin-left: 0;
+        position: relative;
     }
 
     .text {
@@ -217,16 +225,19 @@ main {
         height: auto;
         margin: 10px auto;
     }
-     .content-wrapper,
+
+    .content-wrapper,
     main,
     .bgimg {
-        margin-left: 0; 
+        margin-left: 0;
     }
+
     .social-icons {
         gap: 10px;
     }
-    .social-icons a{
-      font-size:20px;
+
+    .social-icons a {
+        font-size: 20px;
     }
 }
 
@@ -236,44 +247,50 @@ main {
 .login-wrapper {
     display: flex;
     justify-content: center;
-    align-items: center;  
+    align-items: center;
     height: 100vh;
-    width: 100%;         
-    background-image: url(images/9698231_resized.jpg);
+    width: 100%;
+    background-image: url("../img/9698231_resized.jpg");
     background-size: cover;
-    background-position:center;
+    background-position: center;
     background-repeat: no-repeat;
     box-sizing: border-box;
-    margin:0;
-    padding:0;
+    margin: 0;
+    padding: 0;
 
 }
+
 .login-wrapper::before {
     content: '';
     position: absolute;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.677); /* white overlay at 40% opacity */
+    background-color: rgba(0, 0, 0, 0.677);
+    /* white overlay at 40% opacity */
     z-index: 0;
 }
-.login-box p{
-    padding-top:20px;
+
+.login-box p {
+    padding-top: 20px;
     font-size: 18px;
     font-family: sans-serif;
     letter-spacing: 1px;
     font-weight: 600;
 }
-.login-box a{
-    text-decoration:none;
-    color:rgb(255, 204, 168)
+
+.login-box a {
+    text-decoration: none;
+    color: rgb(255, 204, 168)
 }
-.login-box a:hover{
-    text-decoration:underline;
+
+.login-box a:hover {
+    text-decoration: underline;
 }
 
 .login-wrapper .login-box {
-    display:flex;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -283,11 +300,12 @@ main {
     border: 2px solid #1a191d;
     border-radius: 10px;
     background-color: #222228;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     font-size: 20px;
     letter-spacing: 1px;
-    z-index:1;
+    z-index: 1;
 }
+
 #app .login-box label {
     display: block;
     color: #e5e5e5;
@@ -300,9 +318,10 @@ main {
     padding: 12px 15px;
     margin-bottom: 25px;
     border-radius: 5px;
-    border:0;
+    border: 0;
     background-color: #3e3e4d;
-    color: #ededed; /* text color */
+    color: #ededed;
+    /* text color */
     font-size: 18px;
     box-sizing: border-box;
     transition: border 0.3s, box-shadow 0.3s;
@@ -321,7 +340,7 @@ main {
     color: rgb(30, 29, 35);
     font-size: 20px;
     font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     letter-spacing: 1px;
     padding: 12px;
     border: none;
@@ -333,49 +352,57 @@ main {
 #app .login-box button:hover {
     background-color: #ffdbb5;
 }
+
 @media screen and (max-width: 400px) {
     #app .login-box {
         margin: 20px;
         padding: 20px;
     }
 }
+
 .register-wrapper {
     display: flex;
     justify-content: center;
-    align-items: center;  
+    align-items: center;
     height: 100vh;
-    width: 100%;         
-    background-image: url(images/9698231_resized.jpg);
+    width: 100%;
+    background-image: url("../img/9698231_resized.jpg");
     background-size: cover;
-    background-position:center;
+    background-position: center;
     background-repeat: no-repeat;
     box-sizing: border-box;
-    margin:0;
-    padding:0;
+    margin: 0;
+    padding: 0;
 
 }
+
 .register-wrapper::before {
     content: '';
     position: absolute;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.677); /* white overlay at 40% opacity */
+    background-color: rgba(0, 0, 0, 0.677);
+    /* white overlay at 40% opacity */
     z-index: 0;
 }
-.register-box p{
-    padding-top:20px;
+
+.register-box p {
+    padding-top: 20px;
     font-size: 18px;
     font-family: sans-serif;
-    letter-spacing: 1px;;
+    letter-spacing: 1px;
+    ;
 }
-.register-box a{
+
+.register-box a {
     text-decoration: none;
-    color:rgb(255, 204, 168)
+    color: rgb(255, 204, 168)
 }
 
 .register-wrapper .register-box {
-    display:flex;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -385,11 +412,12 @@ main {
     border: 2px solid #1a191d;
     border-radius: 10px;
     background-color: #222228;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     font-size: 20px;
     letter-spacing: 1px;
-    z-index:1;
+    z-index: 1;
 }
+
 #app .register-box label {
     display: block;
     color: #e5e5e5;
@@ -403,9 +431,10 @@ main {
     padding: 12px 15px;
     margin-bottom: 25px;
     border-radius: 5px;
-    border:0;
+    border: 0;
     background-color: #3e3e4d;
-    color: #ededed; /* text color */
+    color: #ededed;
+    /* text color */
     font-size: 18px;
     box-sizing: border-box;
     transition: border 0.3s, box-shadow 0.3s;
@@ -421,11 +450,12 @@ main {
 
 #app .register-box button {
     width: 100%;
-    background-color: #dbdddb; /* coffee brown */
+    background-color: #dbdddb;
+    /* coffee brown */
     color: rgb(30, 29, 35);
     font-size: 20px;
     font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     letter-spacing: 1px;
     padding: 12px;
     border: none;
@@ -437,6 +467,7 @@ main {
 #app .register-box button:hover {
     background-color: #ffdbb5;
 }
+
 @media screen and (max-width: 400px) {
     #app .register-box {
         margin: 20px;
@@ -446,57 +477,59 @@ main {
 
 /* Extra style for the cancel button (red) */
 .cancelbtn {
-  width: auto;
-  padding: 10px 18px;
-  background-color: #f44336;
+    width: auto;
+    padding: 10px 18px;
+    background-color: #f44336;
 }
 
 /* Center the avatar image inside this container */
 .imgcontainer {
-  text-align: center;
-  margin: 24px 0 12px 0;
+    text-align: center;
+    margin: 24px 0 12px 0;
 }
 
 /* Avatar image */
 img.avatar {
-  width: 40%;
-  border-radius: 50%;
+    width: 40%;
+    border-radius: 50%;
 }
 
 /* Add padding to containers */
 .container {
-  padding: 16px;
+    padding: 16px;
 }
 
 /* The "Forgot password" text */
 span.psw {
-  float: right;
-  padding-top: 16px;
+    float: right;
+    padding-top: 16px;
 }
 
 /* Change styles for span and cancel button on extra small screens */
 @media screen and (max-width: 300px) {
-  span.psw {
-    display: block;
-    float: none;
-  }
-  .cancelbtn {
-    width: 100%;
-  }
+    span.psw {
+        display: block;
+        float: none;
+    }
+
+    .cancelbtn {
+        width: 100%;
+    }
 }
 
 profile-li {
     width: 100%;
     display: flex;
     justify-content: center;
-    position: relative; /* anchor for popup */
+    position: relative;
+    /* anchor for popup */
     padding-bottom: 6px;
 }
 
 .profile-icon {
     background: transparent;
     border: none;
-    color: rgba(255,255,255,0.67);
+    color: rgba(255, 255, 255, 0.67);
     font-size: 35px;
     cursor: pointer;
     padding: 8px;
@@ -505,17 +538,19 @@ profile-li {
 }
 
 .profile-icon:hover {
-    background: rgb(87,52,14);
+    background: rgb(87, 52, 14);
     color: #fff;
     transform: translateX(6px);
 }
 
 /* popup */
 .profile-popup {
-    position: fixed;               /* place relative to viewport */
+    position: fixed;
+    /* place relative to viewport */
     top: 50%;
     left: 56%;
-    transform: translate(-50%, -50%); /* center exactly */
+    transform: translate(-50%, -50%);
+    /* center exactly */
     background-color: #222228;
     color: #eaeaea;
     border: 1px solid #1a191d;
@@ -523,9 +558,11 @@ profile-li {
     padding: 30px 10px 30px;
     width: 350px;
     max-width: calc(100% - 40px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
-    z-index: 9999;                /* ensure it sits above the navbar */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    /* ensure it sits above the navbar */
 }
+
 .profile-popup[hidden] {
     display: none;
 }
@@ -536,17 +573,19 @@ profile-li {
     justify-content: center;
     align-items: center;
     gap: 25px;
-    padding:20px;
-    font-weight:bold;
+    padding: 20px;
+    font-weight: bold;
 }
-.profile-popup-content button{
+
+.profile-popup-content button {
     text-transform: uppercase;
     letter-spacing: 1px;
-    width:150px;
+    width: 150px;
     transition: 0.6s ease;
-    font-weight:bold;
+    font-weight: bold;
 }
-.profile-popup .profile-close{
+
+.profile-popup .profile-close {
     position: absolute;
     top: 12px;
     right: 12px;
@@ -556,16 +595,17 @@ profile-li {
     font-size: 26px;
     cursor: pointer;
     padding: 0;
-    width:28px;
-    height:28px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    display:flex;
+    display: flex;
     justify-content: center;
     align-items: center;
     line-height: 1;
     transition: background 0.15s ease;
     z-index: 10000;
 }
+
 .profile-popup .profile-close:hover {
     background: #ff0000;
     color: #fff;
@@ -608,21 +648,79 @@ profile-li {
     pointer-events: auto;
 }
 
+#profile-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9;
+    /* under .profile-popup (9999) */
+    display: none;
+    transition: opacity 180ms ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#profile-backdrop.active {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#profile-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9;
+    /* under .profile-popup (9999) */
+    display: none;
+    transition: opacity 180ms ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#profile-backdrop.active {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+}
+
 /* small-screen adjustments */
 @media screen and (max-width: 768px) {
-    .profile-li { margin-bottom: 6px; }
-    .profile-popup { left: 50%; transform: translateX(-50%); }
+    .profile-li {
+        margin-bottom: 6px;
+    }
+
+    .profile-popup {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
     #profile-backdrop {
         left: 0;
         width: 100%;
-        z-index: 9; /* behind navbar (10) so navbar is not darkened */
+        z-index: 9;
+        /* behind navbar (10) so navbar is not darkened */
     }
-    
+
 }
+
 @media screen and (min-width: 769px) and (max-width: 900px) {
     .navbar {
-        width: 20%;         /* increase from 15% to give more room */
-        min-width: 160px;   /* ensure it never becomes too small for items */
+        width: 20%;
+        /* increase from 15% to give more room */
+        min-width: 160px;
+        /* ensure it never becomes too small for items */
+    }
+
+    #profile-backdrop {
+        left: 15%;
+        width: calc(100% - 15%);
     }
     #profile-backdrop {
         left: 15%;

@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/csrf.php';
-require_once __DIR__ . '/output.php';
+require_once __DIR__ . '/../../core/csrf.php';
+require_once __DIR__ . '/../../core/output.php';
 ?>
 <div class="register-wrapper">
-<form class="register-box" action="include/register_handler.php" method="post" autocomplete="on">
+<form class="register-box" action="controllers/register_handler.php" method="post" autocomplete="on">
     <input type="hidden" name="csrf_token" value="<?php echo e(csrf_token()); ?>">
 
     <label for="username"><b>Username</b></label>

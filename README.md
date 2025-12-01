@@ -1,5 +1,3 @@
-To Do:
-
 Rares:
 
 baga meniul in baza de date si fa sa se afiseze elementele in pagina de meniu (daca exista alta metoda mai buna, fa-o)

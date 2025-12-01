@@ -4,7 +4,7 @@ require_once __DIR__ . '/security.php'; // ensures session is started and secure
 
 header('Content-Type: application/json; charset=utf-8');
 
-$username = $_SESSION['username'] ?? null;
+$username = SessionManager::getCurrentUser();
 
 echo json_encode([
     'username' => $username

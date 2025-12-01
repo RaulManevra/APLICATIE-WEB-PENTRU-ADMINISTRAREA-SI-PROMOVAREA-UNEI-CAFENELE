@@ -2,8 +2,23 @@
 const app = document.getElementById("app");
 const hero = document.getElementById("hero");
 
-// CURRENT_USER is set initially by index.php as window.CURRENT_USER
-// It may be null or a string username.
+// ===== PAGE MAPPING =====
+// Routes are now injected from index.php via window.APP_CONFIG.routes
+
+// ===== SAFE FETCH WRAPPER =====
+async function safeFetch(url, options = {}) {
+    try {
+        const res = await fetch(url, options);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res;
+    } catch (err) {
+        console.error("Fetch error:", err);
+        showModal("Connection error. Please check your internet connection and try again.");
+        throw err; // Re-throw to let caller handle specific logic if needed
+    }
+}
 
 // ===== HERO SECTION UPDATE =====
 function updateHero(page) {
@@ -41,21 +56,25 @@ function escapeHtml(str) {
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
+        .replaceAll('"', '&quot;');
 }
 
-// ===== LOAD PAGE VIA AJAX (returns a Promise) =====
+// ===== LOAD PAGE CONTENT =====
 function loadPage(page, pushState = true) {
     return new Promise((resolve, reject) => {
-        // ===== PLACEHOLDER: Start page transition / spinner animation here =====
-        // e.g. showSpinner();
+        const routes = window.APP_CONFIG?.routes || {};
+        const url = routes[page];
 
-        fetch(`include/${page}.php`)
-            .then(res => {
-                if (!res.ok) throw new Error('Network response was not ok');
-                return res.text();
-            })
+        if (!url) {
+            app.innerHTML = "<h2>404 Page not found</h2>";
+            updateHero(page);
+            setActiveLink(page);
+            reject(new Error("Page not found"));
+            return;
+        }
+
+        safeFetch(url)
+            .then(res => res.text())
             .then(html => {
                 app.innerHTML = html;
                 updateHero(page);
@@ -64,15 +83,12 @@ function loadPage(page, pushState = true) {
                 if (pushState) {
                     history.pushState({ page }, "", `?page=${page}`);
                 }
-
-                // ===== PLACEHOLDER: End page transition / fade-in animation here =====
-                // e.g. hideSpinner();
-
                 resolve();
             })
-            .catch(() => {
-                app.innerHTML = "<h2>404 Page not found</h2>";
-                reject();
+            .catch(err => {
+                console.error("Failed to load page:", err);
+                app.innerHTML = "<h2>Error loading page</h2>";
+                reject(err);
             });
     });
 }
@@ -128,7 +144,40 @@ function showModal(message) {
         modal.addEventListener("click", e => {
             if (e.target === modal) modal.style.display = "none";
         });
+        // attach close button behavior (will use closeModal defined below)
+        closeBtn.addEventListener("click", closeModal);
     }
+
+    // centralized close handler that also removes the Escape listener
+    function closeModal() {
+        if (!modal) return;
+        modal.style.display = "none";
+        // remove escape listener if attached
+        if (modal._escHandler) {
+            document.removeEventListener("keydown", modal._escHandler);
+            modal._escHandler = null;
+        }
+    }
+
+    // attach Escape handler (ensure only one listener is active)
+    if (!modal._escHandler) {
+        modal._escHandler = function (e) {
+            if (e.key === "Escape" || e.key === "Esc") {
+                closeModal();
+            }
+        };
+        document.addEventListener("keydown", modal._escHandler);
+    }
+
+    // set message and show
+    const msgEl = document.getElementById("modal-msg");
+    if (msgEl) msgEl.innerText = message;
+    modal.style.display = "flex";
+
+    // move focus into modal for accessibility
+    const content = modal.querySelector(".modal-content");
+    if (content) content.focus?.();
+
 
     document.getElementById("modal-msg").innerText = message;
     modal.style.display = "flex";
@@ -137,8 +186,12 @@ function showModal(message) {
 // ===== REFRESH CURRENT USER FROM SERVER (updates window.CURRENT_USER and hero) =====
 async function refreshCurrentUser() {
     try {
-        const res = await fetch('include/session.php', { cache: 'no-store' });
-        if (!res.ok) return; // keep existing user if request fails
+        // safeFetch handles errors internally (showing modal if needed), 
+        // but for background updates we might want to suppress the modal?
+        // For now, let's use standard fetch here to avoid annoying modals on background checks,
+        // OR use safeFetch but catch the error silently.
+        const res = await fetch('core/session.php', { cache: 'no-store' });
+        if (!res.ok) return;
         const data = await res.json();
         window.CURRENT_USER = data.username ?? null;
         // Update hero immediately if on home
@@ -155,14 +208,14 @@ async function refreshCurrentUser() {
 document.addEventListener("submit", async e => {
     const form = e.target;
 
-    if (form.matches("form[action*='register_handler.php'], form[action*='login_handler.php']")) {
+    if (form.matches("form[action*='controllers/register_handler.php'], form[action*='controllers/login_handler.php']")) {
         e.preventDefault();
 
         const formData = new FormData(form);
         const action = form.getAttribute("action");
 
         try {
-            const res = await fetch(action, { method: "POST", body: formData });
+            const res = await safeFetch(action, { method: "POST", body: formData });
             const data = await res.json();
 
             if (data.success) {
@@ -177,7 +230,11 @@ document.addEventListener("submit", async e => {
             }
         } catch (err) {
             console.error(err);
-            showModal("An error occurred. Please try again.");
+            // Modal already shown by safeFetch if network error, 
+            // but if json() fails or other logic, we catch here.
+            // If safeFetch threw, it already showed modal, so maybe check?
+            // Simple approach: just log. safeFetch covers network. 
+            // If data.success is false, we handled it.
         }
     }
 });
@@ -190,7 +247,7 @@ document.addEventListener("click", async e => {
 
         if (page === "logout") {
             try {
-                const res = await fetch('include/logout.php', { method: 'GET' });
+                const res = await safeFetch('controllers/logout.php', { method: 'GET' });
                 const data = await res.json();
                 if (data.success) {
                     // Refresh user (should become null)
@@ -202,7 +259,7 @@ document.addEventListener("click", async e => {
                 }
             } catch (err) {
                 console.error(err);
-                showModal("Logout failed. Try again.");
+                // safeFetch shows modal on network error
             }
             return;
         }
@@ -240,6 +297,11 @@ function initProfilePopup() {
         document.body.appendChild(backdrop);
     }
 
+    let scrollCompApplied = false;
+    let previousBodyPaddingRight = '';
+
+    const getScrollbarWidth = () => window.innerWidth - document.documentElement.clientWidth;
+
     const isHidden = (el) => el.hasAttribute('hidden');
 
     function openPopup() {
@@ -248,12 +310,32 @@ function initProfilePopup() {
         btn.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden';
     }
+
+    const sbw = getScrollbarWidth();
+    if (sbw > 0) {
+        previousBodyPaddingRight = document.body.style.paddingRight || '';
+        document.body.style.paddingRight = `${sbw}px`;
+        scrollCompApplied = true;
+    }
+    // disable scroll on root element to avoid jump
+    document.documentElement.style.overflow = 'hidden';
+
     function closePopup() {
         popup.setAttribute('hidden', '');
         backdrop.classList.remove('active');
         btn.setAttribute('aria-expanded', 'false');
+
+
+        // restore padding if applied and re-enable scroll
+        if (scrollCompApplied) {
+            document.body.style.paddingRight = previousBodyPaddingRight;
+            scrollCompApplied = false;
+            previousBodyPaddingRight = '';
+        }
+        document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
     }
+
     function togglePopup(e) {
         if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
         isHidden(popup) ? openPopup() : closePopup();

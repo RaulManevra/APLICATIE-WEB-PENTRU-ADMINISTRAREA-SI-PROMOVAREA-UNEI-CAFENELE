@@ -1,10 +1,10 @@
 <?php
 // include/login_handler.php
 declare(strict_types=1);
-require_once __DIR__ . '/security.php';
-require_once __DIR__ . '/db_config.php';
-require_once __DIR__ . '/csrf.php';
-require_once __DIR__ . '/output.php';
+require_once __DIR__ . '/../core/security.php';
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../core/csrf.php';
+require_once __DIR__ . '/../core/output.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
