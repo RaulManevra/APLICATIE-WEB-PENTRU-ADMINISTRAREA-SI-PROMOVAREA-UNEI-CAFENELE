@@ -1,0 +1,131 @@
+.register-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    background-image: url("../img/9698231_resized.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    color:white;
+
+}
+.register-box p{
+    font-weight:bold;
+}
+.register-box p a{
+    text-decoration: none;
+    color: rgb(195, 106, 43)
+}
+.register-box a:hover {
+    text-decoration: underline;
+}
+
+.register-wrapper::before {
+    content: '';
+    position: fixed;       /* fixed so overlay covers the viewport even when page scrolls */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.677);
+    z-index: 0;
+}
+
+.register-box p {
+    padding-top: 20px;
+    font-size: 18px;
+    font-family: sans-serif;
+    letter-spacing: 1px;
+    ;
+}
+
+.register-box a {
+    text-decoration: none;
+    color: rgb(255, 204, 168)
+}
+
+.register-wrapper .register-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 670px;
+    max-width: 90%;
+    padding: 60px 45px;
+    border: 2px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(20px);
+    border-radius: 40px;
+    background: transparent;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    font-size: 20px;
+    letter-spacing: 1px;
+    z-index: 1;
+    position: relative;
+}
+.register-wrapper .register-box h3 {
+    color: White;
+    font-size: 40px;
+    letter-spacing: 1px;
+    margin-top: 0;
+}
+
+#app .register-box label {
+    display: block;
+    color: #e5e5e5;
+    margin-bottom: 5px;
+}
+
+#app .register-box input[type=email],
+#app .register-box input[type=password],
+#app .register-box input[type=text] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 25px;
+    border-radius: 40px;
+    border: 2px solid rgba(255,255,255,0.2);
+    outline: none;
+    background: transparent;
+    color: #ededed;
+    font-size: 18px;
+    box-sizing: border-box;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+#app .register-box input[type=email]:focus,
+#app .register-box input[type=password]:focus,
+#app .register-box input[type=text]:focus {
+    outline: none;
+    border-color: #25233a;
+    box-shadow: 0 0 5px rgba(205, 201, 218, 0.5);
+}
+
+#app .register-box button {
+    width: 100%;
+    background-color: #dbdddb;
+    color: rgb(30, 29, 35);
+    font-size: 20px;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 1px;
+    padding: 12px;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#app .register-box button:hover {
+    background-color: #ffdbb5;
+}
+
+@media screen and (max-width: 400px) {
+    #app .register-box {
+        margin: 20px;
+        padding: 20px;
+    }
+}

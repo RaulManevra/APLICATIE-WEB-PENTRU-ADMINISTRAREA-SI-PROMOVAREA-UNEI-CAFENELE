@@ -6,18 +6,32 @@ require_once __DIR__ . '/../../core/output.php';
 <form class="register-box" action="controllers/register_handler.php" method="post" autocomplete="on">
     <input type="hidden" name="csrf_token" value="<?php echo e(csrf_token()); ?>">
 
-    <label for="username"><b>Username</b></label>
-    <input id="username" type="text" name="username" autocomplete="username" pattern="[a-z_.]{3,15}" title="Username must be 3-15 characters long and contain only lowercase letters, underscores, and dots." required>
+    <h3>Register</h3>
 
-    <label for="email"><b>Email</b></label>
-    <input id="email" type="email" name="email" autocomplete="email" required>
+    <div class="input-box">
+        <input id="username" type="text" name="username" autocomplete="username" pattern="[a-z_.]{3,15}" title="Username must be 3-15 characters long and contain only lowercase letters, underscores, and dots." required placeholder="Username">
+        <i class="fa-solid fa-user" aria-hidden="true"></i>
+    </div>
 
-    <label for="psw"><b>Password</b></label>
-    <input id="psw" type="password" name="psw" autocomplete="new-password" required>
+    <div class="input-box">
+        <input id="email" type="email" name="email" autocomplete="email" required placeholder="Email">
+        <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+    </div>
 
-    <label for="psw-repeat"><b>Repeat Password</b></label>
-    <input id="psw-repeat" type="password" name="psw-repeat" autocomplete="new-password" required>
+    <div class="input-box">
+        <input id="psw" type="password" name="psw" autocomplete="new-password" required placeholder="Password">
+        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+    </div>
+
+    <div class="input-box">
+        <input id="psw-repeat" type="password" name="psw-repeat" autocomplete="new-password" required placeholder="Repeat password">
+        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+    </div>
 
     <button type="submit">Register</button>
+
+    <p class="auth-help" style="margin-top:12px; color:#eaeaea;">
+        Already have an account? <a href="?page=login">Login here</a>
+    </p>
 </form>
 </div>

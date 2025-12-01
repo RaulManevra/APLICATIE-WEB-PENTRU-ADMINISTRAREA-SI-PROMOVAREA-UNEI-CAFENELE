@@ -301,32 +301,21 @@ function initProfilePopup() {
     let previousBodyPaddingRight = '';
 
     const getScrollbarWidth = () => window.innerWidth - document.documentElement.clientWidth;
-
     const isHidden = (el) => el.hasAttribute('hidden');
 
-    function openPopup() {
-        popup.removeAttribute('hidden');
-        backdrop.classList.add('active');
-        btn.setAttribute('aria-expanded', 'true');
+    function applyScrollComp() {
+        const sbw = getScrollbarWidth();
+        if (sbw > 0) {
+            previousBodyPaddingRight = document.body.style.paddingRight || '';
+            document.body.style.paddingRight = `${sbw}px`;
+            scrollCompApplied = true;
+        }
+        // prevent page scroll while modal is open
+        document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
     }
 
-    const sbw = getScrollbarWidth();
-    if (sbw > 0) {
-        previousBodyPaddingRight = document.body.style.paddingRight || '';
-        document.body.style.paddingRight = `${sbw}px`;
-        scrollCompApplied = true;
-    }
-    // disable scroll on root element to avoid jump
-    document.documentElement.style.overflow = 'hidden';
-
-    function closePopup() {
-        popup.setAttribute('hidden', '');
-        backdrop.classList.remove('active');
-        btn.setAttribute('aria-expanded', 'false');
-
-
-        // restore padding if applied and re-enable scroll
+    function removeScrollComp() {
         if (scrollCompApplied) {
             document.body.style.paddingRight = previousBodyPaddingRight;
             scrollCompApplied = false;
@@ -334,6 +323,20 @@ function initProfilePopup() {
         }
         document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
+    }
+
+    function openPopup() {
+        popup.removeAttribute('hidden');
+        backdrop.classList.add('active');
+        btn.setAttribute('aria-expanded', 'true');
+        applyScrollComp();
+    }
+
+    function closePopup() {
+        popup.setAttribute('hidden', '');
+        backdrop.classList.remove('active');
+        btn.setAttribute('aria-expanded', 'false');
+        removeScrollComp();
     }
 
     function togglePopup(e) {
@@ -357,18 +360,9 @@ function initProfilePopup() {
         });
 
         // Redirect actions
-        if (loginBtn) {
-            loginBtn.addEventListener('click', function () {
-                window.location.href = '?page=login';
-            });
-        }
-        if (registerBtn) {
-            registerBtn.addEventListener('click', function () {
-                window.location.href = '?page=register';
-            });
-        }
+        if (loginBtn) loginBtn.addEventListener('click', function () { window.location.href = '?page=login'; });
+        if (registerBtn) registerBtn.addEventListener('click', function () { window.location.href = '?page=register'; });
 
-        // Close button inside popup
         if (closeBtn) {
             closeBtn.addEventListener('click', function (e) {
                 e.stopPropagation();

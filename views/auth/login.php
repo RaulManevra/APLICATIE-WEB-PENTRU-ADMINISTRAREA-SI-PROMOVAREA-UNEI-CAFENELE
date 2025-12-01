@@ -5,12 +5,17 @@ require_once __DIR__ . '/../../core/output.php';
 <div class="login-wrapper">
 <form class="login-box" action="controllers/login_handler.php" method="post" autocomplete="on">
     <input type="hidden" name="csrf_token" value="<?php echo e(csrf_token()); ?>">
+    <h3>Login</h3>
 
-    <label for="uname"><b>Username or Email</b></label>
-    <input id="uname" type="text" name="uname" autocomplete="username" required placeholder="Username or Email">
+    <div class="input-box">
+        <input id="uname" type="text" name="uname" autocomplete="username" required placeholder="Username or Email">
+        <i class="fa-solid fa-user"></i>
+    </div>
 
-    <label for="psw"><b>Password</b></label>
-    <input id="psw" type="password" name="psw" autocomplete="current-password" required placeholder="Passoword">
+    <div class="input-box">
+        <input id="psw" type="password" name="psw" autocomplete="current-password" required placeholder="Passoword">
+        <i class="fa-solid fa-lock"></i>
+    </div>
 
     <div class="remember">
         <label><input type="checkbox">Remember me</label>
