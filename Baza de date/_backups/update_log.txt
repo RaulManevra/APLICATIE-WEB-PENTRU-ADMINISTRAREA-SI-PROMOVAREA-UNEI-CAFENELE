@@ -1,10 +1,91 @@
-============================================== 
-Run: Fri 12/05/2025 17:04:21.63 
-============================================== 
-MySQL running. 
-IMPORT SUCCESS 
-============================================== 
-Run: Fri 12/05/2025 17:05:16.62 
-============================================== 
-MySQL running. 
-EXPORT SUCCESS 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 18:53:57.60 
+  DATABASE: mazi_coffee  |  USER: root 
+====================================================================== 
+[WARN] Previous session terminated unexpectedly/crashed 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 18:54:50.82 
+  DATABASE: mazi_coffee  |  USER: root 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+ 
+[93m[WARN] Previous session terminated unexpectedly/crashed[0m 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 18:54:53.62 
+  DATABASE: mazi_coffee  |  USER: root 
+====================================================================== 
+[WARN] Previous session terminated unexpectedly/crashed 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 18:54:57.17 
+  DATABASE: mazi_coffee  |  USER: root 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 12/05/2025 18:54:59.73 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 18:55:59.65 
+  DATABASE: mazi_coffee  |  USER: root 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+ 
+[93m[WARN] Previous session terminated unexpectedly/crashed[0m 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 18:56:02.09 
+  DATABASE: mazi_coffee  |  USER: root 
+====================================================================== 
+[WARN] Previous session terminated unexpectedly/crashed 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+ 
+[93m[WARN] Previous session terminated unexpectedly/crashed[0m 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 18:56:32.55 
+  DATABASE: mazi_coffee  |  USER: root 
+====================================================================== 
+[WARN] Previous session terminated unexpectedly/crashed 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 18:58:50.24 
+  DATABASE: mazi_coffee  |  USER: root 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+ 
+[WARN] Previous session terminated unexpectedly/crashed 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 18:58:53.14 
+  DATABASE: mazi_coffee  |  USER: root 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
