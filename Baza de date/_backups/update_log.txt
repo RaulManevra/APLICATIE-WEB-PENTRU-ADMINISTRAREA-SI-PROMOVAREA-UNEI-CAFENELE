@@ -1,0 +1,18 @@
+ 
+[WARN] Previous session terminated unexpectedly/crashed 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 23:10:26.05 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[05-12-FriT23:10:26] [INFO] Checking MySQL server status... 
+[05-12-FriT23:10:26] [INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[05-12-FriT23:10:31] [INFO] Dropping and recreating database... 
+[05-12-FriT23:10:32] [INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 12/05/2025 23:10:32.18 
+====================================== 
+[05-12-FriT23:10:36] [INFO] Listed backups. 
+[05-12-FriT23:10:40] [INFO] User exited menu. 
+[05-12-FriT23:10:40] [INFO] Session closed normally. 
