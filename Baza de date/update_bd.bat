@@ -51,7 +51,7 @@ if exist "%LOCK_FILE%" (
 echo. >> "%LOG_FILE%"
 echo ====================================================================== >> "%LOG_FILE%"
 echo   SESSION START: %DATE% %TIME% >> "%LOG_FILE%"
-echo   DATABASE: %DB_NAME%  ^|  USER: %DB_USER% >> "%LOG_FILE%"
+echo   DATABASE: %DB_NAME%  ^|  COMPUTER: %COMPUTERNAME% >> "%LOG_FILE%"
 echo ====================================================================== >> "%LOG_FILE%"
 
 

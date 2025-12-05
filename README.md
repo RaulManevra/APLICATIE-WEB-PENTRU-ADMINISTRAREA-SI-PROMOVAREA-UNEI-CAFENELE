@@ -8,6 +8,8 @@ include/.htaccess — restrict direct access
 
 Propun sa vedem ce face Laravel si daca se merita sa il folosim
 
+Vezi daca script-ul de update a bazei de date functioneaza corect si pentru MacOS
+
 Ianis si Erwin:
 
 Design modal de erori

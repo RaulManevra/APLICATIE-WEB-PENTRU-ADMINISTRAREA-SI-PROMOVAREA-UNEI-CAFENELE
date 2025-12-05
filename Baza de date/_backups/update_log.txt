@@ -89,3 +89,12 @@
 [INFO] MySQL is already running. 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Fri 12/05/2025 19:06:15.90 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
