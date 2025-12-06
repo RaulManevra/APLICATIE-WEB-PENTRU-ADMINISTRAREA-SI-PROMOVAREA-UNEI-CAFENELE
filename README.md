@@ -18,6 +18,9 @@ Unde am pus PLACEHOLDER, puneti ce animatii simiti ca e nevoie (daca simiti ca e
 
 BEM methodology si semantic HTML (vedeti cum sunt structurate paginile, incercati sa aplicati unde e cazul. In cel mai rau caz, IsraelGPT fa codul sa respecte BEM)
 
+Repara navbar
+
+Vezi daca reusesti ca atunci cand dai hover la butonul cu Facebook sa se faca albastru, nu curcubeu ca la instagram
 
 Aplicatii:
 

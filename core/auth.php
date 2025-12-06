@@ -10,7 +10,9 @@ function require_login() {
 
 function require_admin() {
     require_login();
-    $roles = SessionManager::getCurrentUserRoles();
+    $userData = SessionManager::getCurrentUserData();
+    $roles = $userData['roles'] ?? [];
+
     if (!in_array("admin", $roles)) {
         http_response_code(403);
         exit("Forbidden");

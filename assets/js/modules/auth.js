@@ -22,6 +22,7 @@ export async function refreshCurrentUser() {
         if (window.APP_CONFIG) {
             window.APP_CONFIG.currentUserRoles = data.roles || [];
             window.APP_CONFIG.currentUser = window.CURRENT_USER;
+            window.APP_CONFIG.currentUserData = data.userData || null;
         }
 
         updateHeaderUI();

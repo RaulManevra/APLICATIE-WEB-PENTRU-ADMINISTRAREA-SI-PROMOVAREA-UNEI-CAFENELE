@@ -23,7 +23,7 @@ if ($uname === '' || $psw === '') {
 }
 
 // Find user by email or username using prepared statement
-$stmt = $conn->prepare("SELECT id, email, username, password, role FROM users WHERE email = ? OR username = ? LIMIT 1");
+$stmt = $conn->prepare("SELECT id, email, username, password, role, PuncteFidelitate, PPicture FROM users WHERE email = ? OR username = ? LIMIT 1");
 $stmt->bind_param("ss", $uname, $uname);
 $stmt->execute();
 $result = $stmt->get_result();

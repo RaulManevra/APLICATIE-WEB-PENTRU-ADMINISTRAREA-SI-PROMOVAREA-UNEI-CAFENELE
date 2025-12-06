@@ -4,6 +4,8 @@
 import { safeFetch } from './api.js';
 import { updateHero, setActiveLink } from './ui.js';
 
+import { showModal } from './utils.js';
+
 const app = document.getElementById("app");
 
 /**
@@ -22,6 +24,16 @@ export function loadPage(page, pushState = true) {
             setActiveLink(page);
             reject(new Error("Page not found"));
             return;
+        }
+
+        if (page === "admin") {
+            const roles = window.APP_CONFIG?.currentUserRoles || [];
+            if (!roles.includes("admin")) {
+                showModal("You are not authorized to access the admin dashboard.");
+                setActiveLink("home");
+                // Don't recurse infinitely if home is broken, but here it's fine
+                return loadPage("home");
+            }
         }
 
         safeFetch(url)

@@ -32,32 +32,41 @@ class SessionManager {
     }
 
     /**
-     * returns the current logged-in username or null.
+     * Returns the full current logged-in user data or null.
      */
-    public static function getCurrentUser(): ?string {
+    public static function getCurrentUserData(): ?array {
         self::start();
-        return $_SESSION['username'] ?? null;
-    }
-
-    /**
-     * Returns the current logged-in user's roles or an empty array.
-     */
-    public static function getCurrentUserRoles(): ?array {
-        self::start();
+        if (!isset($_SESSION['username'])) {
+            return null;
+        }
+        
+        // Helper to consistently get roles
+        $roles = [];
         if (isset($_SESSION['roles']) && is_array($_SESSION['roles'])) {
-            return $_SESSION['roles'];
+            $roles = $_SESSION['roles'];
+        } elseif (isset($_SESSION['role'])) {
+            $roles = [$_SESSION['role']];
         }
-        if (isset($_SESSION['role'])) {
-            return [$_SESSION['role']];
+
+        $pic = $_SESSION['profile_picture'] ?? 'assets/public/default.png';
+        if (str_starts_with($pic, '/')) {
+            $pic = substr($pic, 1);
         }
-        return [];
+
+        return [
+            'username' => $_SESSION['username'],
+            'email' => $_SESSION['email'] ?? '',
+            'roles' => $roles,
+            'loyalty_points' => $_SESSION['loyalty_points'] ?? 0,
+            'profile_picture' => $pic
+        ];
     }
 
     /**
      * Checks if a user is logged in.
      */
     public static function isLoggedIn(): bool {
-        return self::getCurrentUser() !== null;
+        return self::getCurrentUserData() !== null;
     }
 
     /**
@@ -81,6 +90,10 @@ class SessionManager {
             $_SESSION['role'] = self::ROLE_USER;
             $_SESSION['roles'] = [self::ROLE_USER];
         }
+        
+        // New fields
+        $_SESSION['loyalty_points'] = $user['PuncteFidelitate'] ?? 0;
+        $_SESSION['profile_picture'] = $user['PPicture'] ?? 'assets/public/default.png';
     }
 
     /**

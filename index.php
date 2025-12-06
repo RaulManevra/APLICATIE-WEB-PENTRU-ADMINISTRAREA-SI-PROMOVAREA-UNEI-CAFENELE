@@ -2,8 +2,10 @@
 require_once __DIR__ . '/core/security.php'; // starts session and sets secure cookie params
 
 
-$currentUser = SessionManager::getCurrentUser();
-$currentUserRoles = SessionManager::getCurrentUserRoles();
+$userData = SessionManager::getCurrentUserData();
+$currentUser = $userData['username'] ?? null;
+$currentUserRoles = $userData['roles'] ?? [];
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -39,6 +41,7 @@ $currentUserRoles = SessionManager::getCurrentUserRoles();
         window.APP_CONFIG = {
             currentUser: <?php echo json_encode($currentUser, JSON_UNESCAPED_UNICODE); ?>,
             currentUserRoles: <?php echo json_encode($currentUserRoles, JSON_UNESCAPED_UNICODE); ?>,
+            currentUserData: <?php echo json_encode($userData, JSON_UNESCAPED_UNICODE); ?>,
             routes: <?php echo json_encode([
                 'home' => 'views/pages/home.php',
                 'about' => 'views/pages/about.php',
@@ -47,6 +50,7 @@ $currentUserRoles = SessionManager::getCurrentUserRoles();
                 'login' => 'views/auth/login.php',
                 'register' => 'views/auth/register.php',
                 'admin' => 'views/pages/admin.php',
+                'tables' => 'views/pages/tables.php',
             ], JSON_UNESCAPED_UNICODE); ?>
         };
         // Backwards compatibility if needed, or just use APP_CONFIG.currentUser

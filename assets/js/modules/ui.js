@@ -36,6 +36,7 @@ export function updateHeaderUI() {
     const roles = window.APP_CONFIG?.currentUserRoles || [];
     const isAdmin = roles.includes('admin');
     const isLoggedIn = !!window.CURRENT_USER;
+    const userData = window.APP_CONFIG?.currentUserData || {};
 
     // 1. Toggle Admin Link
     let adminLinkAndLi = document.querySelector('.nav-link[data-page="admin"]')?.parentElement;
@@ -62,12 +63,33 @@ export function updateHeaderUI() {
     let registerBtn = document.getElementById('popup-register');
     let logoutBtn = document.getElementById('popup-logout');
 
+    // Profile Info Container
+    let profileInfo = document.getElementById('profile-info');
+
     const popupContent = document.querySelector('.profile-popup-content');
     if (popupContent) {
         if (isLoggedIn) {
-            // Logged IN: Hide auth buttons, Show Logout
+            // Logged IN: Hide auth buttons, Show Info + Logout
             if (loginBtn) loginBtn.style.display = 'none';
             if (registerBtn) registerBtn.style.display = 'none';
+
+            // Create Profile Info if missing
+            if (!profileInfo) {
+                profileInfo = document.createElement('div');
+                profileInfo.id = 'profile-info';
+                profileInfo.style.marginBottom = '15px';
+                profileInfo.style.textAlign = 'center';
+                popupContent.prepend(profileInfo); // Add at top
+            }
+            // Update Profile Info Content
+            const avatarUrl = userData.profile_picture || 'assets/public/default.png';
+            const points = userData.loyalty_points || 0;
+            profileInfo.innerHTML = `
+                <img src="${escapeHtml(avatarUrl)}" alt="Profile" style="width:60px;height:60px;border-radius:50%;margin-bottom:10px;object-fit:cover;">
+                <div style="font-weight:bold;margin-bottom:5px;">${escapeHtml(userData.username)}</div>
+                <div style="font-size:0.9em;color:#666;">Loyalty Points: <span style="color:#d4a373;font-weight:bold;">${points}</span></div>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+             `;
 
             if (!logoutBtn) {
                 const btn = document.createElement('button');
@@ -80,7 +102,8 @@ export function updateHeaderUI() {
                 logoutBtn.style.display = '';
             }
         } else {
-            // Logged OUT: Show Login/Register, Hide Logout
+            // Logged OUT: Remove Info, Show Login/Register, Hide Logout
+            if (profileInfo) profileInfo.remove();
             if (logoutBtn) logoutBtn.style.display = 'none';
 
             if (!loginBtn) {

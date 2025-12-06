@@ -98,3 +98,33 @@
 [INFO] MySQL is already running. 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 12/06/2025 18:46:07.01 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sat 12/06/2025 18:46:11.60 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 12/06/2025 19:23:09.38 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sat 12/06/2025 19:23:15.96 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 

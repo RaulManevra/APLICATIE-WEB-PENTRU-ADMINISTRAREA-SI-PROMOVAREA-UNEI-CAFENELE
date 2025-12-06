@@ -6,6 +6,7 @@
         <li><a href="?page=about" class="nav-link" data-page="about">About</a></li>
         <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
         <li><a href="?page=contact" class="nav-link" data-page="contact">Contact</a></li>
+        <li><a href="?page=tables" class="nav-link" data-page="tables">Tables</a></li>
         <?php if (in_array('admin', $currentUserRoles)): ?>
             <li><a href="?page=admin" class="nav-link" data-page="admin">Admin</a></li>
         <?php endif; ?>

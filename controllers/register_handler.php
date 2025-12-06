@@ -73,7 +73,9 @@ if ($stmt->execute()) {
         'id' => $stmt->insert_id,
         'email' => $email,
         'username' => $username,
-        'role' => 'user'
+        'role' => 'user',
+        'PuncteFidelitate' => 0,
+        'PPicture' => 'assets/public/default.png'
     ];
     
     SessionManager::login($user);

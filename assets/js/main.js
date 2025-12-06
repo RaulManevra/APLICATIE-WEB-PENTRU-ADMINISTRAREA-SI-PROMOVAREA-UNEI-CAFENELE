@@ -6,6 +6,7 @@ import { loadPage } from './modules/router.js';
 import { refreshCurrentUser } from './modules/auth.js';
 import { initProfilePopup, closeProfilePopup } from './modules/profile.js';
 import { showModal } from './modules/utils.js';
+import { updateHeaderUI } from './modules/ui.js';
 
 // ===== EVENT LISTENERS =====
 
@@ -78,9 +79,16 @@ window.addEventListener("popstate", e => {
     }
 });
 
+// ... imports at top ...
+
+// ... other imports
+
 // 4. Initial Load
 const urlParams = new URLSearchParams(window.location.search);
 loadPage(urlParams.get("page") || "home", false);
+
+// Initialize Header UI immediately with data from PHP
+updateHeaderUI();
 
 // Initialize Popup logic
 document.addEventListener('DOMContentLoaded', initProfilePopup);
