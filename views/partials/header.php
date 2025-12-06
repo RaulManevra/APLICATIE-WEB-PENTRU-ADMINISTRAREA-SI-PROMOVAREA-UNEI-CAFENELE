@@ -6,17 +6,23 @@
         <li><a href="?page=about" class="nav-link" data-page="about">About</a></li>
         <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
         <li><a href="?page=contact" class="nav-link" data-page="contact">Contact</a></li>
-        <li><a href="#" class="nav-link" data-page="logout">Logout</a></li>
+        <?php if (in_array('admin', $currentUserRoles)): ?>
+            <li><a href="?page=admin" class="nav-link" data-page="admin">Admin</a></li>
+        <?php endif; ?>
         <li class="profile-li">
             <button id="profile-btn" class="profile-icon" aria-haspopup="true" aria-expanded="false" title="Account">
                 <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
             </button>
-
+                
             <div id="profile-popup" class="profile-popup" hidden>
                 <button id="profile-close" class="profile-close" aria-label="Close">&times;</button>
                 <div class="profile-popup-content">
+                    <?php if (empty($currentUser)): ?>
                     <button id="popup-login" class="popup-action">Log In</button>
                     <button id="popup-register" class="popup-action">Register</button>
+                    <?php else: ?>
+                    <button id="popup-logout" class="popup-action" data-page="logout">Logout</button>
+                    <?php endif; ?>
                 </div>
             </div>
         </li>

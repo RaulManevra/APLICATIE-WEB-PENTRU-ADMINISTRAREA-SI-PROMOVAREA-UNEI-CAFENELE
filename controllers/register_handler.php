@@ -1,5 +1,4 @@
 <?php
-// include/register_handler.php
 declare(strict_types=1);
 require_once __DIR__ . '/../core/security.php';
 require_once __DIR__ . '/../config/db.php';
@@ -7,11 +6,6 @@ require_once __DIR__ . '/../core/csrf.php';
 require_once __DIR__ . '/../core/output.php';
 
 header('Content-Type: application/json; charset=utf-8');
-
-function sendError(string $msg) {
-    echo json_encode(['success' => false, 'message' => $msg], JSON_UNESCAPED_UNICODE);
-    exit;
-}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendError("Invalid request method.");
@@ -74,14 +68,17 @@ $stmt = $conn->prepare("INSERT INTO users (username, email, password, role) VALU
 $stmt->bind_param("sss", $username, $email, $hashedPassword);
 
 if ($stmt->execute()) {
-    session_regenerate_id(true);
-    $_SESSION['user_id'] = $stmt->insert_id;
-    $_SESSION['email'] = $email;
-    // NEW: Save username in session
-    $_SESSION['username'] = $username;
-    $_SESSION['role'] = 'user';
+    // Construct user array for SessionManager
+    $user = [
+        'id' => $stmt->insert_id,
+        'email' => $email,
+        'username' => $username,
+        'role' => 'user'
+    ];
+    
+    SessionManager::login($user);
 
-    echo json_encode(['success' => true, 'redirect' => 'home'], JSON_UNESCAPED_UNICODE);
+    sendSuccess(['redirect' => 'home']);
     $stmt->close();
     $conn->close();
     exit;

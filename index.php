@@ -3,6 +3,7 @@ require_once __DIR__ . '/core/security.php'; // starts session and sets secure c
 
 
 $currentUser = SessionManager::getCurrentUser();
+$currentUserRoles = SessionManager::getCurrentUserRoles();
 ?>
 <!DOCTYPE html>
 <html>
@@ -37,19 +38,22 @@ $currentUser = SessionManager::getCurrentUser();
     <script>
         window.APP_CONFIG = {
             currentUser: <?php echo json_encode($currentUser, JSON_UNESCAPED_UNICODE); ?>,
+            currentUserRoles: <?php echo json_encode($currentUserRoles, JSON_UNESCAPED_UNICODE); ?>,
             routes: <?php echo json_encode([
                 'home' => 'views/pages/home.php',
                 'about' => 'views/pages/about.php',
                 'menu' => 'views/pages/menu.php',
                 'contact' => 'views/pages/contact.php',
                 'login' => 'views/auth/login.php',
-                'register' => 'views/auth/register.php'
+                'register' => 'views/auth/register.php',
+                'admin' => 'views/pages/admin.php',
             ], JSON_UNESCAPED_UNICODE); ?>
         };
         // Backwards compatibility if needed, or just use APP_CONFIG.currentUser
         window.CURRENT_USER = window.APP_CONFIG.currentUser; 
+        window.CURRENT_USER_ROLES = window.APP_CONFIG.currentUserRoles;
     </script>
 
-    <script src="assets/js/script.js"></script>
+    <script type="module" src="assets/js/main.js"></script>
 </body>
 </html>

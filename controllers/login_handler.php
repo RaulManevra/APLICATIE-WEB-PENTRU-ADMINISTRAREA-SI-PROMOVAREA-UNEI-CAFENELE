@@ -1,5 +1,4 @@
 <?php
-// include/login_handler.php
 declare(strict_types=1);
 require_once __DIR__ . '/../core/security.php';
 require_once __DIR__ . '/../config/db.php';
@@ -7,11 +6,6 @@ require_once __DIR__ . '/../core/csrf.php';
 require_once __DIR__ . '/../core/output.php';
 
 header('Content-Type: application/json; charset=utf-8');
-
-function sendError(string $msg) {
-    echo json_encode(['success' => false, 'message' => $msg], JSON_UNESCAPED_UNICODE);
-    exit;
-}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendError("Invalid request method.");
@@ -45,12 +39,8 @@ if (!password_verify($psw, $user['password'])) {
 }
 
 // Successful login
-session_regenerate_id(true);
-$_SESSION['user_id'] = $user['id'];
-$_SESSION['email'] = $user['email'];
-$_SESSION['username'] = $user['username'] ?? '';
-$_SESSION['role'] = $user['role'] ?? 'user';
+SessionManager::login($user);
 
-echo json_encode(['success' => true, 'redirect' => 'home'], JSON_UNESCAPED_UNICODE);
+sendSuccess(['redirect' => 'home']);
 $conn->close();
 exit;

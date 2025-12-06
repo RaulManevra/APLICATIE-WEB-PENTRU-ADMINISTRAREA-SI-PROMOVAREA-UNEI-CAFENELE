@@ -1,0 +1,90 @@
+/**
+ * Mazi Coffee - Main Entry Point
+ */
+import { safeFetch } from './modules/api.js';
+import { loadPage } from './modules/router.js';
+import { refreshCurrentUser } from './modules/auth.js';
+import { initProfilePopup, closeProfilePopup } from './modules/profile.js';
+import { showModal } from './modules/utils.js';
+
+// ===== EVENT LISTENERS =====
+
+// 1. Form Submission (Login/Register)
+document.addEventListener("submit", async e => {
+    const form = e.target;
+    if (form.matches("form[action*='controllers/register_handler.php'], form[action*='controllers/login_handler.php']")) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const action = form.getAttribute("action");
+
+        try {
+            const res = await safeFetch(action, { method: "POST", body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                await refreshCurrentUser();
+                await loadPage(data.redirect);
+            } else {
+                showModal(data.message);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+});
+
+// 2. Navigation Click Handler (delegation for .nav-link and .popup-action)
+document.addEventListener("click", async e => {
+    const target = e.target.closest('.nav-link, .popup-action');
+    if (!target) return;
+
+    const page = target.dataset.page;
+    if (!page) return;
+
+    // Special handling for Logout
+    if (page === "logout") {
+        e.preventDefault();
+        try {
+            const res = await safeFetch('controllers/logout.php', { method: 'GET' });
+            const data = await res.json();
+            if (data.success) {
+                await refreshCurrentUser();
+                await loadPage(data.redirect);
+                closeProfilePopup();
+            } else {
+                showModal("Logout failed.");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+        return;
+    }
+
+    // Standard Navigation
+    if (target.classList.contains('nav-link') || target.classList.contains('popup-action')) {
+        e.preventDefault();
+        await loadPage(page);
+
+        if (target.classList.contains('popup-action')) {
+            closeProfilePopup();
+        }
+    }
+});
+
+// 3. History State Manager
+window.addEventListener("popstate", e => {
+    if (e.state && e.state.page) {
+        loadPage(e.state.page, false);
+    }
+});
+
+// 4. Initial Load
+const urlParams = new URLSearchParams(window.location.search);
+loadPage(urlParams.get("page") || "home", false);
+
+// Initialize Popup logic
+document.addEventListener('DOMContentLoaded', initProfilePopup);
+// Fallback if script loads after DOMContentLoaded
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initProfilePopup();
+}
