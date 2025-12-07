@@ -1,60 +1,26 @@
 body {
-    margin: 0;
     font-family: sans-serif;
-    display: flex;
-    min-height: 100vh;
+    display:flex;
+    height: 100vh;
+    background-image: url("../img/sny01074_.jpeg");
+    background-size:cover;
+    background-position:center;
     flex-direction: column;
     overflow-x: hidden;
     box-sizing: border-box;
 }
 
 * {
-    box-sizing: inherit;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
 .content-wrapper {
     display: flex;
     flex-direction: column;
-    margin-left: 15%;
-    width: 85%;
 }
 
-main {
-    margin-top: 0; /* already accounted for by .content-wrapper */
-    padding-left: 0;
-}
-
-.bgimg {
-    position:relative;
-    width: 100%;
-    height:100hv;   /* fill screen UNDER navbar */
-    margin-top:0;            /* push hero below fixed navbar */
-    background-image: url("../img/sny01074_.jpeg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: scroll;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;          /* normal flow */
-    z-index: 0;
-}
-
-.text {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 45%;
-    height: 100%;
-    max-width: 680px;
-    min-width: 280px;
-    background-color: rgba(255, 165, 0, 0.5);
-    padding: 20px;
-    box-sizing: border-box;
-    overflow: auto;
-    border-radius: 8px;
-}
 .home-box {
     max-width: 900px;
     margin: 40px auto;
@@ -76,27 +42,6 @@ main {
     line-height: 1.7;
     color: #333;
 }
-@media screen and (max-width: 900px) {
-    .bgimg {
-        min-height: calc(100vh - 72px); /* allow for fixed top navbar on mobile */
-        align-items: flex-start;
-        padding-top: 20px;
-    }
 
-    .content-wrapper {
-        margin-top: 88px;
-    }
-}
-@media screen and (min-width: 901px) {
-    .bgimg {
-        position: fixed;
-        top: 72px;
-        left: 0;
-        width: 100%;
-        height: calc(100vh - 72px);
-        min-height: auto;
-        z-index: -1;
-    }
-}
 
 

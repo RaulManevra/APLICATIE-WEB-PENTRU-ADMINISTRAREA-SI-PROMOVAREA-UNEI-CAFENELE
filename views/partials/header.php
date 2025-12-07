@@ -1,3 +1,4 @@
+<div class="header">
 <div class="navbar">
     <h1>Mazi Coffee</h1>
 
@@ -33,4 +34,20 @@
         <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
         <a href="#" class="icon"><i class="fa-brands fa-instagram"></i></a>
     </div>
+    <div class="toggle_btn">
+        <i class="fa-solid fa-bars"></i>
+    </div>
+    <div class="dropdown_menu">
+        <li><a href="?page=home" class="nav-link" data-page="home">Home</a></li>
+        <li><a href="?page=about" class="nav-link" data-page="about">About</a></li>
+        <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
+        <li><a href="?page=contact" class="nav-link" data-page="contact">Contact</a></li>
+        <li><a href="?page=tables" class="nav-link" data-page="tables">Tables</a></li>
+        </li>
+        <div class="social-icons">
+            <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="icon"><i class="fa-brands fa-instagram"></i></a>
+        </div>
+    </div>
+</div>
 </div>

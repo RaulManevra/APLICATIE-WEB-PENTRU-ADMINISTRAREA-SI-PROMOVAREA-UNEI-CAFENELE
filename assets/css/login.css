@@ -22,7 +22,7 @@
     position:relative;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;      /* allow wrapper to grow if content is taller */
+    height: 100vh;      /* allow wrapper to grow if content is taller */
     width: 100%;
     background-image: url("../img/9698231_resized.jpg");
     background-size: cover;
@@ -31,7 +31,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    overflow: auto; 
+    overflow: hidden; 
     color:#fff;        /* enable scrolling inside the wrapper on small screens */
 }
 

@@ -173,3 +173,28 @@
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sun 12/07/2025 23:34:29.40 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[WARN] MySQL is not running. Attempting to start... 
+[INFO] MySQL started successfully. 
+ 
+[WARN] Previous session terminated unexpectedly/crashed 
+ 
+====================================================================== 
+  SESSION START: Sun 12/07/2025 23:34:53.15 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sun 12/07/2025 23:34:59.05 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 

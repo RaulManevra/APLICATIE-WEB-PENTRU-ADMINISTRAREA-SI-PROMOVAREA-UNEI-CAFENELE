@@ -58,19 +58,14 @@ span.psw {
 }
 
 .profile-icon:hover {
-    background: rgb(87, 52, 14);
     color: #fff;
-    transform: translateX(6px);
 }
 
 /* popup */
 .profile-popup {
     position: fixed;
-    /* place relative to viewport */
-    top: 50%;
-    left: 56%;
+    inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
-    /* center exactly */
     background-color: #222228;
     color: #eaeaea;
     border: 1px solid #1a191d;
@@ -79,7 +74,7 @@ span.psw {
     width: 350px;
     max-width: calc(100% - 40px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-    z-index: 9999;
+    z-index: 99999;
     /* ensure it sits above the navbar */
 }
 
@@ -155,55 +150,13 @@ span.psw {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 9; /* under .profile-popup (9999) */
+    background: rgba(0,0,0,0.5); /* under .profile-popup (9999) */
     display: none;
     transition: opacity 180ms ease;
     opacity: 0;
     pointer-events: none;
+    z-index:10;
 }
-#profile-backdrop.active {
-    display: block;
-    opacity: 1;
-    pointer-events: auto;
-}
-
-#profile-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9;
-    /* under .profile-popup (9999) */
-    display: none;
-    transition: opacity 180ms ease;
-    opacity: 0;
-    pointer-events: none;
-}
-
-#profile-backdrop.active {
-    display: block;
-    opacity: 1;
-    pointer-events: auto;
-}
-
-#profile-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9;
-    /* under .profile-popup (9999) */
-    display: none;
-    transition: opacity 180ms ease;
-    opacity: 0;
-    pointer-events: none;
-}
-
 #profile-backdrop.active {
     display: block;
     opacity: 1;
@@ -215,34 +168,14 @@ span.psw {
     .profile-li {
         margin-bottom: 6px;
     }
-
     .profile-popup {
         left: 50%;
-        transform: translateX(-50%);
-    }
-
-    #profile-backdrop {
-        left: 0;
-        width: 100%;
-        z-index: 9;
-        /* behind navbar (10) so navbar is not darkened */
-    }
-    .navbar {
-        height: auto;
-        flex-wrap: wrap;
-        padding: 12px;
-    }
-    .navbar ul {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        order: 3;
-        padding-top: 8px;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        position: fixed;
     }
     .social-icons { order: 2; width: auto; }
     .navbar h1 { order: 1; width: 100%; text-align: center; margin-bottom: 6px; }
-    .profile-popup { right: 12px; top: calc(100% + 8px); position: absolute; }
 
 }
 
@@ -253,16 +186,6 @@ span.psw {
         min-width: 160px;
         /* ensure it never becomes too small for items */
     }
-
-    #profile-backdrop {
-        left: 15%;
-        width: calc(100% - 15%);
-    }
-    #profile-backdrop {
-        left: 15%;
-        width: calc(100% - 15%);
-    }
-
     /* keep the content shifted to match the navbar width */
     .content-wrapper,
     main {
