@@ -7,7 +7,7 @@ DB_PASS="mysql"
 
 # AMPPS Path detection (MacOS)
 AMPPS_PATH="/Applications/AMPPS"
-MYSQL_BIN="$AMPPS_PATH/apps/mysql/bin"
+MYSQL_BIN="$AMPPS_PATH/mysql/bin"
 
 # Project paths (adjust relative to script location if needed, assuming valid structure)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
