@@ -57,6 +57,28 @@ export function showModal(message) {
     }
 
     const msgEl = document.getElementById("modal-msg");
-    if (msgEl) msgEl.innerText = message;
+    if (msgEl) {
+        msgEl.innerHTML = ""; // Clear previous content
+        msgEl.innerText = message;
+    }
+    modal.style.display = "flex";
+}
+
+/**
+ * Displays a modal with custom HTML content.
+ * @param {string} html 
+ */
+export function showContentModal(html) {
+    let modal = document.getElementById("modal");
+    if (!modal) {
+        // Initialize modal if not exists (reuse showModal logic basically)
+        showModal("");
+        modal = document.getElementById("modal");
+    }
+
+    const msgEl = document.getElementById("modal-msg");
+    if (msgEl) {
+        msgEl.innerHTML = html;
+    }
     modal.style.display = "flex";
 }

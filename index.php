@@ -51,6 +51,7 @@ $currentUserRoles = $userData['roles'] ?? [];
                 'register' => 'views/auth/register.php',
                 'admin' => 'views/pages/admin.php',
                 'tables' => 'views/pages/tables.php',
+                'profile_picture_upload' => 'views/forms/profile_picture_upload.php',
             ], JSON_UNESCAPED_UNICODE); ?>
         };
         // Backwards compatibility if needed, or just use APP_CONFIG.currentUser

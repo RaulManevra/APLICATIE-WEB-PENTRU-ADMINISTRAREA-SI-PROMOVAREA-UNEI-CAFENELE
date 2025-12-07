@@ -85,11 +85,42 @@ export function updateHeaderUI() {
             const avatarUrl = userData.profile_picture || 'assets/public/default.png';
             const points = userData.loyalty_points || 0;
             profileInfo.innerHTML = `
-                <img src="${escapeHtml(avatarUrl)}" alt="Profile" style="width:60px;height:60px;border-radius:50%;margin-bottom:10px;object-fit:cover;">
+                <img id="profile-pic-trigger" src="${escapeHtml(avatarUrl)}" alt="Profile" style="width:60px;height:60px;border-radius:50%;margin-bottom:10px;object-fit:cover;cursor:pointer;">
                 <div style="font-weight:bold;margin-bottom:5px;">${escapeHtml(userData.username)}</div>
                 <div style="font-size:0.9em;color:#666;">Loyalty Points: <span style="color:#d4a373;font-weight:bold;">${points}</span></div>
                 <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
              `;
+
+            // Add click listener for profile picture
+            setTimeout(() => {
+                const picTrigger = document.getElementById('profile-pic-trigger');
+                if (picTrigger) {
+                    picTrigger.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (confirm("Do you want to change your profile picture?")) {
+                            import('./profile.js').then(p => p.closeProfilePopup());
+
+                            // Fetch and show modal
+                            import('./api.js').then(({ safeFetch }) => {
+                                const routes = window.APP_CONFIG?.routes || {};
+                                const url = routes['profile_picture_upload'];
+                                if (url) {
+                                    safeFetch(url)
+                                        .then(res => res.text())
+                                        .then(html => {
+                                            import('./utils.js').then(({ showContentModal }) => {
+                                                showContentModal(html);
+                                            });
+                                        })
+                                        .catch(err => console.error("Failed to load upload form", err));
+                                } else {
+                                    console.error("Route for profile_picture_upload not found");
+                                }
+                            });
+                        }
+                    });
+                }
+            }, 0);
 
             if (!logoutBtn) {
                 const btn = document.createElement('button');

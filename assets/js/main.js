@@ -13,7 +13,7 @@ import { updateHeaderUI } from './modules/ui.js';
 // 1. Form Submission (Login/Register)
 document.addEventListener("submit", async e => {
     const form = e.target;
-    if (form.matches("form[action*='controllers/register_handler.php'], form[action*='controllers/login_handler.php']")) {
+    if (form.matches("form[action*='controllers/register_handler.php'], form[action*='controllers/login_handler.php'], form[action*='controllers/profile_handler.php']")) {
         e.preventDefault();
         const formData = new FormData(form);
         const action = form.getAttribute("action");
@@ -24,7 +24,22 @@ document.addEventListener("submit", async e => {
 
             if (data.success) {
                 await refreshCurrentUser();
-                await loadPage(data.redirect);
+
+                // Special handling for profile picture upload
+                if (action.includes('profile_handler.php')) {
+                    // Close modal
+                    const modal = document.getElementById("modal");
+                    if (modal) modal.style.display = "none";
+
+                    // Force image refresh by appending timestamp
+                    const timestamp = new Date().getTime();
+                    document.querySelectorAll('img[src*="assets/uploads/profile_pictures/"], img[id="profile-pic-trigger"]').forEach(img => {
+                        const src = img.getAttribute('src').split('?')[0];
+                        img.setAttribute('src', `${src}?t=${timestamp}`);
+                    });
+                } else if (data.redirect) {
+                    await loadPage(data.redirect);
+                }
             } else {
                 showModal(data.message);
             }

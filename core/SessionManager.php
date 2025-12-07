@@ -49,7 +49,7 @@ class SessionManager {
         }
 
         $pic = $_SESSION['profile_picture'] ?? 'assets/public/default.png';
-        if (str_starts_with($pic, '/')) {
+        if (substr($pic, 0, 1) === '/') {
             $pic = substr($pic, 1);
         }
 

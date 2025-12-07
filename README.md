@@ -22,6 +22,10 @@ Repara navbar
 
 Vezi daca reusesti ca atunci cand dai hover la butonul cu Facebook sa se faca albastru, nu curcubeu ca la instagram
 
+Modifica modalul de la profile picture
+
+Modifica fie doar stilul fie cu totul modul in care userul este intrebat daca vrea sa isi schimbe poza de profil
+
 Aplicatii:
 
 SupaBase host

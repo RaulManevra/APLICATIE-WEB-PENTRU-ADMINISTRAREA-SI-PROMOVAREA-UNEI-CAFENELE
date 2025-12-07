@@ -1,23 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 color 0F
-title Database Management - %DB_NAME%
-
-:: ------------------------------------------
-:: CONFIGURATION (no quotes here)
-:: ------------------------------------------
-set AMPPS_PATH=C:\Program Files\Ampps
-set MYSQL_BIN=%AMPPS_PATH%\mysql\bin
 set DB_NAME=mazi_coffee
-set DB_USER=root
-set DB_PASS=mysql
-
-set SQL_FILE=%AMPPS_PATH%\www\APLICATIE-WEB-PENTRU-ADMINISTRAREA-SI-PROMOVAREA-UNEI-CAFENELE\Baza de date\mazi_coffee.sql
-set BACKUP_FOLDER=%AMPPS_PATH%\www\APLICATIE-WEB-PENTRU-ADMINISTRAREA-SI-PROMOVAREA-UNEI-CAFENELE\Baza de date\_backups
-set LOG_FILE=%BACKUP_FOLDER%\update_log.txt
-set LOCK_FILE=%BACKUP_FOLDER%\session.lock
-
-if not exist "%BACKUP_FOLDER%" mkdir "%BACKUP_FOLDER%"
+title Database Management - %DB_NAME%
 
 :: ------------------------------------------
 :: ANSI COLORS SETUP
@@ -32,6 +17,42 @@ set "CRed=%ESC%[91m"
 set "CMagenta=%ESC%[95m"
 set "CWhite=%ESC%[97m"
 set "CGray=%ESC%[90m"
+
+:: ------------------------------------------
+:: CONFIGURATION & PATH CHECK
+:: ------------------------------------------
+set "AMPPS_PATH=C:\Program Files\Ampps"
+
+if not exist "!AMPPS_PATH!" (
+    echo.
+    echo %CYellow%[WARN] Ampps directory not found at default location: !AMPPS_PATH!%CReset%
+    
+    set "AMPPS_PATH=D:\Apps\Ampps"
+    echo %CYellow%[INFO] checking fallback path: !AMPPS_PATH!%CReset%
+    echo.
+
+    if not exist "!AMPPS_PATH!" (
+        echo.
+        echo %CRed%[ERROR] Ampps directory not found!%CReset%
+        echo %CRed%Could not find Ampps at C:\Program Files\Ampps or D:\Apps\Ampps%CReset%
+        echo.
+        pause
+        exit /b 1
+    )
+)
+
+echo %CGreen%[INFO] Ampps found at: !AMPPS_PATH!%CReset%
+
+set MYSQL_BIN=!AMPPS_PATH!\mysql\bin
+set DB_USER=root
+set DB_PASS=mysql
+
+set SQL_FILE=!AMPPS_PATH!\www\APLICATIE-WEB-PENTRU-ADMINISTRAREA-SI-PROMOVAREA-UNEI-CAFENELE\Baza de date\mazi_coffee.sql
+set BACKUP_FOLDER=!AMPPS_PATH!\www\APLICATIE-WEB-PENTRU-ADMINISTRAREA-SI-PROMOVAREA-UNEI-CAFENELE\Baza de date\_backups
+set LOG_FILE=!BACKUP_FOLDER!\update_log.txt
+set LOCK_FILE=!BACKUP_FOLDER!\session.lock
+
+if not exist "!BACKUP_FOLDER!" mkdir "!BACKUP_FOLDER!"
 
 :: Timestamp for backups
 for /f "tokens=1-6 delims=/:. " %%a in ("%date% %time%") do (

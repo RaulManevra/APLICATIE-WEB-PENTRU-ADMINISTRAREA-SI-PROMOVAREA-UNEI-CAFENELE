@@ -143,3 +143,33 @@
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sun 12/07/2025 16:42:47.91 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sun 12/07/2025 16:42:53.42 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sun 12/07/2025 17:06:00.83 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sun 12/07/2025 17:06:05.82 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
