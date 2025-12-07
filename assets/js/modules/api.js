@@ -10,8 +10,14 @@ import { showModal } from './utils.js';
  * @returns {Promise<Response>} - The fetch response.
  */
 export async function safeFetch(url, options = {}) {
+    // MERGE default headers with options.headers
+    const headers = {
+        'X-Requested-With': 'XMLHttpRequest',
+        ...options.headers
+    };
+
     try {
-        const res = await fetch(url, options);
+        const res = await fetch(url, { ...options, headers });
         if (!res.ok) {
             if (res.status === 401) {
                 // 401 Unauthorized: specific handling if needed

@@ -1,4 +1,10 @@
 <?php
+// SAFETY GATE: Block direct access to this file
+// This ensures the file can only be loaded via the implementation's safeFetch (AJAX)
+if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
+    http_response_code(403);
+    exit('Direct access denied.');
+}
 // Verify database connection is available
 if (!isset($conn)) {
     require_once __DIR__ . '/../../config/db.php';
