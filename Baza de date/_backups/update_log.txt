@@ -187,6 +187,21 @@
 ====================================================================== 
   SESSION START: Sun 12/07/2025 23:34:53.15 
   DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+[2025-12-07 21:52:49] [INFO] Checking MySQL server status...
+[2025-12-07 21:52:49] [INFO] MySQL is already running.
+[2025-12-07 21:52:52] [ACTION] IMPORT SELECTED
+[2025-12-07 21:52:52] [INFO] Dropping and recreating database...
+[2025-12-07 21:52:52] [INFO] Importing data from SQL file...
+[2025-12-07 21:52:52] [INFO] Database imported successfully!
+[2025-12-07 21:52:53] [ACTION] EXPORT SELECTED
+[2025-12-07 21:52:53] [INFO] Backing up existing SQL file...
+[2025-12-07 21:52:53] [INFO] Exporting database to SQL file...
+[2025-12-07 21:52:54] [INFO] Database exported successfully!
+[2025-12-07 21:52:56] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Sun 12/07/2025 22:28:57.31 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
 ====================================================================== 
 [INFO] Checking MySQL server status... 
 [INFO] MySQL is already running. 
@@ -195,6 +210,7 @@
 [INFO] Importing data from SQL file... 
 ====================================== 
   IMPORT SUCCESS  |  Sun 12/07/2025 23:34:59.05 
+  IMPORT SUCCESS  |  Sun 12/07/2025 22:29:03.52 
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
