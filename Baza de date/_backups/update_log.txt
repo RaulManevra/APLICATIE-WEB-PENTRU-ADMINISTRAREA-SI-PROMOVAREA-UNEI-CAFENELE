@@ -237,3 +237,18 @@
 [2025-12-08 19:29:01] [INFO] Database exported successfully!
 [2025-12-08 19:29:06] [INFO] Listed backups.
 [2025-12-08 19:29:10] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Mon 12/08/2025 19:31:37.63 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Mon 12/08/2025 19:31:40.31 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
