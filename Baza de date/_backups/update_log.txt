@@ -229,3 +229,11 @@
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+[2025-12-08 19:28:08] [INFO] Checking MySQL server status...
+[2025-12-08 19:28:08] [INFO] MySQL is already running.
+[2025-12-08 19:29:00] [ACTION] EXPORT SELECTED
+[2025-12-08 19:29:00] [INFO] Backing up existing SQL file...
+[2025-12-08 19:29:00] [INFO] Exporting database to SQL file...
+[2025-12-08 19:29:01] [INFO] Database exported successfully!
+[2025-12-08 19:29:06] [INFO] Listed backups.
+[2025-12-08 19:29:10] [INFO] User exited menu.

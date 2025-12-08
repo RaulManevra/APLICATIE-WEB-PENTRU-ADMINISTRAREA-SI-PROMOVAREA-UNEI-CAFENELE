@@ -64,7 +64,7 @@ $hashedPassword = password_hash($psw, PASSWORD_BCRYPT, $options);
 
 // Insert user
 // NEW: Insert username into database
-$stmt = $conn->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')");
+$stmt = $conn->prepare("INSERT INTO users (username, email, password, role, PuncteFidelitate, PPicture) VALUES (?, ?, ?, 'user', 0, 'assets/public/default.png')");
 $stmt->bind_param("sss", $username, $email, $hashedPassword);
 
 if ($stmt->execute()) {
