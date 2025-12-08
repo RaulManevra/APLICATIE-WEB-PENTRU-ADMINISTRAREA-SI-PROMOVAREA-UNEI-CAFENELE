@@ -214,3 +214,18 @@
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Mon 12/08/2025 18:54:08.37 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Mon 12/08/2025 18:54:13.26 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
