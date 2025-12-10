@@ -2,7 +2,7 @@ body {
     font-family: sans-serif;
     display:flex;
     height: 100vh;
-    background-image: url("../img/sny01074_.jpeg");
+    background-image: url("../img/brown-coffee-droplets-fly-around-cup-chaotic-artistic-splash.jpg");
     background-size:cover;
     background-position:center;
     flex-direction: column;
@@ -26,7 +26,7 @@ body {
     margin: 40px auto;
     padding: 0 20px;
 }
-#app h2 {
+h2 {
     font-size: 36px;
     font-weight: 700;
     text-align: center;
@@ -35,12 +35,62 @@ body {
     letter-spacing: 1px;
 }
 
-#app p {
+p {
     max-width: 900px;
     margin: 0 auto 18px;
     font-size: 18px;
     line-height: 1.7;
     color: #333;
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 80px 8%;
+    min-height: 100vh;
+    color: white;
+}
+
+.hero-content {
+    max-width: 520px;
+}
+
+.hero-content h2 {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    color:#e2e2e2;
+}
+
+.hero-content p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #e2d5c8;
+    margin-bottom: 30px;
+}
+
+.hero-btn {
+    padding: 12px 26px;
+    background: #c89b66;
+    border: none;
+    color: #1f120b;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.hero-btn:hover {
+    background: #e0b480;
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0); }
 }
 
 

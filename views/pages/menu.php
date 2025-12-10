@@ -33,6 +33,7 @@ $result = $conn->query($sql);
                             <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
                             <div class="product-price"><?= number_format($row['price'], 2) ?> RON</div>
                         </div>
+                        <span class="buy-now">Buy Now</span>
                     </div>
                 <?php endwhile; ?>
             </div>

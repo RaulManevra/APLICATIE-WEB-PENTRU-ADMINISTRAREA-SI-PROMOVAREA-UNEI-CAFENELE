@@ -1,0 +1,28 @@
+.social-icons {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    padding-right:2rem;
+}
+
+.social-icons a {
+    font-size: 25px;
+    color: #eaeaea;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.social-icons a:hover {
+    transform: scale(1.3);
+}
+
+.social-icons a .fa-instagram:hover {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.social-icons a .fa-facebook-f:hover {
+    color: #145dbf; /* darker blue on hover */
+}

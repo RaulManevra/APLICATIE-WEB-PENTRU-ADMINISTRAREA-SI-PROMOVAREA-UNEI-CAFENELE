@@ -178,23 +178,3 @@ span.psw {
     .navbar h1 { order: 1; width: 100%; text-align: center; margin-bottom: 6px; }
 
 }
-
-@media screen and (min-width: 769px) and (max-width: 900px) {
-    .navbar {
-        width: 20%;
-        /* increase from 15% to give more room */
-        min-width: 160px;
-        /* ensure it never becomes too small for items */
-    }
-    /* keep the content shifted to match the navbar width */
-    .content-wrapper,
-    main {
-        margin-left: 20%;
-    }
-
-    /* reduce link min-width slightly to avoid overflow if needed */
-    .navbar li a {
-        min-width: 110px;
-        padding: 12px 18px;
-    }
-}

@@ -2,7 +2,7 @@
 
 .menu-section {
     padding: 4rem 1rem;
-    background-color: #885712;
+    background: linear-gradient(135deg, #2a130d, #5c2c18, #b97c4b);
     width: 100%;
 }
 
@@ -15,7 +15,7 @@
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 3rem;
-    color: #2c3e50;
+    color: #e7e7e7;
     font-family: 'Georgia', serif;
     position: relative;
     padding-bottom: 1rem;
@@ -29,7 +29,7 @@
     transform: translateX(-50%);
     width: 80px;
     height: 3px;
-    background-color: #d35400;
+    background-color: #e7a816;
 }
 
 .menu-grid {
@@ -39,14 +39,13 @@
 }
 
 .product-card {
-    background: #ffffff;
+    position:relative;
+    background: #000;
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 10px 20px rgba(0,0,0,0.05);
     transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    display:block;
 }
 
 .product-card:hover {
@@ -56,9 +55,9 @@
 
 .product-image {
     width: 100%;
-    height: 220px;
+    height: 100%;
     overflow: hidden;
-    background-color: #eaeaea;
+    flex-shrink: 0;
 }
 
 .product-image img {
@@ -73,22 +72,30 @@
 }
 
 .product-info {
+    position: absolute; /* overlay on top of image */
+    bottom: 0;
+    left: 0;
+    width: 100%;
     padding: 1.5rem;
+    background-color: rgba(0,0,0,0.4); /* semi-transparent dark */
+    backdrop-filter: blur(6px);
+    color: #fff;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
 }
 
 .product-name {
     font-size: 1.4rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: #f5faff;
     margin: 0 0 0.5rem 0;
 }
 
 .product-description {
     font-size: 0.95rem;
-    color: #7f8c8d;
+    color: #c8c8c8;
     line-height: 1.6;
     margin-bottom: 1.5rem;
     flex-grow: 1;
@@ -96,14 +103,28 @@
 
 .product-price {
     font-size: 1.25rem;
-    font-weight: 700;
-    color: #d35400;
+    font-weight: 500;
+    color: #ffffff;
     text-align: right;
     margin-top: auto;
-    background: #fff5eb;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1rem 0.5rem 0;
     border-radius: 20px;
     align-self: flex-end;
+}
+.product-card .buy-now {
+    position: absolute;
+    bottom: 1rem;  /* aligns with bottom padding of card */
+    left: 1rem;    /* spacing from the left edge */
+    font-weight: bold;
+    font-size: 1rem;
+    color: #dbdbdb;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.3s ease;
+}
+.product-card .buy-now:hover {
+    color: #ffffff;
+    text-decoration:underline;
 }
 
 .no-products {

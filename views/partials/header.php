@@ -6,7 +6,6 @@
         <li><a href="?page=home" class="nav-link" data-page="home">Home</a></li>
         <li><a href="?page=about" class="nav-link" data-page="about">About</a></li>
         <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
-        <li><a href="?page=contact" class="nav-link" data-page="contact">Contact</a></li>
         <li><a href="?page=tables" class="nav-link" data-page="tables">Tables</a></li>
         <?php if (in_array('admin', $currentUserRoles)): ?>
             <li><a href="?page=admin" class="nav-link" data-page="admin">Admin</a></li>
@@ -30,10 +29,11 @@
         </li>
     </ul>
 
-    <div class="social-icons">
-        <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-        <a href="#" class="icon"><i class="fa-brands fa-instagram"></i></a>
+    <div class="auth-buttons">
+        <a href="?page=login" class="nav-link auth-btn login" data-page="login">Login</a>
+        <a href="?page=register" class="nav-link auth-btn signup" data-page="register">Sign up</a>
     </div>
+
     <div class="toggle_btn">
         <i class="fa-solid fa-bars"></i>
     </div>
@@ -44,10 +44,6 @@
         <li><a href="?page=contact" class="nav-link" data-page="contact">Contact</a></li>
         <li><a href="?page=tables" class="nav-link" data-page="tables">Tables</a></li>
         </li>
-        <div class="social-icons">
-            <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-            <a href="#" class="icon"><i class="fa-brands fa-instagram"></i></a>
-        </div>
     </div>
 </div>
 </div>

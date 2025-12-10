@@ -4,14 +4,17 @@
 }
 
 .navbar {
-    width: 100%;
-    height: 60px;
-    margin: 0;        
-    display: flex;      
-    align-items: center;
-    justify-content: space-between;
-    z-index:20;
-    position:fixed;
+  width: 100%;
+  height: 60px;
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* left (logo), center (nav), right (auth) */
+  align-items: center;
+  z-index: 20;
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding: 0 1rem; /* horizontal padding */
 }
 .navbar::before {
     content: '';
@@ -23,84 +26,122 @@
 }
 
 .navbar h1 {
-    color: rgb(0, 0, 0);
-    margin: 0;
-    padding: 0 2rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    letter-spacing: 1px;
+  justify-self: start; /* left column */
+  color: rgb(216, 164, 50);
+  margin: 0;
+  padding: 0 2rem 0 0; /* keep left spacing */
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .navbar ul {
-    display: flex;
-    flex-direction: row;          /* horizontal links */
-    align-items: center;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    gap: 2rem;
+  grid-column: 2;            /* middle column */
+  justify-self: center;      /* center the list */
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .navbar li {
-    width: auto;
     display: inline-flex;
-    justify-content: center;
-    list-style: none;
+    align-items: center;
 }
 
 .navbar li a {
-    display:flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px 16px;
-    color: rgba(255, 255, 255, 0.9);
-    text-decoration: none;
-    transition: color 0.2s ease, transform 0.3s ease, background-color 0.25s ease;
-    font-size: 1rem;
-    letter-spacing: 1px;
-    border-radius: 20px;
-    min-width: 0;                 /* allow compact top-bar items */
-    box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  transition: color .8s ease, transform .3s ease, background-color .25s ease;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  border-radius: 20px;
+  box-sizing: border-box;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .navbar li a:not(.active):hover {
-    font-weight: bold;
-    color: rgb(74, 49, 2);
+    transform: scale(1.05);
+    color: rgb(246, 187, 59);
 }
 
 .navbar a.active {
     font-weight: bold;
     color: rgb(241, 241, 241);
-    background-color: rgb(87, 52, 14);
-    border-radius: 20px;
-    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.06);
+    position:relative;
+
+}
+.navbar a.active::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 2.5px;                  /* distance below the text */
+    transform: translateX(-50%);
+    width: 60%;                   /* underline width */
+    height: 3px;
+    background-color: rgb(216, 164, 50); /* your yellow */
+    border-radius: 3px;
+}
+.auth-buttons {
+  grid-column: 3;         /* right column */
+  justify-self: end;      /* push to the right */
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
-.social-icons {
-    display: flex;
-    flex-direction: row;
-    gap: 15px;
+/* basic button styles */
+.auth-btn {
+    all: unset;                 /* remove nav-link inherited styles */
+    display: inline-flex;
     align-items: center;
-    padding-right:2rem;
-}
+    justify-content: center;
 
-.social-icons a {
-    font-size: 25px;
-    color: #eaeaea;
+    padding: 7px 16px;
+    font-weight: 600;
+    font-size: .95rem;
+    cursor: pointer;
+
+    border:none;
+    background: transparent;
+    color: rgba(255,255,255,0.9);
     text-decoration: none;
-    display: inline-block;
-    transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.auth-btn.login:hover {
+    font-weight: bold;
+    color: rgb(246, 187, 59);
+    transition: color .8s ease, transform .3s ease, background-color .25s ease;
+    transform: scale(1.05);
 }
 
-.social-icons a:hover {
-    transform: scale(1.3);
+.auth-btn.signup:hover {
+    background: rgb(232, 180, 70);
+    color: #000;
+    transition: color 0.8s ease, transform .3s ease, background-color .25s ease;
+    transform: scale(1.05);
+}
+.auth-btn.signup {
+    border: 2px solid rgb(216, 164, 50);
+    background: transparent;
+    border-radius: 10px;
+}
+.auth-btn::after {
+    display: none;
 }
 
-.social-icons a:hover i {
-    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+/* accent for register */
+.auth-btn.register {
+  background: rgb(216,164,50);
+  color: #000;
+  border-color: rgb(216,164,50);
 }
+
 .navbar .toggle_btn {
     font-size: 1.5rem;
     color: #fff;
@@ -131,13 +172,64 @@
 }
 
 @media screen and (max-width: 992px) {
-    .navbar ul, .social-icons{
-        display:none;
+
+    .navbar {
+        display: flex !important;       /* switch from grid to flex */
+        justify-content: space-between; /* logo left, toggle right */
+        align-items: center;
+        width: 100vw;                   /* full viewport width */
+        left: 0;                         /* fixed left */
+        padding: 0 1rem;
+        box-sizing: border-box;          /* include padding in width */
     }
-    .navbar .toggle_btn{
-        display:block;
+
+    /* Center nav links hidden */
+    .navbar ul {
+        display: none;
     }
-    .dropdown_menu{
-        display:block;
+
+    /* Auth buttons hidden */
+    .auth-buttons {
+        display: none;
+    }
+
+    /* Show hamburger toggle */
+    .navbar .toggle_btn {
+        display: block;
+        font-size: 1.5rem;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    /* Dropdown menu for mobile */
+    .dropdown_menu {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 100vw;                   /* full width */
+        background-color: rgba(0,0,0,0.85);
+        backdrop-filter: blur(15px);
+        flex-direction: column;
+        display: none;                  /* shown when toggle clicked */
+        z-index: 25;
+    }
+
+    .dropdown_menu.open {
+        display: flex;
+    }
+
+      .dropdown_menu li {
+        width: 100%;
+        text-align: center;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .dropdown_menu li a,
+    .dropdown_menu li .auth-btn {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+        font-size: 1.1rem;
     }
 }
