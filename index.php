@@ -21,7 +21,7 @@ $currentUserRoles = $userData['roles'] ?? [];
     <link rel="stylesheet" href="assets/css/register.css">
     <link rel="stylesheet" href="assets/css/about.css">
     <link rel="stylesheet" href="assets/css/menu.css">
-    <link rel="stylesheet" href="assets/css/contact.css">
+    <link rel="stylesheet" href="assets/css/modal.css">
     <link rel="stylesheet" href="assets/css/navbar.css">
     <link rel="stylesheet" href="assets/css/popup.css">
 

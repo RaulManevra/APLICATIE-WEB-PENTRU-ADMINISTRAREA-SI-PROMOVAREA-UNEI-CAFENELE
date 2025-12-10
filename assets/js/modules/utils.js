@@ -22,31 +22,69 @@ export function escapeHtml(str) {
  */
 export function showModal(message) {
     let modal = document.getElementById("modal");
+
     if (!modal) {
         modal = document.createElement("div");
         modal.id = "modal";
         modal.innerHTML = `
             <div class="modal-content">
                 <span class="close">&times;</span>
-                <p id="modal-msg"></p>
-            </div>`;
+                <div class="error-box">
+                    <span class="error-icon">⛔</span>
+                    <div class="error-text">
+                        <strong>Error:</strong> <span id="modal-msg"></span>
+                    </div>
+                </div>
+            </div>
+        `;
         document.body.appendChild(modal);
 
         // CSS Styles for execution info
         Object.assign(modal.style, {
-            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-            background: "rgba(0,0,0,0.5)", display: "none", alignItems: "center",
-            justifyContent: "center", zIndex: 9999
+            position: "fixed",
+            top: 0, left: 0,
+            width: "100%", height: "100%",
+            background: "rgba(0,0,0,0.4)",
+            display: "none",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999
         });
         const content = modal.querySelector(".modal-content");
         Object.assign(content.style, {
-            background: "#fff", padding: "20px", borderRadius: "8px",
-            minWidth: "300px", textAlign: "center", position: "relative"
+            background: "#f8d7da",
+            border: "1px solid #f5aaaa",
+            padding: "14px 18px",
+            borderRadius: "8px",
+            minWidth: "320px",
+            maxWidth: "420px",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            color: "#842029",
+            fontFamily: "Arial, sans-serif",
+            fontWeight: "bold",
+        });
+        const errorBox = content.querySelector(".error-box");
+        Object.assign(errorBox.style, {
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: "10px"
+        });
+        const icon = content.querySelector(".error-icon");
+        Object.assign(icon.style, {
+            fontSize: "22px",
         });
         const closeBtn = modal.querySelector(".close");
         Object.assign(closeBtn.style, {
-            position: "absolute", top: "5px", right: "10px",
-            cursor: "pointer", fontSize: "20px"
+            position: "absolute",
+            right: "10px",
+            top: "8px",
+            cursor: "pointer",
+            fontSize: "20px",
+            color: "#842029",
+            opacity: 0.7
         });
 
         // Event Listeners
