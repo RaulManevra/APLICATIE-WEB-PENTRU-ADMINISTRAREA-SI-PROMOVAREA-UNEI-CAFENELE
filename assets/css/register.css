@@ -1,6 +1,6 @@
 .register-wrapper {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     height: 100vh;
     width: 100%;
@@ -23,6 +23,16 @@
 }
 .register-box a:hover {
     text-decoration: underline;
+}
+.register-box {
+    display: flex;
+    flex-direction: column;
+}
+.register-box .bottom-text {
+    margin-top: auto;   /* pushes it to the bottom */
+    padding-top: 20px;
+    font-weight: bold;
+    color: #eaeaea;
 }
 
 .register-wrapper::before {
@@ -54,25 +64,28 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 670px;
+    width: 750px;
+    height:100%;
     max-width: 90%;
     padding: 60px 45px;
     margin-top:60px;
     border: 2px solid rgba(255,255,255,0.2);
     backdrop-filter: blur(20px);
-    border-radius: 40px;
     background: transparent;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     font-size: 20px;
     letter-spacing: 1px;
     z-index: 1;
     position: relative;
+    margin:0;
 }
 .register-wrapper .register-box h3 {
     color: White;
     font-size: 40px;
     letter-spacing: 1px;
     margin-top: 0;
+    padding-bottom:80px;
+    padding-top:40px;
 }
 
 #app .register-box label {
@@ -121,7 +134,9 @@
 }
 
 #app .register-box button:hover {
-    background-color: #ffdbb5;
+    background-color: #d9a60d;
+    color:black;
+    transition: 0.8s ease;
 }
 
 @media screen and (max-width: 400px) {

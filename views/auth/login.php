@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../core/output.php';
 <div class="login-wrapper">
 <form class="login-box" action="controllers/login_handler.php" method="post" autocomplete="on">
     <input type="hidden" name="csrf_token" value="<?php echo e(csrf_token()); ?>">
-    <h3>Login</h3>
+    <h3>Welcome back!</h3>
 
     <div class="input-box">
         <input id="uname" type="text" name="uname" autocomplete="username" required placeholder="Username or Email">
@@ -27,8 +27,8 @@ require_once __DIR__ . '/../../core/output.php';
     </div>
 
     <button type="submit">Login</button>
-    <p style="margin-top:12px; color:#eaeaea;">
-        Don't have an account? <a href="?page=register">Register here</a>
-    </p>
+    <p class="bottom-text">
+    Don't have an account? <a href="?page=register">Register here</a>
+</p>
 </form>
 </div>

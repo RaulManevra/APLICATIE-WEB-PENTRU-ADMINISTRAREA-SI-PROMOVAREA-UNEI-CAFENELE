@@ -3,6 +3,7 @@
     width: 100%;
     display: flex;
     align-items: center;
+    padding-bottom: 10px;
 }
 .input-box input {
     padding-right: 48px; /* room for the icon */
@@ -20,10 +21,11 @@
 .login-wrapper {
     display: flex;
     position:relative;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     height: 100vh;      /* allow wrapper to grow if content is taller */
     width: 100%;
+    padding-top:60px;
     background-image: url("../img/9698231_resized.jpg");
     background-size: cover;
     background-position: center;
@@ -55,6 +57,10 @@
     letter-spacing: 1px;
     font-weight: 600;
 }
+.login-box{
+    display:flex;
+    flex-direction:column;
+}
 
 .login-box a {
     text-decoration: none;
@@ -64,18 +70,23 @@
 .login-box a:hover {
     text-decoration: underline;
 }
+.login-box .bottom-text {
+    margin-top: auto;   /* pushes it to the bottom */
+    padding-top: 20px;
+    color: #eaeaea;
+}
 
 .login-wrapper .login-box {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 670px;
+    width: 750px;
     max-width: 90%;
+    height:100%;
     padding: 60px 45px;
     border: 2px solid rgba(255,255,255,0.2);
     backdrop-filter: blur(20px);
-    border-radius: 40px;
     background:transparent;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     font-size: 20px;
@@ -88,6 +99,8 @@
     font-size: 40px;
     letter-spacing: 1px;
     margin-top:0;
+    padding-bottom:100px;
+    padding-top:60px;
 }
 .login-wrapper .remember {
     display: flex;
@@ -154,6 +167,7 @@
     outline:none;
     border-radius:40px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     cursor:pointer;
     font-size:20px;
     color:#333;
@@ -161,7 +175,9 @@
 }
 
 #app .login-box button:hover {
-    background-color: #ffdbb5;
+    background-color: #d9a60d;
+    color:black;
+    transition: 0.8s ease;
 }
 
 @media screen and (max-width: 400px) {

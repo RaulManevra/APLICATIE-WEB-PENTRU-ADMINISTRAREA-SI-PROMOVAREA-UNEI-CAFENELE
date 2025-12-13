@@ -34,8 +34,8 @@ require_once __DIR__ . '/../../core/output.php';
 
     <button type="submit">Register</button>
 
-    <p class="auth-help" style="margin-top:12px; color:#eaeaea;">
-        Already have an account? <a href="?page=login">Login here</a>
-    </p>
+    <p class="bottom-text">
+    Already have an account? <a href="?page=login">Login here</a>
+</p>
 </form>
 </div>
