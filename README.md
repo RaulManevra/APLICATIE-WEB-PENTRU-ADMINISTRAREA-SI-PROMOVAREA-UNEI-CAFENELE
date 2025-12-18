@@ -12,15 +12,8 @@ Vezi daca script-ul de update a bazei de date functioneaza corect si pentru MacO
 
 Ianis si Erwin:
 
-Design modal de erori ----TERMINAT CRED ----
-
-Unde am pus PLACEHOLDER, puneti ce animatii simiti ca e nevoie (daca simiti ca e nevoie)
 
 BEM methodology si semantic HTML (vedeti cum sunt structurate paginile, incercati sa aplicati unde e cazul. In cel mai rau caz, IsraelGPT fa codul sa respecte BEM)
-
-Repara navbar --- TERMINAT ---- 
-
-Vezi daca reusesti ca atunci cand dai hover la butonul cu Facebook sa se faca albastru, nu curcubeu ca la instagram ---- TERMINAT -----
 
 Modifica modalul de la profile picture
 

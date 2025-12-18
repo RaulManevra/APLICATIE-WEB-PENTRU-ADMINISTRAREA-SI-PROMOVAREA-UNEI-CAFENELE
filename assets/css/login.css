@@ -93,6 +93,7 @@
     letter-spacing: 1px;
     z-index: 1;
     position:relative;
+    animation: slideInFromRight 1.4s ease-out forwards;
 }
 .login-wrapper .login-box h3 {
     color:White;
@@ -184,5 +185,16 @@
     #app .login-box {
         margin: 20px;
         padding: 20px;
+    }
+}
+
+@keyframes slideInFromRight {
+    0% {
+        opacity: 0;
+        transform: translateX(120px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
     }
 }

@@ -26,97 +26,138 @@ export function showModal(message) {
     if (!modal) {
         modal = document.createElement("div");
         modal.id = "modal";
+
         modal.innerHTML = `
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <div class="error-box">
-                    <span class="error-icon">⛔</span>
-                    <div class="error-text">
-                        <strong>Error:</strong> <span id="modal-msg"></span>
-                    </div>
-                </div>
+            <div class="modal-card">
+                <div class="icon error-icon">✕</div>
+                <h2 class="modal-title">Error</h2>
+                <p class="modal-text" id="modal-msg"></p>
+                <button class="modal-btn">Try Again</button>
             </div>
         `;
+
         document.body.appendChild(modal);
 
-        // CSS Styles for execution info
+        /* ===== Overlay ===== */
         Object.assign(modal.style, {
             position: "fixed",
-            top: 0, left: 0,
-            width: "100%", height: "100%",
-            background: "rgba(0,0,0,0.4)",
+            inset: 0,
             display: "none",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 9999
         });
-        const content = modal.querySelector(".modal-content");
-        Object.assign(content.style, {
-            background: "#f8d7da",
-            border: "1px solid #f5aaaa",
-            padding: "14px 18px",
-            borderRadius: "8px",
-            minWidth: "320px",
-            maxWidth: "420px",
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            color: "#842029",
+
+        /* ===== Card ===== */
+        const card = modal.querySelector(".modal-card");
+        Object.assign(card.style, {
+            background: "#fff",
+            borderRadius: "16px",
+            padding: "36px 32px",
+            width: "360px",
+            maxWidth: "90%",
+            textAlign: "center",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
             fontFamily: "Arial, sans-serif",
-            fontWeight: "bold",
+
+            /* Animation initial state */
+            opacity: "0",
+            transform: "scale(0.85)",
+            transition: "opacity 0.8s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)"
         });
-        const errorBox = content.querySelector(".error-box");
-        Object.assign(errorBox.style, {
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: "10px"
-        });
-        const icon = content.querySelector(".error-icon");
+
+        /* ===== Icon ===== */
+        const icon = modal.querySelector(".icon");
         Object.assign(icon.style, {
-            fontSize: "22px",
+            width: "72px",
+            height: "72px",
+            borderRadius: "50%",
+            border: "8px solid #ff4d4d",
+            color: "#ff4d4d",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "36px",
+            margin: "0 auto 16px"
         });
-        const closeBtn = modal.querySelector(".close");
-        Object.assign(closeBtn.style, {
-            position: "absolute",
-            right: "10px",
-            top: "8px",
+
+        /* ===== Title ===== */
+        const title = modal.querySelector(".modal-title");
+        Object.assign(title.style, {
+            color: "#ff4d4d",
+            margin: "10px 0",
+            fontSize: "26px",
+            fontWeight: "700"
+        });
+
+        /* ===== Text ===== */
+        const text = modal.querySelector(".modal-text");
+        Object.assign(text.style, {
+            color: "#777",
+            fontSize: "15px",
+            lineHeight: "1.5",
+            marginBottom: "24px"
+        });
+
+        /* ===== Button ===== */
+        const btn = modal.querySelector(".modal-btn");
+        Object.assign(btn.style, {
+            background: "#ff4d4d",
+            color: "#fff",
+            border: "none",
+            borderRadius: "999px",
+            padding: "12px 28px",
+            fontSize: "16px",
+            fontWeight: "600",
             cursor: "pointer",
-            fontSize: "20px",
-            color: "#842029",
-            opacity: 0.7
+            width: "100%",
+            transition: "background-color 0.3s ease, transform 0.3s ease"
         });
 
-        // Event Listeners
+        /* Hover animation */
+        btn.addEventListener("mouseenter", () => {
+            btn.style.backgroundColor = "#e63e3e";
+            btn.style.transform = "scale(1.05)";
+        });
+
+        btn.addEventListener("mouseleave", () => {
+            btn.style.backgroundColor = "#ff4d4d";
+            btn.style.transform = "scale(1)";
+        });
+
+        /* Close modal */
+        btn.addEventListener("click", () => {
+            card.style.opacity = "0";
+            card.style.transform = "scale(0.85)";
+            setTimeout(() => {
+                modal.style.display = "none";
+            }, 300);
+        });
+
         modal.addEventListener("click", e => {
-            if (e.target === modal) modal.style.display = "none";
+            if (e.target === modal) {
+                card.style.opacity = "0";
+                card.style.transform = "scale(0.85)";
+                setTimeout(() => {
+                    modal.style.display = "none";
+                }, 300);
+            }
         });
-        closeBtn.addEventListener("click", () => modal.style.display = "none");
     }
 
     const msgEl = document.getElementById("modal-msg");
     if (msgEl) {
-        msgEl.innerHTML = ""; // Clear previous content
-        msgEl.innerText = message;
-    }
-    modal.style.display = "flex";
-}
-
-/**
- * Displays a modal with custom HTML content.
- * @param {string} html 
- */
-export function showContentModal(html) {
-    let modal = document.getElementById("modal");
-    if (!modal) {
-        // Initialize modal if not exists (reuse showModal logic basically)
-        showModal("");
-        modal = document.getElementById("modal");
+        msgEl.textContent = message || "Something went wrong. Please try again.";
     }
 
-    const msgEl = document.getElementById("modal-msg");
-    if (msgEl) {
-        msgEl.innerHTML = html;
-    }
+    /* Show modal */
     modal.style.display = "flex";
+
+    /* Trigger entrance animation */
+    const card = modal.querySelector(".modal-card");
+    requestAnimationFrame(() => {
+        card.style.opacity = "1";
+        card.style.transform = "scale(1)";
+    });
 }
+

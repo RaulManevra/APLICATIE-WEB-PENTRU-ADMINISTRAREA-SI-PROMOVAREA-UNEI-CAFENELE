@@ -111,3 +111,5 @@ document.addEventListener('DOMContentLoaded', initProfilePopup);
 if (document.readyState === 'interactive' || document.readyState === 'complete') {
     initProfilePopup();
 }
+
+

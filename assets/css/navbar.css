@@ -44,11 +44,58 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  position:relative;
 }
+.navbar ul::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    height: 3px;
+    width: 60%;
+    background-color: rgb(216, 164, 50);
+    border-radius: 3px;
+
+    /* start hidden until active is found */
+    opacity: 0;
+
+    transition:
+        left 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.2s ease;
+}
+
 
 .navbar li {
     display: inline-flex;
     align-items: center;
+    position:relative;
+}
+.navbar li::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 2.5px;
+    transform: translateX(-50%) scaleX(0);
+    width: 60%;
+    height: 3px;
+    background-color: rgb(216, 164, 50);
+    border-radius: 3px;
+
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.navbar li a.active::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 2.5px;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 3px;
+    background-color: rgb(216, 164, 50);
+    border-radius: 3px;
+}
+.navbar li:hover::after {
+    transform: translateX(-50%) scaleX(1);
 }
 
 .navbar li a {
@@ -77,16 +124,12 @@
     position:relative;
 
 }
-.navbar a.active::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: 2.5px;                  /* distance below the text */
-    transform: translateX(-50%);
-    width: 60%;                   /* underline width */
-    height: 3px;
-    background-color: rgb(216, 164, 50); /* your yellow */
-    border-radius: 3px;
+.navbar li a.active {
+    position: relative;
+}
+
+.navbar li:has(a.active) ~ ::after {
+    opacity: 1;
 }
 .auth-buttons {
   grid-column: 3;         /* right column */
@@ -123,7 +166,7 @@
 .auth-btn.signup:hover {
     background: rgb(232, 180, 70);
     color: #000;
-    transition: color 0.8s ease, transform .3s ease, background-color .25s ease;
+    transition: color 1.2s ease, transform .5s ease, background-color .40s ease;
     transform: scale(1.05);
 }
 .auth-btn.signup {
