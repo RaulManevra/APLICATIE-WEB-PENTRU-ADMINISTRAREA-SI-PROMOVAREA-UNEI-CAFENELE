@@ -36,10 +36,14 @@ export function loadPage(page, pushState = true) {
             }
         }
 
-        safeFetch(url)
+        // Append timestamp to prevent caching of views
+        const fetchUrl = `${url}?t=${new Date().getTime()}`;
+
+        safeFetch(fetchUrl)
             .then(res => res.text())
             .then(html => {
                 app.innerHTML = html;
+                executeScripts(app);
                 updateHero(page);
                 setActiveLink(page);
 
@@ -53,5 +57,26 @@ export function loadPage(page, pushState = true) {
                 app.innerHTML = "<h2>Error loading page</h2>";
                 reject(err);
             });
+    });
+}
+
+/**
+ * Execute scripts found in a container.
+ * innerHTML does not execute scripts for security reasons.
+ * We must recreate them to run them.
+ */
+function executeScripts(container) {
+    const scripts = container.querySelectorAll("script");
+    scripts.forEach(oldScript => {
+        const newScript = document.createElement("script");
+        Array.from(oldScript.attributes).forEach(attr => {
+            newScript.setAttribute(attr.name, attr.value);
+        });
+
+        // Clone text content (for inline scripts)
+        newScript.textContent = oldScript.textContent;
+
+        // Replace old script with new one to trigger execution
+        oldScript.parentNode.replaceChild(newScript, oldScript);
     });
 }

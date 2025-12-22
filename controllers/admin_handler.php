@@ -1,0 +1,47 @@
+<?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/../core/security.php';
+require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../core/auth.php';
+require_once __DIR__ . '/../core/output.php';
+require_once __DIR__ . '/ProductController.php';
+
+// 1. Ensure strictly JSON response
+header('Content-Type: application/json; charset=utf-8');
+
+// 2. CSRF Check (Assuming verify_csrf is available from security.php or csrf.php)
+require_once __DIR__ . '/../core/csrf.php';
+if (!verify_csrf()) {
+   // For GET requests sometimes we might skip, but for admin actions strictly enforce
+   // If it's a simple Fetch GET, we usually pass token in header.
+   // For now, let's assume all admin actions need CSRF or we can loosen for GET if needed.
+   // Actually, standard practice for API:
+   if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+       // Only enforce on state-changing methods
+        if (!verify_csrf()) {
+             sendError("Invalid session token.");
+        }
+   }
+}
+
+// 3. Auth Check
+// require_admin() usually checks Auth and redirects or exits.
+// Since this is an AJAX handler, we want JSON error, not HTML redirect.
+if (!SessionManager::isLoggedIn()) {
+    http_response_code(401);
+    sendError("Unauthorized. Please login.");
+}
+
+$userData = SessionManager::getCurrentUserData();
+$roles = $userData['roles'] ?? [];
+if (!in_array('admin', $roles)) {
+    http_response_code(403);
+    sendError("Forbidden. Admin access required.");
+}
+
+// 4. Route to Controller
+$controller = new ProductController($conn);
+$controller->handleRequest();
+
+$conn->close();
