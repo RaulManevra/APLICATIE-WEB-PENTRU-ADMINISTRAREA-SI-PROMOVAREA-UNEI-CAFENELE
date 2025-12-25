@@ -5,8 +5,10 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
 }
 
 require_once __DIR__ . '/../../core/auth.php';
+require_once __DIR__ . '/../../core/csrf.php';
 require_admin();
 ?>
+<input type="hidden" id="csrf-token-global" value="<?= csrf_token() ?>">
 <link rel="stylesheet" href="assets/css/admin.css?v=<?= time(); ?>">
 
 <div class="admin-dashboard">
@@ -45,6 +47,7 @@ require_admin();
         <h3 id="modal-title">Add Product</h3>
         <form id="product-form" enctype="multipart/form-data">
             <input type="hidden" name="id" id="prod-id">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
             <input type="hidden" name="action" id="form-action" value="add">
             
             <div class="form-group">
@@ -86,4 +89,4 @@ require_admin();
     </div>
 </div>
 
-<script src="../../assets/js/admin.js?v=<?= time(); ?>"></script>
+<script src="assets/js/admin.js?v=<?= time(); ?>"></script>

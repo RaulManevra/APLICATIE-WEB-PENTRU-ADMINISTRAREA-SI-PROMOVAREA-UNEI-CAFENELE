@@ -39,7 +39,7 @@ class ProductController {
         while ($row = $result->fetch_assoc()) {
             $products[] = $row;
         }
-        sendSuccess($products);
+        sendSuccess(['data' => $products]);
     }
 
     private function add() {

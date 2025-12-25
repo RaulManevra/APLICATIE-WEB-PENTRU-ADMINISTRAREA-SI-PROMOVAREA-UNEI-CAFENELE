@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-$host = "localhost";
+$host = "127.0.0.1";
 $user = "root";
 $pass = "mysql";
 $dbname = "mazi_coffee";
