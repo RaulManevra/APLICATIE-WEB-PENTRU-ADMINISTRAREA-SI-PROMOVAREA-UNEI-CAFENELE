@@ -336,3 +336,33 @@
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 12/27/2025 17:58:49.22 
+  DATABASE: mazi_coffee  |  COMPUTER: HEY 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sat 12/27/2025 17:58:53.65 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 12/27/2025 18:56:08.02 
+  DATABASE: mazi_coffee  |  COMPUTER: HEY 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sat 12/27/2025 18:56:11.61 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 

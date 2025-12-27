@@ -42,13 +42,13 @@
 }
 
 .product-card {
-    position:relative;
+    position: relative;
     background: #000;
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
-    display:block;
+    display: block;
     opacity: 0;
     transform: scale(0.95);
     filter: blur(6px);
@@ -57,12 +57,12 @@
 
 .product-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
 .product-image {
     width: 100%;
-    height: 100%;
+    aspect-ratio: 1 / 1;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -79,12 +79,14 @@
 }
 
 .product-info {
-    position: absolute; /* overlay on top of image */
+    position: absolute;
+    /* overlay on top of image */
     bottom: 0;
     left: 0;
     width: 100%;
     padding: 1.5rem;
-    background-color: rgba(0,0,0,0.4); /* semi-transparent dark */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* semi-transparent dark */
     backdrop-filter: blur(6px);
     color: #fff;
     display: flex;
@@ -118,10 +120,13 @@
     border-radius: 20px;
     align-self: flex-end;
 }
+
 .product-card .buy-now {
     position: absolute;
-    bottom: 1rem;  /* aligns with bottom padding of card */
-    left: 1rem;    /* spacing from the left edge */
+    bottom: 1rem;
+    /* aligns with bottom padding of card */
+    left: 1rem;
+    /* spacing from the left edge */
     font-weight: bold;
     font-size: 1rem;
     color: #dbdbdb;
@@ -129,9 +134,10 @@
     user-select: none;
     transition: color 0.3s ease;
 }
+
 .product-card .buy-now:hover {
     color: #ffffff;
-    text-decoration:underline;
+    text-decoration: underline;
 }
 
 .no-products {
@@ -146,7 +152,7 @@
     .section-title {
         font-size: 2rem;
     }
-    
+
     .menu-grid {
         gap: 1.5rem;
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -159,10 +165,10 @@
         transform: scale(0.94);
         filter: blur(6px);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
         filter: blur(0);
     }
 }
-
