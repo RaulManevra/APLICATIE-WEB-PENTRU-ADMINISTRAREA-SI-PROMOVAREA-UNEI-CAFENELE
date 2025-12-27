@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.44, for macos10.15 (x86_64)
 --
 -- Host: localhost    Database: mazi_coffee
 -- ------------------------------------------------------
@@ -84,4 +84,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-27 17:15:24
+-- Dump completed on 2025-12-25 18:30:44

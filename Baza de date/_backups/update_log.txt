@@ -270,3 +270,24 @@
 [2025-12-25 18:30:43] [INFO] Exporting database to SQL file...
 [2025-12-25 18:30:44] [INFO] Database exported successfully!
 [2025-12-25 18:30:46] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Sat 12/27/2025 17:09:00.42 
+  DATABASE: mazi_coffee  |  COMPUTER: HEY 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sat 12/27/2025 17:09:04.56 
+====================================== 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sat 12/27/2025 17:15:24.48 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
