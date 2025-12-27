@@ -321,3 +321,18 @@
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: 27.12.2025  7:57:10,51 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-91K5HLR 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  27.12.2025  7:57:13,28 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
