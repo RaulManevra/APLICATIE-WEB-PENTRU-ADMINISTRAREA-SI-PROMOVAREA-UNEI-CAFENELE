@@ -3,6 +3,7 @@
  */
 import { safeFetch } from './api.js';
 import { updateHero, setActiveLink } from './ui.js';
+import { initSlider, stopSlider } from './slider.js';
 
 import { showModal } from './utils.js';
 
@@ -15,6 +16,9 @@ const app = document.getElementById("app");
  */
 export function loadPage(page, pushState = true) {
     return new Promise((resolve, reject) => {
+        // ALWAYS stop the slider when navigating
+        stopSlider();
+
         const routes = window.APP_CONFIG?.routes || {};
         const url = routes[page];
 
@@ -44,6 +48,10 @@ export function loadPage(page, pushState = true) {
             .then(html => {
                 app.innerHTML = html;
                 executeScripts(app);
+
+                // Try to init slider if we are on home page (or if the page has a slider)
+                initSlider();
+
                 updateHero(page);
                 setActiveLink(page);
 

@@ -18,12 +18,28 @@ body {
     flex-direction: column;
     min-height: 100vh;
     overflow-x: hidden;
+    /* removed background-attachment: fixed causing lag */
+}
+
+/* 
+   Performance Fix: Use a fixed pseudo-element for the background.
+   This creates a comprehensive layer that doesn't trigger repaints on scroll.
+*/
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
     background-image:
       url("../img/Coffee Pattern - BLURRED.png"),
       url("../img/GRADIENT.png");
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
+    pointer-events: none; /* ensure clicks pass through */
+    will-change: transform; /* hint for composition */
 }
 
 /* Wrapper */
