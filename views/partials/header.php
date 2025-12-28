@@ -1,6 +1,8 @@
 <div class="header">
     <div class="navbar">
-        <h1>Mazi Coffee</h1>
+        <a href="index.php" class="logo">
+            <img src="assets/img/Logo Modificat.png" alt="Mazi Coffee Logo">
+        </a>
 
         <ul>
             <li><a href="?page=home" class="nav-link" data-page="home">Home</a></li>
@@ -10,22 +12,21 @@
             <?php if (in_array('admin', $currentUserRoles)): ?>
                 <li><a href="?page=admin" class="nav-link" data-page="admin">Admin</a></li>
             <?php endif; ?>
-            <?php if (!empty($currentUser)): ?>
-                <li class="profile-li" id="profile-nav">
-                    <button id="profile-btn" class="profile-icon" aria-haspopup="true" aria-expanded="false" title="Account">
-                        <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
-                    </button>
-
-                    <div id="profile-popup" class="profile-popup" hidden>
-                        <button id="profile-close" class="profile-close" aria-label="Close">&times;</button>
-                        <div class="profile-popup-content">
-                            <button id="popup-logout" class="popup-action" data-page="logout">Logout</button>
-                        </div>
-                    </div>
-                </li>
-            <?php endif; ?>
-
         </ul>
+        <?php if (!empty($currentUser)): ?>
+    <div class="auth-buttons" id="profile-buttons">
+        <button id="profile-btn" class="profile-icon" aria-haspopup="true" aria-expanded="false" title="Account">
+            <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+        </button>
+
+        <div id="profile-popup" class="profile-popup" hidden>
+            <button id="profile-close" class="profile-close" aria-label="Close">&times;</button>
+            <div class="profile-popup-content">
+                <button id="popup-logout" class="popup-action" data-page="logout">Logout</button>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 
         <?php if (empty($currentUser)): ?>
             <div class="auth-buttons" id="auth-buttons">

@@ -1,37 +1,50 @@
-body {
-    font-family: sans-serif;
-    display:flex;
-    height: 100vh;
-    background-image: url("../img/brown-coffee-droplets-fly-around-cup-chaotic-artistic-splash.jpg");
-    background-size:cover;
-    background-position:center;
-    flex-direction: column;
-    overflow-x: hidden;
+/* =========================
+   GLOBAL
+========================= */
+html {
+    /* always reserve vertical scrollbar space so page width doesn't jump */
+    overflow-y: scroll;
+}
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
-* {
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      url("../img/Coffee Pattern - BLURRED.png"),
+      url("../img/GRADIENT.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
+/* Wrapper */
 .content-wrapper {
     display: flex;
     flex-direction: column;
 }
 
+/* General text layout */
 .home-box {
     max-width: 900px;
     margin: 40px auto;
     padding: 0 20px;
 }
+
 h2 {
     font-size: 36px;
     font-weight: 700;
     text-align: center;
     margin-bottom: 20px;
-    color: #2a0e02;           /* coffee brown */
+    color: #2a0e02;   /* coffee brown */
     letter-spacing: 1px;
 }
 
@@ -43,55 +56,199 @@ p {
     color: #333;
 }
 
+/* =========================
+   HERO SECTION
+========================= */
 .hero {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 80px 8%;
-    min-height: 100vh;
+    padding: 80px 6%;
+    min-height: 95vh;
+    overflow: hidden;
     color: white;
 }
 
-.hero-content {
+/* =========================
+   LEFT SLIDER AREA
+========================= */
+.hero-left {
+    width: 50%;
+    max-width: 750px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* remove box completely */
+.hero-slider {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    min-height: 500px;
+    background: none;
+    border-radius: 0;
+    overflow: visible;
+    box-shadow: none;
+}
+
+/* =========================
+   SLIDES (real magic here)
+========================= */
+.hero-slider .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+
+    opacity: 0;
+    transform: scale(1.05) translateY(8px);
+    transition:
+        opacity 1s ease,
+        transform 1s ease;
+}
+
+/* visible image */
+.hero-slider .slide.active {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+/* optional nice subtle float like Starbucks style */
+.hero-slider .slide.active {
+    animation: floatCoffee 6s ease-in-out infinite;
+}
+
+@keyframes floatCoffee {
+    0% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.01); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+
+/* =========================
+   RIGHT TEXT SIDE
+========================= */
+.hero-right {
+    width: 45%;
     max-width: 520px;
+    margin-left:-40px;
 }
 
-.hero-content h2 {
+.hero-subtitle {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;       /* Medium */
+    color: #E0B574;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.hero-title {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-style: italic;
+    color: rgba(255,255,255,0.7);   /* White 70% */
     font-size: 4rem;
-    font-weight: 800;
     line-height: 1.1;
-    margin-bottom: 20px;
-    color:#e2e2e2;
+    margin-bottom: 18px;
 }
 
-.hero-content p {
+.hero-text {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;      /* Medium */
+    color: rgba(255,255,255,0.8);   /* White 80% */
     font-size: 1.1rem;
     line-height: 1.6;
-    color: #e2d5c8;
-    margin-bottom: 30px;
+    max-width: 560px;
 }
-
-.hero-btn {
+/* BUTTON */
+.hero-offer-btn {
     padding: 12px 26px;
-    background: #c89b66;
+    background: #cfa16d;
     border: none;
+    border-radius: 10px;
     color: #1f120b;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border-radius: 8px;
+    font-weight: 700;
     cursor: pointer;
-    transition: 0.3s;
+    transition: .3s;
 }
 
-.hero-btn:hover {
-    background: #e0b480;
+.hero-offer-btn:hover {
+    background: #e4b787;
 }
 
-@keyframes float {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-    100% { transform: translateY(0); }
+/* =========================
+   SLIDER CONTROLS
+========================= */
+.slider-controls {
+    margin-top: 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
+.arrow {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.6);
+    background: transparent;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: .3s;
+}
 
+.arrow:hover {
+    background: white;
+    color: #2b1205;
+}
+
+/* dots */
+.dots {
+    display: flex;
+    gap: 8px;
+}
+
+.dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.45);
+    cursor: pointer;
+    transition: .3s;
+}
+
+.dots span.active {
+    background: white;
+    width: 11px;
+    height: 11px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 960px) {
+    .hero {
+        flex-direction: column-reverse;
+        text-align: center;
+    }
+    
+    .hero-left,
+    .hero-right {
+        width: 100%;
+    }
+
+    .hero-slider {
+        height: 60vh;
+        min-height: 380px;
+        margin-bottom: 30px;
+    }
+
+    .hero-title {
+        font-size: 2.8rem;
+    }
+}
 

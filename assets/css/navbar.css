@@ -25,14 +25,16 @@
     z-index: -1;
 }
 
-.navbar h1 {
-  justify-self: start; /* left column */
-  color: rgb(216, 164, 50);
-  margin: 0;
-  padding: 0 2rem 0 0; /* keep left spacing */
-  font-size: 1.5rem;
-  font-weight: bold;
-  letter-spacing: 1px;
+.navbar .logo {
+    justify-self: start; /* same as before */
+    display: inline-block;
+    padding-right: 2rem; /* optional spacing */
+}
+
+.navbar .logo img {
+    height: 40px; /* adjust to fit your navbar height */
+    width: auto;
+    display: block;
 }
 
 .navbar ul {
@@ -132,11 +134,11 @@
     opacity: 1;
 }
 .auth-buttons {
-  grid-column: 3;         /* right column */
-  justify-self: end;      /* push to the right */
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
+    grid-column: 3;         /* right column */
+    justify-self: end;      /* push to the right */
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
 }
 
 /* basic button styles */
