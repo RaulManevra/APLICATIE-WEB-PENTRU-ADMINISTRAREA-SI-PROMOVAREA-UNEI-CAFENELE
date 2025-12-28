@@ -39,40 +39,25 @@ export function updateHeaderUI() {
     const userData = window.APP_CONFIG?.currentUserData || {};
 
     // 1. Toggle Admin Link
-    let adminLinkAndLi = document.querySelector('.nav-link[data-page="admin"]')?.parentElement;
-    if (isAdmin) {
-        if (!adminLinkAndLi) {
-            const ul = document.querySelector('.navbar ul');
-            if (ul) {
-                const contactLi = document.querySelector('.nav-link[data-page="contact"]')?.parentElement;
-                if (contactLi) {
-                    const li = document.createElement('li');
-                    li.innerHTML = '<a href="?page=admin" class="nav-link" data-page="admin">Admin</a>';
-                    contactLi.after(li);
-                }
-            }
-        } else {
-            adminLinkAndLi.style.display = '';
-        }
-    } else {
-        if (adminLinkAndLi) adminLinkAndLi.style.display = 'none';
+    const adminLinkLi = document.getElementById('admin-link-li');
+    if (adminLinkLi) {
+        adminLinkLi.style.display = isAdmin ? '' : 'none';
     }
 
     // 2. Toggle Popup Content (Login/Register vs Logout)
-    let loginBtn = document.getElementById('popup-login');
-    let registerBtn = document.getElementById('popup-register');
-    let logoutBtn = document.getElementById('popup-logout');
+    const authButtons = document.getElementById('auth-buttons');
+    const profileButtons = document.getElementById('profile-buttons');
 
-    // Profile Info Container
+    // Profile Info Container (inside profile popup)
     let profileInfo = document.getElementById('profile-info');
-
     const popupContent = document.querySelector('.profile-popup-content');
-    if (popupContent) {
-        if (isLoggedIn) {
-            // Logged IN: Hide auth buttons, Show Info + Logout
-            if (loginBtn) loginBtn.style.display = 'none';
-            if (registerBtn) registerBtn.style.display = 'none';
 
+    if (isLoggedIn) {
+        // Logged IN: Show Profile Icon, Hide Login/Register
+        if (authButtons) authButtons.style.display = 'none';
+        if (profileButtons) profileButtons.style.display = '';
+
+        if (popupContent) {
             // Create Profile Info if missing
             if (!profileInfo) {
                 profileInfo = document.createElement('div');
@@ -121,47 +106,13 @@ export function updateHeaderUI() {
                     });
                 }
             }, 0);
-
-            if (!logoutBtn) {
-                const btn = document.createElement('button');
-                btn.id = 'popup-logout';
-                btn.className = 'popup-action';
-                btn.dataset.page = 'logout';
-                btn.innerText = 'Logout';
-                popupContent.appendChild(btn);
-            } else {
-                logoutBtn.style.display = '';
-            }
-        } else {
-            // Logged OUT: Remove Info, Show Login/Register, Hide Logout
-            if (profileInfo) profileInfo.remove();
-            if (logoutBtn) logoutBtn.style.display = 'none';
-
-            if (!loginBtn) {
-                const btn = document.createElement('button');
-                btn.id = 'popup-login';
-                btn.className = 'popup-action';
-                btn.dataset.page = 'login';
-                btn.innerText = 'Log In';
-                popupContent.appendChild(btn);
-                loginBtn = btn;
-            } else {
-                loginBtn.style.display = '';
-                if (!loginBtn.dataset.page) loginBtn.dataset.page = 'login';
-            }
-
-            if (!registerBtn) {
-                const btn = document.createElement('button');
-                btn.id = 'popup-register';
-                btn.className = 'popup-action';
-                btn.dataset.page = 'register';
-                btn.innerText = 'Register';
-                popupContent.appendChild(btn);
-                registerBtn = btn;
-            } else {
-                registerBtn.style.display = '';
-                if (!registerBtn.dataset.page) registerBtn.dataset.page = 'register';
-            }
         }
+    } else {
+        // Logged OUT: Hide Profile Icon, Show Login/Register
+        if (authButtons) authButtons.style.display = '';
+        if (profileButtons) profileButtons.style.display = 'none';
+
+        // Remove profile info from popup if it exists (cleanup)
+        if (profileInfo) profileInfo.remove();
     }
 }
