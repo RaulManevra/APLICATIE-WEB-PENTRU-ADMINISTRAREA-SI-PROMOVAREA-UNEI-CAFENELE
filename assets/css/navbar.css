@@ -1,53 +1,82 @@
-.header{
-    position:relative;
+.header {
+    position: relative;
     padding: 0;
 }
 
 .navbar {
-  width: 100%;
-  height: 60px;
-  margin: 0;
-  display: grid;
-  grid-template-columns: auto 1fr auto; /* left (logo), center (nav), right (auth) */
-  align-items: center;
-  z-index: 20;
-  position: fixed;
-  left: 0;
-  top: 0;
-  padding: 0 1rem; /* horizontal padding */
+    width: 100%;
+    height: 60px;
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    /* left (logo), center (nav), right (auth) */
+    align-items: center;
+    z-index: 20;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 0 1rem;
+    /* horizontal padding */
+    transition: all 0.3s ease;
 }
+
+.navbar.scrolled {
+    background: rgba(43, 18, 5, 0.85);
+    /* Darker coffee background */
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    height: 60px;
+    /* Ensure height stays consistent or shrinks if desired */
+}
+
+/* Override the default background-less state if needed, 
+   but currently .navbar::before handles the background.
+   We can adjust opacity of ::before on scroll or just override background on .navbar itself.
+*/
+.navbar.scrolled::before {
+    opacity: 0;
+    /* Hide the default light tint overlay in favor of the dark scrolled background */
+}
+
 .navbar::before {
     content: '';
     position: absolute;
     inset: 0;
     backdrop-filter: blur(15px);
-    background: rgba(255,255,255,0.15); /* optional tint */
+    background: rgba(255, 255, 255, 0.15);
+    /* optional tint */
     z-index: -1;
 }
 
 .navbar .logo {
-    justify-self: start; /* same as before */
+    justify-self: start;
+    /* same as before */
     display: inline-block;
-    padding-right: 2rem; /* optional spacing */
+    padding-right: 2rem;
+    /* optional spacing */
 }
 
 .navbar .logo img {
-    height: 40px; /* adjust to fit your navbar height */
+    height: 40px;
+    /* adjust to fit your navbar height */
     width: auto;
     display: block;
 }
 
 .navbar ul {
-  grid-column: 2;            /* middle column */
-  justify-self: center;      /* center the list */
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  position:relative;
+    grid-column: 2;
+    /* middle column */
+    justify-self: center;
+    /* center the list */
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
 }
+
 .navbar ul::after {
     content: '';
     position: absolute;
@@ -70,8 +99,9 @@
 .navbar li {
     display: inline-flex;
     align-items: center;
-    position:relative;
+    position: relative;
 }
+
 .navbar li::after {
     content: '';
     position: absolute;
@@ -85,6 +115,7 @@
 
     transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 .navbar li a.active::after {
     content: '';
     position: absolute;
@@ -96,23 +127,24 @@
     background-color: rgb(216, 164, 50);
     border-radius: 3px;
 }
+
 .navbar li:hover::after {
     transform: translateX(-50%) scaleX(1);
 }
 
 .navbar li a {
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-  color: rgba(255,255,255,0.9);
-  text-decoration: none;
-  transition: color .8s ease, transform .3s ease, background-color .25s ease;
-  font-size: 1rem;
-  letter-spacing: 1px;
-  border-radius: 20px;
-  box-sizing: border-box;
-  font-weight: 600;
-  line-height: 1;
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: color .8s ease, transform .3s ease, background-color .25s ease;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    border-radius: 20px;
+    box-sizing: border-box;
+    font-weight: 600;
+    line-height: 1;
 }
 
 .navbar li a:not(.active):hover {
@@ -123,19 +155,23 @@
 .navbar a.active {
     font-weight: bold;
     color: rgb(241, 241, 241);
-    position:relative;
+    position: relative;
 
 }
+
 .navbar li a.active {
     position: relative;
 }
 
-.navbar li:has(a.active) ~ ::after {
+.navbar li:has(a.active)~ ::after {
     opacity: 1;
 }
+
 .auth-buttons {
-    grid-column: 3;         /* right column */
-    justify-self: end;      /* push to the right */
+    grid-column: 3;
+    /* right column */
+    justify-self: end;
+    /* push to the right */
     display: flex;
     gap: 0.75rem;
     align-items: center;
@@ -143,7 +179,8 @@
 
 /* basic button styles */
 .auth-btn {
-    all: unset;                 /* remove nav-link inherited styles */
+    all: unset;
+    /* remove nav-link inherited styles */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -153,11 +190,12 @@
     font-size: .95rem;
     cursor: pointer;
 
-    border:none;
+    border: none;
     background: transparent;
-    color: rgba(255,255,255,0.9);
+    color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
 }
+
 .auth-btn.login:hover {
     font-weight: bold;
     color: rgb(246, 187, 59);
@@ -171,47 +209,52 @@
     transition: color 1.2s ease, transform .5s ease, background-color .40s ease;
     transform: scale(1.05);
 }
+
 .auth-btn.signup {
     border: 2px solid rgb(216, 164, 50);
     background: transparent;
     border-radius: 10px;
 }
+
 .auth-btn::after {
     display: none;
 }
 
 /* accent for register */
 .auth-btn.register {
-  background: rgb(216,164,50);
-  color: #000;
-  border-color: rgb(216,164,50);
+    background: rgb(216, 164, 50);
+    color: #000;
+    border-color: rgb(216, 164, 50);
 }
 
 .navbar .toggle_btn {
     font-size: 1.5rem;
     color: #fff;
     cursor: pointer;
-    display:none;
+    display: none;
 }
+
 .dropdown_menu {
     position: absolute;
     right: 2rem;
-    top:60px;
-    background-color:rgba(255,255,255,0.1);
+    top: 60px;
+    background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(15px);
     width: 300px;
-    height:0;
-    border-radius:10px;
-    overflow:hidden;
-    display:none;
-    transition: height .2s cubic-bezier(0.175 , 0.885 , 0.32 , 1.275);
+    height: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    display: none;
+    transition: height .2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.dropdown_menu .open{
-    height:240px;
+
+.dropdown_menu .open {
+    height: 240px;
 }
+
 .dropdown_menu li {
     padding: 0.7rem;
-    display:flex;
+    display: flex;
     justify-content: center;
     align-items: center;
 }
@@ -219,13 +262,18 @@
 @media screen and (max-width: 992px) {
 
     .navbar {
-        display: flex !important;       /* switch from grid to flex */
-        justify-content: space-between; /* logo left, toggle right */
+        display: flex !important;
+        /* switch from grid to flex */
+        justify-content: space-between;
+        /* logo left, toggle right */
         align-items: center;
-        width: 100vw;                   /* full viewport width */
-        left: 0;                         /* fixed left */
+        width: 100vw;
+        /* full viewport width */
+        left: 0;
+        /* fixed left */
         padding: 0 1rem;
-        box-sizing: border-box;          /* include padding in width */
+        box-sizing: border-box;
+        /* include padding in width */
     }
 
     /* Center nav links hidden */
@@ -251,11 +299,13 @@
         position: fixed;
         top: 60px;
         left: 0;
-        width: 100vw;                   /* full width */
-        background-color: rgba(0,0,0,0.85);
+        width: 100vw;
+        /* full width */
+        background-color: rgba(0, 0, 0, 0.85);
         backdrop-filter: blur(15px);
         flex-direction: column;
-        display: none;                  /* shown when toggle clicked */
+        display: none;
+        /* shown when toggle clicked */
         z-index: 25;
     }
 
@@ -263,11 +313,11 @@
         display: flex;
     }
 
-      .dropdown_menu li {
+    .dropdown_menu li {
         width: 100%;
         text-align: center;
         padding: 0.8rem 0;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .dropdown_menu li a,

@@ -2,12 +2,17 @@
  * Router Implementation
  */
 import { safeFetch } from './api.js';
-import { updateHero, setActiveLink } from './ui.js';
+import { updateHero, setActiveLink, initNavbarScroll, initRippleEffect } from './ui.js';
 import { initSlider, stopSlider } from './slider.js';
+import { initAnimations } from './animations.js';
 
 import { showModal } from './utils.js';
 
 const app = document.getElementById("app");
+
+// Initialize global UI effects once
+initNavbarScroll();
+initRippleEffect();
 
 /**
  * Loads page content via AJAX and updates history state.
@@ -43,14 +48,30 @@ export function loadPage(page, pushState = true) {
         // Append timestamp to prevent caching of views
         const fetchUrl = `${url}?t=${new Date().getTime()}`;
 
-        safeFetch(fetchUrl)
-            .then(res => res.text())
-            .then(html => {
+        // 1. Start Fade Out
+        app.classList.add('page-transition-exit');
+
+        // Wait for animation to finish (300ms matches CSS) AND fetch to complete
+        const animationPromise = new Promise(r => setTimeout(r, 300));
+        const fetchPromise = safeFetch(fetchUrl).then(res => res.text());
+
+        Promise.all([animationPromise, fetchPromise])
+            .then(([_, html]) => {
+                // 2. Swap Content
                 app.innerHTML = html;
+                app.classList.remove('page-transition-exit');
+
+                // 3. Start Fade In
+                app.classList.add('page-transition-enter');
+                setTimeout(() => app.classList.remove('page-transition-enter'), 400); // Clean up after anim
+
                 executeScripts(app);
 
                 // Try to init slider if we are on home page (or if the page has a slider)
                 initSlider();
+
+                // Initialize scroll animations
+                initAnimations();
 
                 updateHero(page);
                 setActiveLink(page);
@@ -63,6 +84,12 @@ export function loadPage(page, pushState = true) {
             .catch(err => {
                 console.error("Failed to load page:", err);
                 app.innerHTML = "<h2>Error loading page</h2>";
+
+                // RESTORE VISIBILITY
+                app.classList.remove('page-transition-exit');
+                app.classList.add('page-transition-enter');
+                setTimeout(() => app.classList.remove('page-transition-enter'), 400);
+
                 reject(err);
             });
     });

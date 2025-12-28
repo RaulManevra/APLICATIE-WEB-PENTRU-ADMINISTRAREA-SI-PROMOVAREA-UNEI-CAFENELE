@@ -23,7 +23,7 @@ $result = $conn->query($sql);
         <?php if ($result && $result->num_rows > 0): ?>
             <div class="menu-grid">
                 <?php while($row = $result->fetch_assoc()): ?>
-                    <div class="product-card">
+                    <div class="product-card animate-on-scroll">
                         <div class="product-image">
                             <!-- Use relative path from root is assumed, or ensure path from DB is correct -->
                             <img src="<?= htmlspecialchars($row['image_path']) ?>" alt="<?= htmlspecialchars($row['name']) ?>" loading="lazy">

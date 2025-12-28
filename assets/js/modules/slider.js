@@ -17,28 +17,69 @@ export function initSlider() {
     const slides = Array.from(slider.querySelectorAll('.slide'));
     if (!slides.length) return false;
 
-    // Stop any existing interval just in case
+    // Controls
+    const prevBtn = document.querySelector('.arrow.prev');
+    const nextBtn = document.querySelector('.arrow.next');
+    const dotsContainer = document.querySelector('.dots');
+
+    // Stop existing to be safe
     stopSlider();
 
     let index = 0;
-    const intervalTime = 4200;
+    const intervalTime = 5000; // slightly longer for better UX
 
-    // Reset initial state
+    // Initialize dots
+    if (dotsContainer) {
+        dotsContainer.innerHTML = '';
+        slides.forEach((_, i) => {
+            const dot = document.createElement('span');
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => {
+                manualSlide(i);
+            });
+            dotsContainer.appendChild(dot);
+        });
+    }
+    const dots = dotsContainer ? Array.from(dotsContainer.children) : [];
+
+    // Reset state
     slides.forEach(s => s.classList.remove('active'));
     slides[0].classList.add('active');
 
     function showSlide(i) {
+        // Wrap around
+        if (i >= slides.length) index = 0;
+        else if (i < 0) index = slides.length - 1;
+        else index = i;
+
+        // Update slides
         slides.forEach((slide, n) => {
-            slide.classList.toggle('active', n === i);
+            slide.classList.toggle('active', n === index);
         });
+
+        // Update dots
+        dots.forEach((dot, n) => {
+            dot.classList.toggle('active', n === index);
+        });
+    }
+
+    function nextSlide() {
+        showSlide(index + 1);
+    }
+
+    function prevSlide() {
+        showSlide(index - 1);
+    }
+
+    function manualSlide(i) {
+        stopTimer(); // specific stop for interaction
+        showSlide(i);
+        startTimer(); // restart
     }
 
     function startTimer() {
         if (sliderInterval) clearInterval(sliderInterval);
-        sliderInterval = setInterval(() => {
-            index = (index + 1) % slides.length;
-            showSlide(index);
-        }, intervalTime);
+        sliderInterval = setInterval(nextSlide, intervalTime);
     }
 
     function stopTimer() {
@@ -46,24 +87,40 @@ export function initSlider() {
         sliderInterval = null;
     }
 
-    // Start
+    // Auto-start
     startTimer();
 
-    // Event Listeners (saved for cleanup, though checking element existence is usually enough)
+    // Event Listeners
     const onMouseEnter = () => stopTimer();
     const onMouseLeave = () => startTimer();
+
+    // Manual Navigation Listeners
+    const onNextClick = () => {
+        stopTimer();
+        nextSlide();
+        startTimer();
+    };
+    const onPrevClick = () => {
+        stopTimer();
+        prevSlide();
+        startTimer();
+    };
 
     slider.addEventListener('mouseenter', onMouseEnter);
     slider.addEventListener('mouseleave', onMouseLeave);
 
-    // Track for cleanup (though stricter cleanup might not be strictly necessary if DOM is wiped, 
-    // stopping the interval is the critical part)
+    if (nextBtn) nextBtn.addEventListener('click', onNextClick);
+    if (prevBtn) prevBtn.addEventListener('click', onPrevClick);
+
+    // Track for cleanup
     sliderEvents = [
         { element: slider, type: 'mouseenter', handler: onMouseEnter },
-        { element: slider, type: 'mouseleave', handler: onMouseLeave }
+        { element: slider, type: 'mouseleave', handler: onMouseLeave },
+        { element: nextBtn, type: 'click', handler: onNextClick },
+        { element: prevBtn, type: 'click', handler: onPrevClick }
     ];
 
-    console.log("Slider initialized");
+    console.log("Slider initialized with controls");
     return true;
 }
 

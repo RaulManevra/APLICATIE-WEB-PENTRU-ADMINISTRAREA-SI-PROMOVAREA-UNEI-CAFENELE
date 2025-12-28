@@ -48,16 +48,29 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
     display: block;
+    display: block;
+
+    /* Reveal Animation State */
     opacity: 0;
-    transform: scale(0.92);
-    filter: blur(6px);
-    animation: menuReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: 0.15s;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+
+/* Class added by JS IntersectionObserver */
+.product-card.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .product-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Ensure manual hover transform uses the same transition timing but overrides the translateY */
+.product-card.visible:hover {
+    transform: translateY(-5px);
 }
 
 .product-image {

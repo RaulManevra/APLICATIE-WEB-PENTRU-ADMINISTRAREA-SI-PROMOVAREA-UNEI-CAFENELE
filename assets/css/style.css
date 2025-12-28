@@ -6,7 +6,9 @@ html {
     overflow-y: scroll;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -34,12 +36,14 @@ body::before {
     height: 100%;
     z-index: -1;
     background-image:
-      url("../img/Coffee Pattern - BLURRED.png"),
-      url("../img/GRADIENT.png");
+        url("../img/Coffee Pattern - BLURRED.png"),
+        url("../img/GRADIENT.png");
     background-size: cover;
     background-position: center;
-    pointer-events: none; /* ensure clicks pass through */
-    will-change: transform; /* hint for composition */
+    pointer-events: none;
+    /* ensure clicks pass through */
+    will-change: transform;
+    /* hint for composition */
 }
 
 /* Wrapper */
@@ -60,7 +64,8 @@ h2 {
     font-weight: 700;
     text-align: center;
     margin-bottom: 20px;
-    color: #2a0e02;   /* coffee brown */
+    color: #2a0e02;
+    /* coffee brown */
     letter-spacing: 1px;
 }
 
@@ -138,9 +143,17 @@ p {
 }
 
 @keyframes floatCoffee {
-    0% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-10px) scale(1.01); }
-    100% { transform: translateY(0) scale(1); }
+    0% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-10px) scale(1.01);
+    }
+
+    100% {
+        transform: translateY(0) scale(1);
+    }
 }
 
 
@@ -150,12 +163,13 @@ p {
 .hero-right {
     width: 45%;
     max-width: 520px;
-    margin-left:-40px;
+    margin-left: -40px;
 }
 
 .hero-subtitle {
     font-family: "Inter", sans-serif;
-    font-weight: 500;       /* Medium */
+    font-weight: 500;
+    /* Medium */
     color: #E0B574;
     font-size: 1.2rem;
     margin-bottom: 10px;
@@ -165,7 +179,8 @@ p {
     font-family: "Playfair Display", serif;
     font-weight: 700;
     font-style: italic;
-    color: rgba(255,255,255,0.7);   /* White 70% */
+    color: rgba(255, 255, 255, 0.7);
+    /* White 70% */
     font-size: 4rem;
     line-height: 1.1;
     margin-bottom: 18px;
@@ -173,12 +188,15 @@ p {
 
 .hero-text {
     font-family: "Inter", sans-serif;
-    font-weight: 500;      /* Medium */
-    color: rgba(255,255,255,0.8);   /* White 80% */
+    font-weight: 500;
+    /* Medium */
+    color: rgba(255, 255, 255, 0.8);
+    /* White 80% */
     font-size: 1.1rem;
     line-height: 1.6;
     max-width: 560px;
 }
+
 /* BUTTON */
 .hero-offer-btn {
     padding: 12px 26px;
@@ -209,7 +227,7 @@ p {
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     background: transparent;
     color: white;
     font-size: 18px;
@@ -232,7 +250,7 @@ p {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: rgba(255,255,255,.45);
+    background: rgba(255, 255, 255, .45);
     cursor: pointer;
     transition: .3s;
 }
@@ -251,7 +269,7 @@ p {
         flex-direction: column-reverse;
         text-align: center;
     }
-    
+
     .hero-left,
     .hero-right {
         width: 100%;
@@ -268,3 +286,62 @@ p {
     }
 }
 
+
+/* =========================
+   PAGE TRANSITIONS
+========================= */
+.page-transition-enter {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.page-transition-exit {
+    animation: fadeOut 0.3s ease-in forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* =========================
+   RIPPLE EFFECT
+========================= */
+.btn-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background-color: rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}

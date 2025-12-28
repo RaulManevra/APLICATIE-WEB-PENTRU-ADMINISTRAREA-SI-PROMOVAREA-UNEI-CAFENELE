@@ -1,6 +1,6 @@
 <div class="header">
     <div class="navbar">
-        <a href="index.php" class="logo">
+        <a href="?page=home" class="logo nav-link" data-page="home">
             <img src="assets/img/Logo Modificat.png" alt="Mazi Coffee Logo">
         </a>
 

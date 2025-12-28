@@ -116,3 +116,59 @@ export function updateHeaderUI() {
         if (profileInfo) profileInfo.remove();
     }
 }
+
+/**
+ * Initializes the navbar scroll effect.
+ */
+export function initNavbarScroll() {
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+
+    const handleScroll = () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial state
+}
+
+/**
+ * Initializes the material design ripple effect on buttons.
+ */
+export function initRippleEffect() {
+    const selector = '.hero-offer-btn, .auth-btn, button, .product-card .buy-now';
+
+    // We use delegation on document body to handle dynamically added buttons (like in menu or loaded pages)
+    document.addEventListener('click', function (e) {
+        const target = e.target.closest(selector);
+
+        if (target) {
+            // Add utility class if missing (for overflow:hidden)
+            if (!target.classList.contains('btn-ripple')) {
+                target.classList.add('btn-ripple');
+            }
+
+            const circle = document.createElement('span');
+            const diameter = Math.max(target.clientWidth, target.clientHeight);
+            const radius = diameter / 2;
+
+            const rect = target.getBoundingClientRect();
+
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${e.clientX - rect.left - radius}px`;
+            circle.style.top = `${e.clientY - rect.top - radius}px`;
+            circle.classList.add('ripple');
+
+            const ripple = target.getElementsByClassName('ripple')[0];
+            if (ripple) {
+                ripple.remove();
+            }
+
+            target.appendChild(circle);
+        }
+    });
+}

@@ -28,7 +28,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
             Ofertă valabilă doar săptămâna aceasta – vino să te bucuri de gustul perfect al caramelului împreună cu un prieten!
         </p>
 
-        <button class="hero-offer-btn">
+        <button class="hero-offer-btn nav-link" data-page="menu">
             12.99 RON 🛒
         </button>
 
