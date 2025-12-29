@@ -93,7 +93,7 @@
     letter-spacing: 1px;
     z-index: 1;
     position:relative;
-    animation: slideInFromRight 1.4s ease-out forwards;
+    animation: slideInFromRight 1s ease-out forwards;
 }
 .login-wrapper .login-box h3 {
     color:White;

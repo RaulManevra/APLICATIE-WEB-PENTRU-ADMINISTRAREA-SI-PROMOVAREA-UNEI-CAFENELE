@@ -70,11 +70,19 @@ export function updateHeaderUI() {
             const avatarUrl = userData.profile_picture || 'assets/public/default.png';
             const points = userData.loyalty_points || 0;
             profileInfo.innerHTML = `
-                <img id="profile-pic-trigger" src="${escapeHtml(avatarUrl)}" alt="Profile" style="width:60px;height:60px;border-radius:50%;margin-bottom:10px;object-fit:cover;cursor:pointer;">
-                <div style="font-weight:bold;margin-bottom:5px;">${escapeHtml(userData.username)}</div>
-                <div style="font-size:0.9em;color:#666;">Loyalty Points: <span style="color:#d4a373;font-weight:bold;">${points}</span></div>
-                <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
-             `;
+    <img id="profile-pic-trigger" src="${escapeHtml(avatarUrl)}" alt="Profile" 
+         style="width:60px;height:60px;border-radius:50%;margin-bottom:10px;object-fit:cover;cursor:pointer;">
+    <div style="font-weight:bold;margin-bottom:5px;">${escapeHtml(userData.username)}</div>
+    <div style="font-size:1em;color:#fff">
+        Your Points: 
+        <br>
+        <span style="display:inline-block; margin-top:5px; color:#d4a373; font-weight:bold; background:#fff; border-radius:99px; padding:5px;">
+            <i class="fa-solid fa-coins"></i> ${points} points
+        </span>
+        <br/>
+    </div>
+    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+`;
 
             // Add click listener for profile picture
             setTimeout(() => {

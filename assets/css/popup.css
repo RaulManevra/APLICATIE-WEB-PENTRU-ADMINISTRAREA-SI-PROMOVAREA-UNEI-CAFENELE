@@ -47,35 +47,43 @@ span.psw {
 }
 
 .profile-icon {
-    background: transparent;
+    background: #0e0e0ec0;
     border: none;
-    color: rgba(255, 255, 255, 0.67);
-    font-size: 35px;
+    color: #e3e3e3;
+    font-size: 16px;
     cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background 0.15s ease, transform 0.15s ease;
+    padding: 10px 22px;
+    border-radius:999px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.25s ease;
 }
 
 .profile-icon:hover {
-    color: #fff;
+    background: #1b1b1b;
+    color:#fff;
 }
+.profile-icon i{
+    font-size:18px;
+} 
 
 /* popup */
 .profile-popup {
     position: fixed;
-    inset: 50% auto auto 50%;
-    transform: translate(-50%, -50%);
+    top:0;
+    right:0;
     background: linear-gradient(135deg, #3b2f2f, #6b4f3a, #b08968);
     color: #f5e9dd;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
     padding: 32px 18px;
-    width: 360px;
+    width: 350px;
+    height:100%;
     max-width: calc(100% - 40px);
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(6px);
     z-index: 99999;
+    animation: slideInFromRight 1s ease-out forwards;
 }
 
 .profile-popup[hidden] {
@@ -177,4 +185,14 @@ span.psw {
     .social-icons { order: 2; width: auto; }
     .navbar h1 { order: 1; width: 100%; text-align: center; margin-bottom: 6px; }
 
+}
+@keyframes slideInFromRight {
+    0% {
+        opacity: 0;
+        transform: translateX(120px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }

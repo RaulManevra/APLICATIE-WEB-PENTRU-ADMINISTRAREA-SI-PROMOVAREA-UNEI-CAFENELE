@@ -64,7 +64,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
     <div class="about-container home-box">
         <div class="about-content">
             <h2 class="section-title" style="text-align: left;">Povestea Noastră</h2>
-            <p class="about-text" style="font-style: italic; color: #2b1205;">
+            <p class="about-text" style="font-style: italic">
                 "A small place in a small town for beautiful people."
             </p>
             <p class="about-text">
@@ -74,7 +74,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
             <p class="about-text">
                 Credem că o cafea excelentă poate face ziua mai bună. Te invităm să descoperi aromele noastre și să te bucuri de moment.
             </p>
-            <a href="?page=about" class="btn-primary nav-link" data-page="about" style="margin-top: 20px; display: inline-block;">Citește mai mult</a>
+            <a href="?page=about" class="btn-primary nav-link" data-page="about" style="margin-top: 20px;">Citește mai mult<i class="fa-solid fa-arrow-right"></i></a>
         </div>
         <div class="about-image">
             <img src="assets/img/slider_1.png" alt="Mazi Coffee Interior" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">

@@ -14,15 +14,12 @@
     max-width: 1200px;
     min-height: 75vh;
     padding: 60px 80px;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(16px);
-    border-radius: 26px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+    background: transparent;
 
     display: flex;
     flex-direction: column;
     justify-content: center;
-    text-align: center;
+    text-align: left;
 
     /* ✨ animation */
     animation: aboutReveal 1s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -33,35 +30,40 @@
 
 
 
+
 /* Heading */
-.about-card h2 {
-    font-size: 38px;
-    margin-bottom: 45px;
-    letter-spacing: 1px;
-    color: rgb(216, 164, 50);
-}
 
 /* Paragraphs */
 .about-card p {
-    font-size: 18px;
+    font-size: 24px;
     line-height: 1.7;
     margin-bottom: 18px;
     color: #e5e5e5;
+    text-indent: 30px;;
+}
+.welcome-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 0px;          /* space between text and cup */
+}
+.welcome-text {
+    font-family:"Playfair Display", serif;
+    font-size: 80px;   /* match SVG height */
+    line-height: 1;     /* tighten line height */
+    font-weight: bold;
+    color: #e9e9e9; 
+    text-indent:0px; 
+
+}
+.welcome-svg {
+    transform: rotate(20deg); /* rotate cup to the right */
+    width: 235px;
+    height: 235px;
+    flex-shrink: 0;
 }
 
 /* ===== Social Box ===== */
 .social-box {
-    margin-top: 60px;          /* move lower */
-    padding: 22px 25px;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.08);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    width: 300px;
-    align-self: flex-start;
-    animation: aboutReveal 1s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: 0.15s;
 }
 
 
@@ -79,23 +81,25 @@
 }
 
 .social-icons a {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    background: #0e0e0ec0;
+    border: none;
+    color: #e3e3e3e7;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 10px 22px;
+    border-radius:999px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    background: rgba(255,255,255,0.12);
-    color: #eaeaea;
+    gap: 6px;
+    transition: 0.25s ease;
     text-decoration: none;
-    transition:
-        transform 0.35s cubic-bezier(0.25, 1, 0.5, 1),
-        background-color 0.35s ease;
 }
 
 .social-icons a:hover {
     transform: scale(1.15);
+    color:#fff;
+    background: black;
+    transition: 0.5s ease-in-out;
 }
 
 /* Instagram gradient */
@@ -115,6 +119,11 @@
 /* Facebook color */
 .social-icons a.facebook:hover i {
     color: #1877f2;
+}
+.social-icons a.maps:hover i {
+    background: linear-gradient(45deg, #d1e1cd, #9fdbae, #7dd79d, #1e5631);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 @media (max-width: 768px) {

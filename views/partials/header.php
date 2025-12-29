@@ -20,7 +20,8 @@
 
         <div class="auth-buttons" id="profile-buttons" style="<?php echo empty($currentUser) ? 'display: none;' : ''; ?>">
             <button id="profile-btn" class="profile-icon" aria-haspopup="true" aria-expanded="false" title="Account">
-                <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+                Cont
+                <i class="fa-regular fa-circle-user"></i>
             </button>
 
             <div id="profile-popup" class="profile-popup" hidden>

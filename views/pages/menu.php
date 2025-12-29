@@ -31,9 +31,8 @@ $result = $conn->query($sql);
                         <div class="product-info">
                             <h3 class="product-name"><?= htmlspecialchars($row['name']) ?></h3>
                             <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
-                            <div class="product-price"><?= number_format($row['price'], 2) ?> RON</div>
+                            <div class="product-price"><i class="fa-solid fa-cart-shopping"></i><?= number_format($row['price'], 2) ?> RON</div>
                         </div>
-                        <span class="buy-now">Buy Now</span>
                     </div>
                 <?php endwhile; ?>
             </div>

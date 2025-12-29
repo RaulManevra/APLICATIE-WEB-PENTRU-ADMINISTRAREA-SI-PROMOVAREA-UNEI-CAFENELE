@@ -21,6 +21,7 @@
     font-family: 'Georgia', serif;
     position: relative;
     padding-bottom: 1rem;
+    margin-top:1rem;
 }
 
 .section-title::after {
@@ -126,31 +127,27 @@
 .product-price {
     font-size: 1.25rem;
     font-weight: 500;
-    color: #ffffff;
+    color: #1a1a1a;
     text-align: right;
     margin-top: auto;
-    padding: 0.5rem 1rem 0.5rem 0;
+    padding: 10px;
     border-radius: 20px;
     align-self: flex-end;
-}
-
-.product-card .buy-now {
-    position: absolute;
-    bottom: 1rem;
-    /* aligns with bottom padding of card */
-    left: 1rem;
-    /* spacing from the left edge */
-    font-weight: bold;
-    font-size: 1rem;
-    color: #dbdbdb;
+    background:linear-gradient(135deg, #E0B574 0%, #C4924E 100%);
+    display:inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    width:fit-content;
+    min-height:38px;
+    text-align:center;
+    align-self:flex-end;
+    gap:4px;
     cursor: pointer;
-    user-select: none;
-    transition: color 0.3s ease;
-}
 
-.product-card .buy-now:hover {
-    color: #ffffff;
-    text-decoration: underline;
+}
+.product-price:hover {
+    background:linear-gradient(135deg, #f8d095 0%, #eab66c 100%);
 }
 
 .no-products {
