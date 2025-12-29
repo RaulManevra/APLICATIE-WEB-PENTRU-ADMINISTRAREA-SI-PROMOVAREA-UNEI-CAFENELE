@@ -41,7 +41,15 @@ if (!in_array('admin', $roles)) {
 }
 
 // 4. Route to Controller
-$controller = new ProductController($conn);
+$entity = $_POST['entity'] ?? $_GET['entity'] ?? 'product';
+
+if ($entity === 'slider') {
+    require_once __DIR__ . '/SliderController.php';
+    $controller = new SliderController($conn);
+} else {
+    $controller = new ProductController($conn);
+}
+
 $controller->handleRequest();
 
 $conn->close();

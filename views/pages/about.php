@@ -8,9 +8,12 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
     <div class="about-card">
         <h2>About Mazi Coffee</h2>
 
+        <p style="font-style: italic; font-weight: 600; color: #E0B574; margin-bottom: 20px;">
+            "A small place in a small town for beautiful people."
+        </p>
         <p>
-            At Mazi Coffee, we believe coffee is more than a drink — it’s a moment.
-            A pause in the day where flavors, aromas, and people come together.
+            Situat în inima orașului Comănești, MAZI Coffee este mai mult decât o cafenea — este un loc de întâlnire.
+            Un moment de pauză în care aromele și oamenii se întâlnesc.
         </p>
 
         <p>
@@ -24,7 +27,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                 <a href="#" class="icon instagram" aria-label="Instagram">
                     <i class="fa-brands fa-instagram"></i>
                 </a>
-                <a href="#" class="icon facebook" aria-label="Facebook">
+                <a href="https://www.facebook.com/p/MAZI-coffee-shop-61573031510808/" class="icon facebook" aria-label="Facebook" target="_blank">
                     <i class="fa-brands fa-facebook-f"></i>
                 </a>
             </div>

@@ -137,23 +137,35 @@ p {
     transform: scale(1) translateY(0);
 }
 
-/* optional nice subtle float like Starbucks style */
-.hero-slider .slide.active {
-    animation: floatCoffee 6s ease-in-out infinite;
+/* Slider Animations */
+.hero-slider .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.05);
+    /* Slight zoom start */
+    transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
 }
 
-@keyframes floatCoffee {
-    0% {
-        transform: translateY(0) scale(1);
-    }
+.hero-slider .slide.active {
+    opacity: 1;
+    transform: scale(1);
+    /* Zoom to normal */
+    z-index: 2;
+}
 
-    50% {
-        transform: translateY(-10px) scale(1.01);
-    }
+#slide-content-wrapper {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
 
-    100% {
-        transform: translateY(0) scale(1);
-    }
+/* Ensure controls are above slides */
+.slider-controls {
+    z-index: 10;
+    position: relative;
 }
 
 
@@ -162,55 +174,65 @@ p {
 ========================= */
 .hero-right {
     width: 45%;
-    max-width: 520px;
+    max-width: 550px;
     margin-left: -40px;
+    z-index: 5;
+    /* Add a subtle dark backing for readability if needed, or rely on text shadow */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .hero-subtitle {
     font-family: "Inter", sans-serif;
-    font-weight: 500;
-    /* Medium */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
     color: #E0B574;
-    font-size: 1.2rem;
-    margin-bottom: 10px;
+    /* Gold */
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    display: block;
 }
 
 .hero-title {
     font-family: "Playfair Display", serif;
     font-weight: 700;
     font-style: italic;
-    color: rgba(255, 255, 255, 0.7);
-    /* White 70% */
-    font-size: 4rem;
+    color: #FFFFFF;
+    font-size: 4.5rem;
     line-height: 1.1;
-    margin-bottom: 18px;
+    margin-bottom: 25px;
 }
 
 .hero-text {
     font-family: "Inter", sans-serif;
-    font-weight: 500;
-    /* Medium */
-    color: rgba(255, 255, 255, 0.8);
-    /* White 80% */
-    font-size: 1.1rem;
-    line-height: 1.6;
-    max-width: 560px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.15rem;
+    line-height: 1.7;
+    max-width: 500px;
+    margin-bottom: 35px;
 }
 
 /* BUTTON */
 .hero-offer-btn {
-    padding: 12px 26px;
-    background: #cfa16d;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #E0B574 0%, #C4924E 100%);
     border: none;
-    border-radius: 10px;
-    color: #1f120b;
+    border-radius: 30px;
+    color: #2b1205;
     font-weight: 700;
+    font-size: 1rem;
     cursor: pointer;
-    transition: .3s;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(224, 181, 116, 0.3);
 }
 
 .hero-offer-btn:hover {
-    background: #e4b787;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(224, 181, 116, 0.5);
+    background: linear-gradient(135deg, #eacaa0 0%, #daa560 100%);
 }
 
 /* =========================
@@ -343,5 +365,168 @@ p {
     to {
         transform: scale(4);
         opacity: 0;
+    }
+}
+
+/* =========================
+   FEATURES SECTION
+========================= */
+.features-section {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.section-title {
+    font-family: "Playfair Display", serif;
+    font-size: 2.8rem;
+    color: #2b1205;
+    margin-bottom: 50px;
+    position: relative;
+    display: inline-block;
+}
+
+/* Decor line under title */
+.section-title::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: #E0B574;
+    margin: 15px auto 0;
+    border-radius: 2px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 40px;
+}
+
+.feature-card {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    /* Soft shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    color: #E0B574;
+    margin-bottom: 25px;
+}
+
+.feature-card h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.5rem;
+    color: #2b1205;
+    margin-bottom: 15px;
+}
+
+.feature-card p {
+    font-family: "Inter", sans-serif;
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* =========================
+   ABOUT SECTION
+========================= */
+.about-section {
+    padding: 80px 0;
+    /* background: #fff; Removed to allow global pattern */
+}
+
+.about-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.about-container {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    /* Fix for Homepage visibility */
+    background: rgba(255, 255, 255, 0.95);
+    padding: 60px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.about-content {
+    flex: 1;
+}
+
+.about-image {
+    flex: 1;
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.about-text {
+    font-family: "Inter", sans-serif;
+    font-size: 1.1rem;
+    color: #444;
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+.btn-primary {
+    background: #2b1205;
+    color: #fff !important;
+    padding: 12px 28px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #E0B574;
+    color: #2b1205 !important;
+}
+
+@media (max-width: 960px) {
+    .about-container {
+        flex-direction: column;
+    }
+
+    .section-title {
+        font-size: 2.2rem;
+    }
+}
+
+/* =========================
+   OFFER SECTION
+========================= */
+@media (max-width: 960px) {
+    .offer-card {
+        flex-direction: column;
+    }
+
+    .offer-image {
+        width: 100%;
+        min-height: 300px;
+    }
+
+    .offer-content {
+        padding: 40px 30px !important;
     }
 }

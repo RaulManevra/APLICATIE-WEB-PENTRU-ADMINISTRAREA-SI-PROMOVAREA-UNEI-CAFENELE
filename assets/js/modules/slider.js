@@ -5,16 +5,47 @@
 
 let sliderInterval = null;
 let sliderEvents = [];
+let sliderData = []; // Store fetched data
 
 /**
  * Initializes the home slider if the element exists.
  * @returns {boolean} True if slider was found and initialized.
  */
-export function initSlider() {
+export async function initSlider() {
     const slider = document.getElementById('homeSlider');
     if (!slider) return false;
 
-    const slides = Array.from(slider.querySelectorAll('.slide'));
+    // Check if slides exist, if not fetch them
+    let slides = Array.from(slider.querySelectorAll('.slide'));
+    sliderData = []; // Reset
+
+    if (slides.length === 0) {
+        try {
+            const res = await fetch('controllers/get_public_slides.php');
+            const data = await res.json();
+
+            if (data.success && data.data && data.data.length > 0) {
+                sliderData = data.data; // Store for later text updates
+                // Render slides
+                data.data.forEach((s, i) => {
+                    const img = document.createElement('img');
+                    img.className = 'slide' + (i === 0 ? ' active' : '');
+                    // Prioritize uploaded slider images, fall back if needed
+                    img.src = s.image_path;
+                    img.alt = s.title || 'Slide';
+                    slider.appendChild(img);
+                });
+                slides = Array.from(slider.querySelectorAll('.slide'));
+            } else {
+                console.warn("No slides found in DB.");
+                return false;
+            }
+        } catch (err) {
+            console.error("Failed to fetch slides:", err);
+            return false;
+        }
+    }
+
     if (!slides.length) return false;
 
     // Controls
@@ -42,10 +73,6 @@ export function initSlider() {
     }
     const dots = dotsContainer ? Array.from(dotsContainer.children) : [];
 
-    // Reset state
-    slides.forEach(s => s.classList.remove('active'));
-    slides[0].classList.add('active');
-
     function showSlide(i) {
         // Wrap around
         if (i >= slides.length) index = 0;
@@ -61,7 +88,52 @@ export function initSlider() {
         dots.forEach((dot, n) => {
             dot.classList.toggle('active', n === index);
         });
+
+        // Update Content with Animation
+        const wrapper = document.getElementById('slide-content-wrapper');
+        const titleEl = document.getElementById('hero-title');
+        const subtitleEl = document.getElementById('hero-subtitle');
+        const descEl = document.getElementById('hero-text');
+        const btnEl = document.getElementById('hero-btn');
+
+        if (wrapper) {
+            // Fade out
+            wrapper.style.opacity = '0';
+            wrapper.style.transform = 'translateY(10px)';
+            wrapper.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+            setTimeout(() => {
+                // Update content
+                if (sliderData && sliderData[index]) {
+                    const s = sliderData[index];
+                    if (titleEl) titleEl.innerHTML = safe(s.title || 'Welcome');
+                    if (subtitleEl) subtitleEl.innerHTML = safe(s.subtitle || '');
+                    if (descEl) descEl.innerHTML = safe(s.description || '');
+
+                    if (btnEl) {
+                        if (s.is_button_visible == "1") {
+                            btnEl.style.display = 'inline-block';
+                            btnEl.innerText = s.button_text || 'View Menu';
+                            btnEl.setAttribute('href', s.button_link || '?page=menu');
+                            btnEl.setAttribute('data-page', (s.button_link || '').replace('?page=', ''));
+                        } else {
+                            btnEl.style.display = 'none';
+                        }
+                    }
+                }
+
+                // Fade in
+                wrapper.style.opacity = '1';
+                wrapper.style.transform = 'translateY(0)';
+            }, 300);
+        }
     }
+
+    function safe(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
 
     function nextSlide() {
         showSlide(index + 1);
@@ -134,9 +206,6 @@ export function stopSlider() {
         console.log("Slider stopped");
     }
 
-    // Optional: Remove listeners if we want to be very clean, 
-    // but if the element is about to be removed from DOM, it's less critical 
-    // than the interval. However, it's good practice.
     sliderEvents.forEach(({ element, type, handler }) => {
         if (element) element.removeEventListener(type, handler);
     });

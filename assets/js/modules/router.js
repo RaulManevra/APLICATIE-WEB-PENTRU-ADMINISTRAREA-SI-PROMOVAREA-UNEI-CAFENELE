@@ -24,6 +24,14 @@ export function loadPage(page, pushState = true) {
         // ALWAYS stop the slider when navigating
         stopSlider();
 
+        // Hide Navbar on Admin Page
+        const navbar = document.querySelector('.header'); // or .navbar
+        if (page === 'admin') {
+            if (navbar) navbar.style.display = 'none';
+        } else {
+            if (navbar) navbar.style.display = 'block';
+        }
+
         const routes = window.APP_CONFIG?.routes || {};
         const url = routes[page];
 
