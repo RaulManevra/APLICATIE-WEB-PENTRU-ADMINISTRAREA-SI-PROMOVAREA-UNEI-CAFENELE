@@ -65,7 +65,7 @@ require_admin();
             </div>
         </section>
 
-        <!-- Menu Management Section (Existing) -->
+        <!-- Menu Management Section -->
         <section id="section-menu" class="admin-section" style="display: none;">
             <div class="header-actions">
                 <h2>Menu Management</h2>
@@ -108,11 +108,63 @@ require_admin();
 
         <!-- Table Management Section -->
         <section id="section-tables" class="admin-section" style="display: none;">
-            <div class="header-actions">
+        <div class="header-actions">
                 <h2>Table Management</h2>
+                <div class="table-controls" style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-weight: bold; color: #2c3e50;">Total Tables:</span>
+                    <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px; border-radius: 8px; border: 1px solid #ddd;">
+                        <button id="remove-table-btn" class="btn btn-danger btn-sm" style="padding: 5px 12px; margin: 0;"><i class="fas fa-minus"></i></button>
+                        <span id="table-count-display" style="font-size: 1.2rem; font-weight: bold; min-width: 30px; text-align: center;">-</span>
+                        <button id="add-table-btn" class="btn btn-primary btn-sm" style="padding: 5px 12px; margin: 0;"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 10px;">
+                    <button id="save-positions-btn" class="btn btn-success btn-sm">Save Positions</button>
+                    <button id="upload-floor-plan-btn" class="btn btn-secondary btn-sm"><i class="fas fa-image"></i> Upload Floor Plan</button>
+                    <input type="file" id="floor-plan-upload" style="display: none;" accept="image/*">
+                </div>
             </div>
-            <div class="placeholder-content">
-                <p>Table reservations and state management coming soon.</p>
+            
+            <div id="floor-plan-container" class="floor-plan" style="position: relative; width: 100%; max-width: 800px; height: 600px; margin: 0 auto 20px auto; background: #e0e0e0; border: 2px solid #ccc; border-radius: 8px; overflow: hidden; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 100% 100%; background-repeat: no-repeat; background-position: center;">
+                <!-- Draggable Tables will be here -->
+                <p style="position: absolute; top: 10px; left: 10px; z-index:0; color: #888; pointer-events: none;">Floor Plan Area</p>
+            </div>
+
+            <!-- Table Properties Modal -->
+            <div id="table-props-modal" class="modal">
+                <div class="modal-content" style="max-width: 400px;">
+                    <span class="close-modal" data-target="table-props-modal">&times;</span>
+                    <h2>Table Properties</h2>
+                    <form id="table-props-form">
+                        <input type="hidden" id="prop-table-id">
+                        <div class="form-group">
+                            <label>Shape</label>
+                            <select id="prop-shape" class="form-control">
+                                <option value="circle">Circle (Round)</option>
+                                <option value="square">Square</option>
+                                <option value="rectangle">Rectangle</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="display: flex; gap: 10px;">
+                            <div style="flex:1">
+                                <label>Width (px)</label>
+                                <input type="number" id="prop-width" class="form-control" min="20" max="300">
+                            </div>
+                            <div style="flex:1">
+                                <label>Height (px)</label>
+                                <input type="number" id="prop-height" class="form-control" min="20" max="300">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Update Table</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="tables-grid" class="tables-grid" style="display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid #ddd; padding-top: 20px;">
+
+            <div id="tables-grid" class="tables-grid" style="display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid #ddd; padding-top: 20px;">
+                <!-- List view still useful for status updates -->
+                <p>Detailed List:</p>
             </div>
         </section>
     </main>

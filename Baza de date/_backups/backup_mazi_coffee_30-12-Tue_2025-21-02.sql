@@ -76,35 +76,6 @@ INSERT INTO `slider_images` VALUES (1,'assets/img/slider_1.png','Dimineți Perfe
 UNLOCK TABLES;
 
 --
--- Table structure for table `tables`
---
-
-DROP TABLE IF EXISTS `tables`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tables` (
-  `ID` int NOT NULL AUTO_INCREMENT,
-  `Status` enum('Inactiva','Libera','Ocupata','Rezervata') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `x_pos` float DEFAULT '10',
-  `y_pos` float DEFAULT '10',
-  `shape` enum('circle','square','rectangle') COLLATE utf8mb4_general_ci DEFAULT 'circle',
-  `width` int DEFAULT '60',
-  `height` int DEFAULT '60',
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tables`
---
-
-LOCK TABLES `tables` WRITE;
-/*!40000 ALTER TABLE `tables` DISABLE KEYS */;
-INSERT INTO `tables` VALUES (1,'Libera',27.925,30.8062,'circle',70,70),(2,'Ocupata',43.3313,64.2844,'circle',45,45),(3,'Libera',56.1797,64.3562,'circle',45,45),(4,'Libera',68.7891,64.3406,'circle',45,45),(5,'Libera',22.7943,53.0523,'square',54,42),(6,'Libera',45.4864,79.5193,'rectangle',42,85),(7,'Libera',66.1875,79.4989,'rectangle',47,83);
-/*!40000 ALTER TABLE `tables` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `users`
 --
 
@@ -144,4 +115,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-30 22:31:09
+-- Dump completed on 2025-12-29 13:24:33

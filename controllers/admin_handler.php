@@ -46,6 +46,9 @@ $entity = $_POST['entity'] ?? $_GET['entity'] ?? 'product';
 if ($entity === 'slider') {
     require_once __DIR__ . '/SliderController.php';
     $controller = new SliderController($conn);
+} elseif ($entity === 'table') {
+    require_once __DIR__ . '/TableController.php';
+    $controller = new TableController($conn);
 } else {
     $controller = new ProductController($conn);
 }

@@ -38,6 +38,8 @@
                     }
                 } else if (targetId === 'slider') {
                     loadSliderImages();
+                } else if (targetId === 'tables') {
+                    loadTables();
                 }
             }
         });
@@ -325,12 +327,590 @@
         return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    // --- Table Logic ---
+    const addTableBtn = document.getElementById('add-table-btn');
+    const removeTableBtn = document.getElementById('remove-table-btn');
+
+    if (addTableBtn) {
+        addTableBtn.onclick = function () {
+            const current = document.querySelectorAll('.table-card').length;
+            postAction({ action: 'update_count', entity: 'table', count: current + 1 }, loadTables);
+        }
+    }
+
+    if (removeTableBtn) {
+        removeTableBtn.onclick = function () {
+            const current = document.querySelectorAll('.table-card').length;
+            if (current <= 0) return;
+            if (!confirm('Remove the last table?')) return;
+            postAction({ action: 'update_count', entity: 'table', count: current - 1 }, loadTables);
+        }
+    }
+
+    let currentTables = [];
+
+    // Background Upload Logic
+    const uploadFloorPlanBtn = document.getElementById('upload-floor-plan-btn');
+    const floorPlanInput = document.getElementById('floor-plan-upload');
+
+    if (uploadFloorPlanBtn && floorPlanInput) {
+        uploadFloorPlanBtn.onclick = () => floorPlanInput.click();
+
+        floorPlanInput.onchange = function () {
+            if (this.files && this.files[0]) {
+                const formData = new FormData();
+                formData.append('action', 'upload_background');
+                formData.append('entity', 'table');
+                formData.append('image', this.files[0]);
+                appendCsrf(formData);
+
+                uploadFloorPlanBtn.innerText = "Uploading...";
+                uploadFloorPlanBtn.disabled = true;
+
+                fetch('controllers/admin_handler.php', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        uploadFloorPlanBtn.innerText = "Upload Floor Plan";
+                        uploadFloorPlanBtn.disabled = false;
+                        if (data.success) {
+                            loadTables(); // Reload to fetch new bg
+                            alert("Background updated!");
+                        } else {
+                            alert("Error: " + data.error);
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        uploadFloorPlanBtn.disabled = false;
+                        alert("Upload failed.");
+                    });
+            }
+        };
+    }
+
+    // Table Properties Modal Logic
+    const tablePropsModal = document.getElementById('table-props-modal');
+    const tablePropsForm = document.getElementById('table-props-form');
+
+    if (tablePropsForm) {
+        tablePropsForm.onsubmit = function (e) {
+            e.preventDefault();
+            const id = document.getElementById('prop-table-id').value;
+            const shape = document.getElementById('prop-shape').value;
+            const width = document.getElementById('prop-width').value;
+            const height = document.getElementById('prop-height').value;
+
+            postAction({
+                action: 'update_details',
+                entity: 'table',
+                id: id,
+                shape: shape,
+                width: width,
+                height: height
+            }, () => {
+                if (tablePropsModal) tablePropsModal.style.display = 'none';
+                loadTables();
+            });
+        };
+    }
+
+    function loadTables() {
+        console.log("Fetching tables...");
+        const container = document.getElementById('tables-grid');
+        if (!container) return;
+
+        container.innerHTML = '<p>Loading tables...</p>';
+
+        const formData = new FormData();
+        formData.append('action', 'get_all');
+        formData.append('entity', 'table');
+        appendCsrf(formData);
+
+        fetch('controllers/admin_handler.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    currentTables = data.data || [];
+                    renderTables(data.data, data.background);
+                    const countDisplay = document.getElementById('table-count-display');
+                    if (countDisplay && data.data) {
+                        countDisplay.textContent = data.data.length;
+                    }
+                } else {
+                    container.innerHTML = '<p>Error loading tables.</p>';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                container.innerHTML = '<p>Connection Error.</p>';
+            });
+    }
+
+    function renderTables(tables, backgroundUrl) {
+        const gridContainer = document.getElementById('tables-grid');
+        const floorPlan = document.getElementById('floor-plan-container');
+
+        if (!gridContainer || !floorPlan) return;
+
+        gridContainer.innerHTML = '';
+        floorPlan.innerHTML = '<p style="position: absolute; top: 10px; left: 10px; z-index:0; color: #888; pointer-events: none;">Floor Plan Area</p>';
+
+        if (backgroundUrl) {
+            // Load image to get dimensions
+            const img = new Image();
+            img.onload = function () {
+                floorPlan.style.backgroundImage = `url('${backgroundUrl}')`;
+                floorPlan.style.backgroundSize = 'contain'; // or cover, does not matter if ratio matches
+                floorPlan.style.backgroundRepeat = 'no-repeat';
+                floorPlan.style.backgroundPosition = 'center';
+
+                // Apply Aspect Ratio
+                const ratio = img.width / img.height;
+                // Set height based on current width to match ratio
+                // floorPlan.style.height = (floorPlan.offsetWidth / ratio) + 'px'; // Simple js resize
+                floorPlan.style.height = 'auto';
+                floorPlan.style.aspectRatio = `${img.width} / ${img.height}`;
+            };
+            img.src = backgroundUrl;
+
+        } else {
+            floorPlan.style.backgroundImage = 'radial-gradient(#ccc 1px, transparent 1px)';
+            floorPlan.style.backgroundSize = '20px 20px';
+            floorPlan.style.height = '600px'; // Default
+            floorPlan.style.aspectRatio = 'auto';
+        }
+
+        if (!tables || tables.length === 0) {
+            gridContainer.innerHTML = '<p>No tables found.</p>';
+            return;
+        }
+
+        tables.forEach(t => {
+            // 1. Grid Item (Control Status)
+            const card = document.createElement('div');
+            const statusClass = 'status-' + t.Status.toLowerCase().replace(/\s+/g, '-');
+            card.className = `table-card ${statusClass}`;
+            card.style.flex = '1 0 200px';
+
+            let icon = 'fa-chair';
+            if (t.Status === 'Ocupata') icon = 'fa-user-friends';
+            if (t.Status === 'Rezervata') icon = 'fa-clock';
+            if (t.Status === 'Inactiva') icon = 'fa-ban';
+
+            card.innerHTML = `
+                <div class="table-icon"><i class="fas ${icon}"></i></div>
+                <div class="table-id">Table ${t.ID}</div>
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">${t.shape || 'circle'}</div>
+                <button class="btn btn-sm btn-secondary" onclick="openTableProps(${t.ID})" style="margin-bottom: 5px;">Edit Props</button>
+                <select class="table-status-select" onchange="window.updateTableStatus(${t.ID}, this.value)">
+                    <option value="Libera" ${t.Status === 'Libera' ? 'selected' : ''}>Libera</option>
+                    <option value="Ocupata" ${t.Status === 'Ocupata' ? 'selected' : ''}>Ocupata</option>
+                    <option value="Rezervata" ${t.Status === 'Rezervata' ? 'selected' : ''}>Rezervata</option>
+                    <option value="Inactiva" ${t.Status === 'Inactiva' ? 'selected' : ''}>Inactiva</option>
+                </select>
+            `;
+            gridContainer.appendChild(card);
+
+            // 2. Floor Plan Item (Draggable)
+            const mapItem = document.createElement('div');
+            mapItem.className = `map-table ${statusClass}`;
+            mapItem.id = `map-table-${t.ID}`;
+            mapItem.style.position = 'absolute';
+            mapItem.style.left = (t.x_pos || 10) + '%';
+            mapItem.style.top = (t.y_pos || 10) + '%';
+
+            const w = t.width || 60;
+            const h = t.height || 60;
+            mapItem.style.width = w + 'px';
+            mapItem.style.height = h + 'px';
+
+            const shape = t.shape || 'circle';
+            if (shape === 'circle') mapItem.style.borderRadius = '50%';
+            else if (shape === 'square') mapItem.style.borderRadius = '8px';
+            else if (shape === 'rectangle') mapItem.style.borderRadius = '8px';
+
+            mapItem.style.border = '2px solid #333';
+            mapItem.style.display = 'flex';
+            mapItem.style.alignItems = 'center';
+            mapItem.style.justifyContent = 'center';
+            mapItem.style.fontWeight = 'bold';
+            mapItem.style.color = '#fff';
+            mapItem.style.cursor = 'grab';
+            mapItem.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+            mapItem.style.backgroundColor = getStatusColor(t.Status);
+            mapItem.style.zIndex = '10';
+            mapItem.innerHTML = `<div style="pointer-events: none;">${t.ID}</div>`;
+
+            // Mouse Move for Cursor Change
+            mapItem.onmousemove = function (e) {
+                if (draggedTableId || resizingTableId) return;
+
+                const rect = mapItem.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const w = rect.width;
+                const h = rect.height;
+                const margin = 10;
+
+                let cursor = '';
+                let n = y < margin;
+                let s = y > h - margin;
+                let w_side = x < margin;
+                let e_side = x > w - margin;
+
+                if (n && w_side) cursor = 'nw-resize';
+                else if (n && e_side) cursor = 'ne-resize';
+                else if (s && w_side) cursor = 'sw-resize';
+                else if (s && e_side) cursor = 'se-resize';
+                else if (n) cursor = 'n-resize';
+                else if (s) cursor = 's-resize';
+                else if (w_side) cursor = 'w-resize';
+                else if (e_side) cursor = 'e-resize';
+                else cursor = 'grab';
+
+                mapItem.style.cursor = cursor;
+                mapItem.dataset.resizeDir = cursor === 'grab' ? '' : cursor.replace('-resize', '');
+            };
+
+            // Mouse Down for Action
+            mapItem.onmousedown = function (e) {
+                if (e.button !== 0) return; // Only left click
+                const dir = mapItem.dataset.resizeDir;
+                if (dir) {
+                    initResize(e, t.ID, dir);
+                } else {
+                    startDrag(e, t.ID);
+                }
+            };
+
+            mapItem.ondblclick = () => openTableProps(t.ID);
+
+            floorPlan.appendChild(mapItem);
+        });
+    }
+
+    // --- Resize Logic ---
+    let resizingTableId = null;
+    let resizeDir = '';
+    let startX, startY, startWidth, startHeight, startLeft, startTop;
+
+    function initResize(e, id, dir) {
+        e.stopPropagation();
+        e.preventDefault();
+        resizingTableId = id;
+        resizeDir = dir;
+
+        const tableEl = document.getElementById(`map-table-${id}`);
+        const rect = tableEl.getBoundingClientRect();
+
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = rect.width;
+        startHeight = rect.height;
+        startLeft = parseFloat(tableEl.style.left); // % value
+        startTop = parseFloat(tableEl.style.top);   // % value
+
+        // Convert % positions to pixels for calc
+        const container = document.getElementById('floor-plan-container');
+        const conRect = container.getBoundingClientRect();
+        startLeftPx = (startLeft / 100) * conRect.width;
+        startTopPx = (startTop / 100) * conRect.height;
+
+        document.documentElement.addEventListener('mousemove', doResize, false);
+        document.documentElement.addEventListener('mouseup', stopResize, false);
+    }
+
+    function doResize(e) {
+        if (!resizingTableId) return;
+        e.preventDefault();
+
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        const tableEl = document.getElementById(`map-table-${resizingTableId}`);
+        const container = document.getElementById('floor-plan-container');
+        const conW = container.offsetWidth;
+        const conH = container.offsetHeight;
+
+        let newW = startWidth;
+        let newH = startHeight;
+        let newLeftPx = startLeftPx;
+        let newTopPx = startTopPx;
+
+        // Apply Delta based on direction
+        if (resizeDir.includes('e')) newW = startWidth + deltaX;
+        if (resizeDir.includes('w')) {
+            newW = startWidth - deltaX;
+            newLeftPx = startLeftPx + deltaX;
+        }
+        if (resizeDir.includes('s')) newH = startHeight + deltaY;
+        if (resizeDir.includes('n')) {
+            newH = startHeight - deltaY;
+            newTopPx = startTopPx + deltaY;
+        }
+
+        // Min dimensions
+        if (newW < 30) {
+            // Correct Left if scaling from West
+            if (resizeDir.includes('w')) newLeftPx = startLeftPx + (startWidth - 30);
+            newW = 30;
+        }
+        if (newH < 30) {
+            // Correct Top if scaling from North
+            if (resizeDir.includes('n')) newTopPx = startTopPx + (startHeight - 30);
+            newH = 30;
+        }
+
+        // Update Styles
+        tableEl.style.width = newW + 'px';
+        tableEl.style.height = newH + 'px';
+
+        // Only update pos if it changed (optimization)
+        if (resizeDir.includes('w') || resizeDir.includes('n')) {
+            tableEl.style.left = (newLeftPx / conW * 100) + '%';
+            tableEl.style.top = (newTopPx / conH * 100) + '%';
+        }
+    }
+
+    function stopResize(e) {
+        if (!resizingTableId) return;
+
+        const tableEl = document.getElementById(`map-table-${resizingTableId}`);
+        const container = document.getElementById('floor-plan-container');
+
+        // Update data
+        const t = currentTables.find(x => x.ID == resizingTableId);
+        if (t) {
+            t.width = parseInt(tableEl.style.width);
+            t.height = parseInt(tableEl.style.height);
+            // Also need to save position if we resized from West/North
+            t.x_pos = parseFloat(tableEl.style.left);
+            t.y_pos = parseFloat(tableEl.style.top);
+
+            // Mark these specifically as changed
+            if (!window.unsavedChanges) window.unsavedChanges = {};
+            window.unsavedChanges[resizingTableId] = {
+                x: t.x_pos,
+                y: t.y_pos,
+                width: t.width,
+                height: t.height
+            };
+
+            // HACK: Since standard save logic might only look at style.left/top, 
+            // we should attach W/H to the object if our save function supports it. 
+            // Or just rely on the 'update_details' endpoint?
+            // Actually, best to trigger a dedicated update for size OR piggyback on save.
+            // Let's assume piggyback for now, but I will check save logic next tool call.
+        }
+
+        document.documentElement.removeEventListener('mousemove', doResize, false);
+        document.documentElement.removeEventListener('mouseup', stopResize, false);
+        resizingTableId = null;
+
+        // UI Feedback
+        const btn = document.getElementById('save-positions-btn');
+        btn.textContent = "Save Changes *";
+        btn.classList.add('btn-warning');
+        btn.classList.remove('btn-success');
+    }
+
+    // --- Drag Logic ---
+    let draggedTableId = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    // Helper to calculate px pos from %
+    let startLeftPx, startTopPx;
+
+    function startDrag(e, id) {
+        e.preventDefault();
+        const el = document.getElementById(`map-table-${id}`);
+        draggedTableId = id;
+
+        // Calculate offset from top-left of element
+        const rect = el.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+
+        el.style.cursor = 'grabbing';
+        el.style.zIndex = '100';
+
+        document.documentElement.addEventListener('mousemove', doDrag, false);
+        document.documentElement.addEventListener('mouseup', stopDrag, false);
+    }
+
+    function doDrag(e) {
+        if (!draggedTableId) return;
+        e.preventDefault();
+
+        const el = document.getElementById(`map-table-${draggedTableId}`);
+        const floorPlan = document.getElementById('floor-plan-container');
+        const containerRect = floorPlan.getBoundingClientRect();
+
+        let newX = e.clientX - containerRect.left - dragOffsetX;
+        let newY = e.clientY - containerRect.top - dragOffsetY;
+
+        // Clamp inside container (pixels)
+        const maxX = containerRect.width - el.offsetWidth;
+        const maxY = containerRect.height - el.offsetHeight;
+
+        newX = Math.max(0, Math.min(newX, maxX));
+        newY = Math.max(0, Math.min(newY, maxY));
+
+        // Convert to percentage for storage
+        const percentX = (newX / containerRect.width) * 100;
+        const percentY = (newY / containerRect.height) * 100;
+
+        // Update visual mostly in px for smoothness, or %? 
+        // Using % directly is fine if simple.
+        el.style.left = percentX + '%';
+        el.style.top = percentY + '%';
+
+        // Store temp percentage for save
+        // This is a bit redundant with activeDrag.percentX/Y, but keeping for consistency with new structure
+        const t = currentTables.find(x => x.ID == draggedTableId);
+        if (t) {
+            t.x_pos = percentX;
+            t.y_pos = percentY;
+        }
+    }
+
+    function stopDrag(e) {
+        if (!draggedTableId) return;
+
+        const el = document.getElementById(`map-table-${draggedTableId}`);
+        el.style.cursor = 'grab';
+        el.style.zIndex = '10';
+
+        const t = currentTables.find(x => x.ID == draggedTableId);
+        if (t && t.x_pos !== undefined && t.y_pos !== undefined) {
+            if (!window.unsavedChanges) window.unsavedChanges = {}; // Safety init if not present yet
+            window.unsavedChanges[draggedTableId] = {
+                x: t.x_pos,
+                y: t.y_pos,
+                width: t.width || 60, // Ensure we send current size too
+                height: t.height || 60
+            };
+        }
+
+        draggedTableId = null;
+        document.documentElement.removeEventListener('mousemove', doDrag, false);
+        document.documentElement.removeEventListener('mouseup', stopDrag, false);
+
+        // UI Feedback
+        const btn = document.getElementById('save-positions-btn');
+        btn.textContent = "Save Changes *";
+        btn.classList.add('btn-warning');
+        btn.classList.remove('btn-success');
+    }
+
+    window.openTableProps = function (id) {
+        const t = currentTables.find(x => x.ID == id);
+        if (!t) return;
+
+        document.getElementById('prop-table-id').value = t.ID;
+        document.getElementById('prop-shape').value = t.shape || 'circle';
+        document.getElementById('prop-width').value = t.width || 60;
+        document.getElementById('prop-height').value = t.height || 60;
+
+        if (tablePropsModal) tablePropsModal.style.display = 'block';
+    }
+
+    function getStatusColor(status) {
+        switch (status) {
+            case 'Libera': return '#2ecc71';
+            case 'Ocupata': return '#e74c3c';
+            case 'Rezervata': return '#f1c40f';
+            case 'Inactiva': return '#95a5a6';
+            default: return '#95a5a6';
+        }
+    }
+
+    // Global storage for unsaved changes
+    window.unsavedChanges = {};
+
+    // Save Positions Button Logic
+    const savePositionsBtn = document.getElementById('save-positions-btn');
+    if (savePositionsBtn) {
+        savePositionsBtn.onclick = function () {
+            const ids = Object.keys(window.unsavedChanges);
+            if (ids.length === 0) {
+                alert("No changes to save.");
+                return;
+            }
+
+            savePositionsBtn.innerText = "Saving...";
+            savePositionsBtn.disabled = true;
+
+            let promises = [];
+            ids.forEach(id => {
+                const pos = window.unsavedChanges[id];
+                const p = new Promise((resolve) => {
+                    // Manually fetch to handle errors properly
+                    const formData = new FormData();
+                    formData.append('action', 'update_coordinates');
+                    formData.append('entity', 'table');
+                    formData.append('id', id);
+                    formData.append('x', pos.x);
+                    formData.append('y', pos.y);
+                    formData.append('width', pos.width || 60);
+                    formData.append('height', pos.height || 60);
+                    appendCsrf(formData);
+
+                    fetch('controllers/admin_handler.php', {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (!data.success) {
+                                console.error(`Failed to save table ${id}: ${data.error}`);
+                            }
+                        })
+                        .catch(err => {
+                            console.error(`Network error saving table ${id}`, err);
+                        })
+                        .finally(() => {
+                            resolve(); // Always resolve so Promise.all completes
+                        });
+                });
+                promises.push(p);
+            });
+
+            Promise.all(promises).then(() => {
+                window.unsavedChanges = {};
+                savePositionsBtn.innerText = "Save Positions";
+                savePositionsBtn.disabled = false;
+                alert("Positions processed (check console for any errors).");
+            });
+        };
+    }
+
+
+
+    window.updateTableStatus = function (id, newStatus) {
+        postAction({ action: 'update_status', entity: 'table', id: id, status: newStatus }, () => {
+            // Optional: reload tables to reflect changes fully or just update UI class
+            loadTables();
+        });
+    };
+
     // Initial Load based on default visible section
     // Check which section is active or default to menu
     if (document.getElementById('section-menu').style.display !== 'none') {
         loadProducts();
     } else if (document.getElementById('section-slider').style.display !== 'none') {
         loadSliderImages();
+    } else if (document.getElementById('section-tables').style.display !== 'none') {
+        loadTables();
     }
 
 })();
