@@ -12,7 +12,7 @@ export function updateHero(page) {
         hero.innerHTML = `
             <div class="content-wrapper">
                 <div class="bgimg">
-                    <div class="text">${userText}</div>
+                    
                 </div>
             </div>
         `;
@@ -76,12 +76,12 @@ export function updateHeaderUI() {
     <div style="font-size:1em;color:#fff">
         Your Points: 
         <br>
-        <span style="display:inline-block; margin-top:5px; color:#d4a373; font-weight:bold; background:#fff; border-radius:99px; padding:5px;">
+        <span style="display:inline-block; margin-top:5px; color:#522F25; font-weight:bold; background:#ebdbc0; border-radius:99px; padding:5px;">
             <i class="fa-solid fa-coins"></i> ${points} points
         </span>
         <br/>
     </div>
-    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+    <hr style="margin: 10px 0; border: 0; border-top: 0px solid #eee;">
 `;
 
             // Add click listener for profile picture

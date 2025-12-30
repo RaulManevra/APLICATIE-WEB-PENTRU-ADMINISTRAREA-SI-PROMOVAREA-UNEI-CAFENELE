@@ -32,7 +32,7 @@
     transform: translateX(-50%);
     width: 450px;
     height: 3px;
-    background-color: #e7a816;
+    background-color: rgb(184, 157, 124);
 }
 
 .menu-grid {

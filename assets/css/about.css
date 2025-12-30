@@ -93,6 +93,12 @@
     gap: 6px;
     transition: 0.25s ease;
     text-decoration: none;
+    overflow: visible;
+}
+.social-icons a i{
+    display: inline-block;
+    line-height: 1;
+    padding-top: 2px; /* tiny breathing room so nothing clips */
 }
 
 .social-icons a:hover {
