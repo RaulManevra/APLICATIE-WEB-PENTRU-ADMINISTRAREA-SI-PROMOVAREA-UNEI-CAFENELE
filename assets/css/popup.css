@@ -100,6 +100,7 @@ span.psw {
     gap: 28px;
     padding: 24px;
     font-weight: 600;
+    z-index: 30;
 }
 
 .profile-popup .profile-close {
@@ -119,6 +120,7 @@ span.psw {
     justify-content: center;
     align-items: center;
     transition: 0.25s ease;
+    z-index: 30;
 }
 
 .profile-popup .profile-close:hover {
@@ -165,7 +167,7 @@ span.psw {
     transition: opacity 180ms ease;
     opacity: 0;
     pointer-events: none;
-    z-index:10;
+    z-index:5;
 }
 #profile-backdrop.active {
     display: block;
@@ -198,3 +200,42 @@ span.psw {
         transform: translateX(0);
     }
 }
+/* Make the avatar container relative */
+.avatar-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center; /* center avatar horizontally */
+    margin-bottom: 15px;
+}
+
+/* Avatar image */
+.avatar-container img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    z-index: 2; /* on top of rectangle */
+    border: 2px solid #fff;
+    position: relative;
+}
+
+/* Rectangular background behind avatar */
+.avatar-bg-rect {
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+    transform: translateX(-50%); 
+    width: 330px;
+    height: 80px; 
+    background:linear-gradient(
+        180deg,
+        #4b2e2a 0%,
+        #6b3f36 30%,
+        #8c5e50 70%,  
+        #b08c6b 100%  );
+    z-index: 1; 
+    border-radius: 5px;
+}
+
+

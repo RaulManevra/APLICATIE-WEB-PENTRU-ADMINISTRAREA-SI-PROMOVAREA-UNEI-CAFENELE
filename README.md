@@ -20,7 +20,7 @@ Problema cu fundalul care fuge (sti tu de bara aia alba de jos)
 
 Would be nice daca refresh-ul nu ar face tot site-ul alb cu exceptia anumitor elemente, fie totul alb, fie refresh-ul sa nu fie atat de tare vizibil
 
-Daca dai scroll si deschizi sa vezi contul, fuge modalul in sus.
+Daca dai scroll si deschizi sa vezi contul, fuge modalul in sus.--Rezolvat--
 
 Ar fi fain sa reparam animatia ca atunci cand dai logout. Spre final, se misca brusc toata imaginea.
 

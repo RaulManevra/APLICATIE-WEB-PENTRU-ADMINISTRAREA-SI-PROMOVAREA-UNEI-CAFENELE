@@ -56,10 +56,16 @@
 
 }
 .welcome-svg {
-    transform: rotate(20deg); /* rotate cup to the right */
     width: 235px;
     height: 235px;
     flex-shrink: 0;
+    animation: cupRotate 1.2s ease-out forwards;
+    animation-delay:0.4s;
+}
+@keyframes cupRotate {
+  0%   { transform: rotate(0deg); }
+  70%  { transform: rotate(25deg); }
+  100% { transform: rotate(20deg); }
 }
 
 /* ===== Social Box ===== */

@@ -69,7 +69,7 @@ require_admin();
         <section id="section-menu" class="admin-section" style="display: none;">
             <div class="header-actions">
                 <h2>Menu Management</h2>
-                <button id="add-product-btn" class="btn btn-primary">
+                <button id="add-product-btn" class="btn btn-secondary">
                     <i class="fas fa-plus"></i> Add New Coffee
                 </button>
             </div>
@@ -96,7 +96,7 @@ require_admin();
         <section id="section-slider" class="admin-section" style="display: none;">
             <div class="header-actions">
                 <h2>Slider Settings</h2>
-                <button id="add-slide-btn" class="btn btn-primary">
+                <button id="add-slide-btn" class="btn btn-secondary">
                     <i class="fas fa-plus"></i> Add New Slide
                 </button>
             </div>
@@ -115,12 +115,12 @@ require_admin();
                     <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px; border-radius: 8px; border: 1px solid #ddd;">
                         <button id="remove-table-btn" class="btn btn-danger btn-sm" style="padding: 5px 12px; margin: 0;"><i class="fas fa-minus"></i></button>
                         <span id="table-count-display" style="font-size: 1.2rem; font-weight: bold; min-width: 30px; text-align: center;">-</span>
-                        <button id="add-table-btn" class="btn btn-primary btn-sm" style="padding: 5px 12px; margin: 0;"><i class="fas fa-plus"></i></button>
+                        <button id="add-table-btn" class="btn btn-secondary btn-sm" style="padding: 5px 12px; margin: 0;width: 40px;"><i class="fas fa-plus"></i></button>
                     </div>
                 </div>
                 <div style="margin-top: 10px; display: flex; gap: 10px;">
                     <button id="save-positions-btn" class="btn btn-success btn-sm">Save Positions</button>
-                    <button id="upload-floor-plan-btn" class="btn btn-secondary btn-sm"><i class="fas fa-image"></i> Upload Floor Plan</button>
+                    <button id="upload-floor-plan-btn" class="btn btn-3 btn-sm"><i class="fas fa-image"></i> Upload Floor Plan</button>
                     <input type="file" id="floor-plan-upload" style="display: none;" accept="image/*">
                 </div>
             </div>

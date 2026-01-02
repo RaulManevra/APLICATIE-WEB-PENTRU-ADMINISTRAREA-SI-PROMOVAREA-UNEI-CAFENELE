@@ -55,7 +55,7 @@ body {
 .nav-link.active {
     background-color: #34495e;
     color: #fff;
-    border-left-color: #e67e22;
+    border-left-color: #bcbdbd;
     /* Accent Color */
 }
 
@@ -143,16 +143,37 @@ body {
     align-items: center;
     gap: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #6f4e37 0%, #5d4030 100%);
+    background: linear-gradient(
+        135deg,           /* diagonal gradient */
+        #1b3a2b 0%,       /* deep forest green */
+        #2e6b3f 40%,      /* medium leafy green */
+        #4ca66b 70%,      /* lighter green */
+        #7ed09a 100%      /* soft minty green */
+    );
     color: white;
+    background-size: 200% 100%;
+    background-position: right;
+    transition: background-position 1s ease;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
+.btn-secondary {
+    background: linear-gradient(
+        135deg,           /* diagonal gradient */
+        #1b3a2b 0%,       /* deep forest green */
+        #2e6b3f 40%,      /* medium leafy green */
+        #4ca66b 70%,      /* lighter green */
+        #7ed09a 100%      /* soft minty green */
+    );
+    color: white;
+    background-size: 200% 100%;
+    background-position: right;
+    transition: background-position 1s ease;
+}
+
+.btn-secondary:hover {
     box-shadow: 0 6px 12px rgba(111, 78, 55, 0.3);
+    color:white;
+    background-position: left;
 }
 
 .btn-success {
@@ -164,8 +185,25 @@ body {
 }
 
 .btn-success:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(67, 160, 71, 0.3);
+}
+.btn-3{
+    width: 100%;     
+    height: 100px;       
+    background: linear-gradient(
+        90deg,        
+        #0d3b66,         
+        #1e6091,        
+        #3da5d9,        
+        #7fc8f8          
+    );
+    background-size: 200% 100%; 
+    background-position: right; 
+    transition: background-position 1s ease; 
+}
+.btn-3:hover {
+    background-position: left; 
+    box-shadow: 0 6px 12px rgba(13, 59, 102, 0.3);
 }
 
 .btn-danger {
@@ -321,7 +359,6 @@ body {
 .form-group input,
 .form-group select,
 .form-group textarea {
-    width: 100%;
     padding: 12px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
@@ -513,10 +550,11 @@ body {
     width: 100%;
     padding: 8px;
     border: 1px solid #bdc3c7;
-    border-radius: 6px;
+    border-radius: 20px;
     background-color: white;
     font-size: 0.9rem;
     cursor: pointer;
+    letter-spacing: 1px;;
 }
 
 .table-status-select:focus {

@@ -11,7 +11,7 @@
     grid-template-columns: auto 1fr auto;
     /* left (logo), center (nav), right (auth) */
     align-items: center;
-    z-index: 20;
+    z-index: 6;
     position: fixed;
     left: 0;
     top: 0;

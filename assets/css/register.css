@@ -21,11 +21,12 @@
 
 .register-box p a {
     text-decoration: none;
-    color: rgb(236, 160, 46)
+    color: rgba(223, 151, 44, 0.911)
 }
 
 .register-box a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    color: rgb(255, 173, 50)
 }
 
 .register-box {
@@ -63,7 +64,7 @@
 
 .register-box a {
     text-decoration: none;
-    color: rgb(236, 160, 46)
+    color: rgba(223, 151, 44, 0.911)
 }
 
 .register-wrapper .register-box {
@@ -72,7 +73,7 @@
     justify-content: center;
     align-items: center;
     width: 750px;
-    height: 100%;
+    height: calc(100% - 85px);
     max-width: 90%;
     padding: 60px 45px;
     margin-top: 60px;
@@ -85,6 +86,7 @@
     z-index: 1;
     position: relative;
     margin: 0;
+    margin-top:85px;
     animation: slideInFromRight 1s ease-out forwards;
 }
 
@@ -93,7 +95,7 @@
     font-size: 40px;
     letter-spacing: 1px;
     margin-top: 0;
-    padding-bottom: 80px;
+    padding-bottom: 40px;
     padding-top: 40px;
 }
 
@@ -108,7 +110,7 @@
 #app .register-box input[type=text] {
     width: 100%;
     padding: 12px 15px;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
     border-radius: 40px;
     border: 2px solid rgba(255, 255, 255, 0.2);
     outline: none;
@@ -129,6 +131,7 @@
 
 #app .register-box button {
     width: 100%;
+    height:45px;
     background-color: #dbdddb;
     color: rgb(30, 29, 35);
     font-size: 20px;
@@ -140,6 +143,7 @@
     border-radius: 40px;
     cursor: pointer;
     transition: background-color 0.3s;
+    overflow:visible;
 }
 
 #app .register-box button:hover {
@@ -189,24 +193,39 @@
     justify-content: center;
     width: 100%;
     height: 45px;
-    background-color: #db4437;
-    color: white !important;
+    background-color: #ffffffe6;
+    color: rgb(66, 66, 66) !important;
     /* Override anchor color */
     border-radius: 40px;
     text-decoration: none;
     font-size: 18px;
     font-weight: 600;
+    border:3px solid #5a5454;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     transition: 0.3s ease;
 }
 
 .btn-google i {
     margin-right: 10px;
-    font-size: 20px;
+    font-size: 22px;
+    background: conic-gradient(
+    from 0deg at 40% 48%,
+    #EA4335 0deg 65deg,
+    #4285F4 65deg 144deg,
+    #34A853 144deg 234deg,
+    #FBBC05 234deg 306deg,
+    #EA4335 306deg 360deg
+  );
+
+  display: inline-block;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 .btn-google:hover {
-    background-color: #c1351d;
+    background-color: #ffffff;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(219, 68, 55, 0.4);
+    box-shadow: 0 4px 12px rgba(213, 213, 213, 0.4);
 }

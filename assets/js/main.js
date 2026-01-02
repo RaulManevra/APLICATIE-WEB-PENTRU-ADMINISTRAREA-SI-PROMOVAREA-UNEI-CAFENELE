@@ -112,3 +112,16 @@ if (document.readyState === 'interactive' || document.readyState === 'complete')
     initProfilePopup();
 }
 
+window.addEventListener('DOMContentLoaded', () => window.scrollTo(0, 0));
+window.addEventListener('load', () => window.scrollTo(0, 0));
+window.addEventListener('popstate', () => window.scrollTo(0, 0));
+
+document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href]');
+    if (!a) return;
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+    // for normal navigation or SPA routers, ensure page is at top
+    setTimeout(() => window.scrollTo(0, 0), 50);
+});
+
