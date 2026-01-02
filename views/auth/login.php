@@ -27,6 +27,13 @@ require_once __DIR__ . '/../../core/output.php';
     </div>
 
     <button type="submit">Login</button>
+
+    <div class="oauth-section">
+        <p>OR</p>
+        <a href="controllers/google_auth.php?action=login" class="btn-google">
+            <i class="fa-brands fa-google"></i> Login with Google
+        </a>
+    </div>
     <p class="bottom-text">
     Don't have an account? <a href="?page=register">Register here</a>
 </p>
