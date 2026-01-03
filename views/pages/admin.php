@@ -34,6 +34,9 @@ require_admin();
             <a href="#" class="nav-link" data-section="tables">
                 <i class="fas fa-chair"></i> Table Management
             </a>
+            <a href="#" class="nav-link" data-section="reservations">
+                <i class="fas fa-calendar-alt"></i> Reservations
+            </a>
         </nav>
         <div class="sidebar-footer">
             <a href="?page=home" class="nav-link return-tosite" data-page="home">
@@ -165,6 +168,53 @@ require_admin();
             <div id="tables-grid" class="tables-grid" style="display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid #ddd; padding-top: 20px;">
                 <!-- List view still useful for status updates -->
                 <p>Detailed List:</p>
+            </div>
+        </section>
+
+        <!-- Reservations Section -->
+        <section id="section-reservations" class="admin-section" style="display: none;">
+            <div class="header-actions">
+                <h2>Reservations</h2>
+            </div>
+            <div class="table-container">
+                <h3>Active & Upcoming</h3>
+                <table class="data-table" id="reservations-table">
+                    <thead>
+                        <tr>
+                            <th>DateTime</th>
+                            <th>Table</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservations-list">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="history-section" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                <details>
+                    <summary style="font-size: 1.2rem; font-weight: bold; cursor: pointer; color: #7f8c8d;">
+                        View Reservation History (Past) <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 5px;"></i>
+                    </summary>
+                    <div class="table-container" style="margin-top: 15px;">
+                        <table class="data-table" id="history-reservations-table" style="opacity: 0.8;">
+                            <thead>
+                                <tr>
+                                    <th>DateTime</th>
+                                    <th>Table</th>
+                                    <th>User</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-reservations-list">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
             </div>
         </section>
     </main>

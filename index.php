@@ -1,10 +1,16 @@
 <?php
 require_once __DIR__ . '/core/security.php'; // starts session and sets secure cookie params
-
+require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/controllers/ReservationController.php';
 
 $userData = SessionManager::getCurrentUserData();
 $currentUser = $userData['username'] ?? null;
 $currentUserRoles = $userData['roles'] ?? [];
+$upcomingReservation = null;
+
+if ($currentUser && isset($conn)) {
+    $upcomingReservation = ReservationController::getUpcomingForUser($conn, $userData['id']);
+}
 
 ?>
 <!DOCTYPE html>

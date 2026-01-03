@@ -39,10 +39,39 @@ class TableController {
     }
 
     private function getAll() {
+        // 1. Fetch Reservations
+        $conn = $this->conn; // shorthand
+        // Note: Timezone is already sync'd in db.php
+        
+        $resSql = "
+            SELECT r.table_id, r.reservation_time, u.username, u.email 
+            FROM reservations r
+            JOIN users u ON r.user_id = u.id
+            WHERE r.reservation_time BETWEEN DATE_SUB(NOW(), INTERVAL 1 HOUR) AND DATE_ADD(NOW(), INTERVAL 20 MINUTE)
+        ";
+        $resResult = $conn->query($resSql);
+        $activeRes = [];
+        if ($resResult) {
+            while($r = $resResult->fetch_assoc()) {
+                $activeRes[$r['table_id']] = $r;
+            }
+        }
+
+        // 2. Fetch Tables
         $sql = "SELECT * FROM tables ORDER BY ID ASC";
-        $result = $this->conn->query($sql);
+        $result = $conn->query($sql);
         $tables = [];
         while ($row = $result->fetch_assoc()) {
+            $tid = $row['ID'];
+            // Normalize status mainly for correctness
+            $row['Status'] = trim($row['Status']);
+            
+            // Inject Reservation Data
+            if (isset($activeRes[$tid])) {
+                 $row['active_reservation'] = $activeRes[$tid];
+                 // If status allows, we can override or just let frontend decide
+                 // Ideally admin sees EVERYTHING.
+            }
             $tables[] = $row;
         }
 

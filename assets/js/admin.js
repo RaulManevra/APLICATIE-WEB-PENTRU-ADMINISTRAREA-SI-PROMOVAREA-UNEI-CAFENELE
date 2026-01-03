@@ -5,6 +5,7 @@
     window.openEdit = openEdit;
     window.deleteProduct = deleteProduct;
     window.deleteSlide = deleteSlide;
+    // blocked user func moved to window directly
 
     // Global store
     let currentProducts = [];
@@ -15,12 +16,19 @@
     // --- Navigation Logic ---
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
     const sections = document.querySelectorAll('.admin-section');
+    let reservationInterval = null; // Track auto-refresh
 
     navLinks.forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = this.getAttribute('data-section');
             if (!targetId) return;
+
+            // Clear any active interval when switching sections
+            if (reservationInterval) {
+                clearInterval(reservationInterval);
+                reservationInterval = null;
+            }
 
             // Update Nav Active State
             navLinks.forEach(n => n.classList.remove('active'));
@@ -40,6 +48,11 @@
                     loadSliderImages();
                 } else if (targetId === 'tables') {
                     loadTables();
+                } else if (targetId === 'reservations') {
+                    loadReservations();
+                    // Start Auto-Refresh (5 minutes = 300,000 ms)
+                    reservationInterval = setInterval(loadReservations, 300000);
+                    console.log("Auto-refresh enabled for reservations (every 5m).");
                 }
             }
         });
@@ -314,11 +327,31 @@
         })
             .then(r => r.json())
             .then(data => {
+                // Pass full data to callback, let it handle success check if needed
+                // OR maintain existing behavior: only call if success? 
+                // But loadReservations NEEDS data even if success check is inside.
+                // Best compatible change:
                 if (data.success) {
-                    if (reloadCallback) reloadCallback();
+                    if (reloadCallback) reloadCallback(data);
                 } else {
-                    alert('Error: ' + data.error);
+                    // Try to handle custom error callbacks or just alert
+                    // If callback handles it?
+                    if (reloadCallback && reloadCallback.length > 0) {
+                        // If callback expects argument, maybe it wants to handle error too? 
+                        // But strictly: postAction implies "Do X".
+                        // Let's call callback with data anyway if we are fetching?
+                        // No, mixed semantics. 
+                        // Let's just pass data.
+                        if (reloadCallback) reloadCallback(data);
+                        return;
+                    }
+                    alert('Error: ' + (data.message || data.error || 'Unknown error'));
                 }
+            })
+            .catch(e => {
+                console.error(e);
+                if (reloadCallback) reloadCallback({ success: false, error: e.toString() });
+                else alert('Network Error');
             });
     }
 
@@ -496,18 +529,42 @@
         tables.forEach(t => {
             // 1. Grid Item (Control Status)
             const card = document.createElement('div');
-            const statusClass = 'status-' + t.Status.toLowerCase().replace(/\s+/g, '-');
+
+            let displayStatus = t.Status;
+            let icon = 'fa-chair';
+            let extraInfo = '';
+
+            if (t.active_reservation) {
+                displayStatus = 'Rezervata';
+                icon = 'fa-clock';
+                // Show Hour:Minute
+                const timeShort = t.active_reservation.reservation_time.split(' ')[1].substring(0, 5);
+                extraInfo = `<div style="font-size: 0.75rem; color: #d35400; font-weight: bold; margin-bottom: 5px; background: rgba(255,255,255,0.8); padding: 2px; border-radius: 4px;">
+                                ${timeShort} - ${t.active_reservation.username}
+                              </div>`;
+            } else {
+                if (t.Status === 'Ocupata') {
+                    icon = 'fa-user-friends';
+                    extraInfo = `<div style="font-size: 0.75rem; color: #c0392b; font-weight: bold; margin-bottom: 5px; background: rgba(255,255,255,0.8); padding: 2px; border-radius: 4px;">Manual: Occupied</div>`;
+                }
+                if (t.Status === 'Rezervata') {
+                    icon = 'fa-clock';
+                    extraInfo = `<div style="font-size: 0.75rem; color: #f39c12; font-weight: bold; margin-bottom: 5px; background: rgba(255,255,255,0.8); padding: 2px; border-radius: 4px;">Manual: Reserved</div>`;
+                }
+                if (t.Status === 'Inactiva') {
+                    icon = 'fa-ban';
+                    extraInfo = `<div style="font-size: 0.75rem; color: #7f8c8d; font-weight: bold; margin-bottom: 5px; background: rgba(255,255,255,0.8); padding: 2px; border-radius: 4px;">Inactive</div>`;
+                }
+            }
+
+            const statusClass = 'status-' + displayStatus.toLowerCase().replace(/\s+/g, '-');
             card.className = `table-card ${statusClass}`;
             card.style.flex = '1 0 200px';
-
-            let icon = 'fa-chair';
-            if (t.Status === 'Ocupata') icon = 'fa-user-friends';
-            if (t.Status === 'Rezervata') icon = 'fa-clock';
-            if (t.Status === 'Inactiva') icon = 'fa-ban';
 
             card.innerHTML = `
                 <div class="table-icon"><i class="fas ${icon}"></i></div>
                 <div class="table-id">Table ${t.ID}</div>
+                ${extraInfo}
                 <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">${t.shape || 'circle'}</div>
                 <button class="btn btn-sm btn-secondary" onclick="openTableProps(${t.ID})" style="margin-bottom: 5px;">Edit Props</button>
                 <select class="table-status-select" onchange="window.updateTableStatus(${t.ID}, this.value)">
@@ -545,9 +602,21 @@
             mapItem.style.color = '#fff';
             mapItem.style.cursor = 'grab';
             mapItem.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-            mapItem.style.backgroundColor = getStatusColor(t.Status);
+
+            // Dynamic Status Override for Admin Map
+            if (t.active_reservation) {
+                mapItem.style.backgroundColor = '#f1c40f'; // Yellow
+                mapItem.style.border = '3px solid #e67e22'; // Distinct border
+                mapItem.title = `Table ${t.ID}\nRESERVED\nUser: ${t.active_reservation.username}\nTime: ${t.active_reservation.reservation_time}`;
+                // Add icon or text?
+                mapItem.innerHTML = `<div style="display:flex;flex-direction:column;pointer-events:none;align-items:center;"><i class="fas fa-clock"></i><span>${t.ID}</span></div>`;
+            } else {
+                mapItem.style.backgroundColor = getStatusColor(t.Status);
+                mapItem.title = `Table ${t.ID}: ${t.Status}`;
+                mapItem.innerHTML = `<div style="pointer-events: none;">${t.ID}</div>`;
+            }
+
             mapItem.style.zIndex = '10';
-            mapItem.innerHTML = `<div style="pointer-events: none;">${t.ID}</div>`;
 
             // Mouse Move for Cursor Change
             mapItem.onmousemove = function (e) {
@@ -912,5 +981,128 @@
     } else if (document.getElementById('section-tables').style.display !== 'none') {
         loadTables();
     }
+
+    // Reservations Logic
+    function loadReservations() {
+        const tbodyActive = document.getElementById('reservations-list');
+        const tbodyHistory = document.getElementById('history-reservations-list');
+
+        tbodyActive.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+        if (tbodyHistory) tbodyHistory.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+
+        postAction({ action: 'get_all', entity: 'reservation' }, (response) => {
+            if (!response || !response.success) {
+                const err = `<tr><td colspan="5">Error: ${response ? (response.message || response.error) : 'Unknown'}</td></tr>`;
+                tbodyActive.innerHTML = err;
+                if (tbodyHistory) tbodyHistory.innerHTML = `<tr><td colspan="4">Error loading data.</td></tr>`;
+                return;
+            }
+            if (!response.data || response.data.length === 0) {
+                tbodyActive.innerHTML = '<tr><td colspan="5">No active reservations.</td></tr>';
+                if (tbodyHistory) tbodyHistory.innerHTML = '<tr><td colspan="4">No past reservations.</td></tr>';
+                return;
+            }
+
+            const now = new Date();
+            const active = [];
+            const past = [];
+
+            response.data.forEach(r => {
+                // Ensure date string is parseable (SQL format YYYY-MM-DD HH:MM:SS -> ISOish)
+                const rTime = new Date(r.reservation_time.replace(' ', 'T'));
+                if (rTime < now) {
+                    past.push(r);
+                } else {
+                    active.push(r);
+                }
+            });
+
+            // Active: Ascending (Sooner first)
+            active.sort((a, b) => new Date(a.reservation_time) - new Date(b.reservation_time));
+            // Past: Descending (Most recent history first)
+            past.sort((a, b) => new Date(b.reservation_time) - new Date(a.reservation_time));
+
+            const renderRow = (r, isHistory) => {
+                const isBlocked = parseInt(r.is_blacklisted) === 1;
+                // shorten buttons for history to save space? Keep same consistency.
+                const btnText = isBlocked ? 'Unblacklist' : 'Blacklist'; // Shortened
+
+                let cols = `
+                    <td>${r.reservation_time}</td>
+                    <td>Table ${r.table_id}</td>
+                    <td>${r.username}</td>
+                `;
+                if (!isHistory) {
+                    cols += `<td>${r.email}</td>`;
+                }
+
+                cols += `
+                    <td>
+                        <button class="btn ${isBlocked ? 'btn-success' : 'btn-warning'} btn-sm" onclick="window.toggleBlacklist(${r.user_id}, ${isBlocked})" title="${btnText} User" style="margin-right:5px;">
+                            <i class="fas fa-${isBlocked ? 'check' : 'ban'}"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="window.deleteReservation(${r.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                return `<tr>${cols}</tr>`;
+            };
+
+            // Render Active
+            if (active.length === 0) {
+                tbodyActive.innerHTML = '<tr><td colspan="5">No active or upcoming reservations.</td></tr>';
+            } else {
+                tbodyActive.innerHTML = active.map(r => renderRow(r, false)).join('');
+            }
+
+            // Render History
+            if (tbodyHistory) {
+                if (past.length === 0) {
+                    tbodyHistory.innerHTML = '<tr><td colspan="4">No past history found.</td></tr>';
+                } else {
+                    tbodyHistory.innerHTML = past.map(r => renderRow(r, true)).join('');
+                }
+            }
+        });
+    }
+
+    window.toggleBlacklist = function (userId, isBlocked) {
+        let reason = '';
+        if (!isBlocked) {
+            // Currently NOT blocked, so we are blocking. Reason required.
+            reason = prompt("Please provide a reason for blacklisting this user:");
+            if (reason === null) return; // Cancelled
+            reason = reason.trim();
+            if (!reason) {
+                alert("A reason is required to blacklist a user.");
+                return;
+            }
+        } else {
+            if (!confirm("Are you sure you want to UNBLACKLIST this user?")) return;
+        }
+
+        postAction({
+            action: 'toggle_blacklist',
+            entity: 'reservation',
+            user_id: userId,
+            reason: reason
+        }, () => {
+            loadReservations(); // Reload list
+        });
+    };
+
+    window.deleteReservation = function (resId) {
+        if (!confirm("Are you sure you want to DELETE this reservation?")) return;
+
+        postAction({
+            action: 'delete',
+            entity: 'reservation',
+            id: resId
+        }, () => {
+            loadReservations(); // Reload list
+            loadTables(); // Reload tables too to update colors
+        });
+    };
 
 })();

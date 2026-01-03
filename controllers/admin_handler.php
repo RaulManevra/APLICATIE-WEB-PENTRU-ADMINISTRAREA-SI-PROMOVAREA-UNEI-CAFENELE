@@ -49,6 +49,9 @@ if ($entity === 'slider') {
 } elseif ($entity === 'table') {
     require_once __DIR__ . '/TableController.php';
     $controller = new TableController($conn);
+} elseif ($entity === 'reservation') {
+    require_once __DIR__ . '/ReservationController.php';
+    $controller = new ReservationController($conn);
 } else {
     $controller = new ProductController($conn);
 }

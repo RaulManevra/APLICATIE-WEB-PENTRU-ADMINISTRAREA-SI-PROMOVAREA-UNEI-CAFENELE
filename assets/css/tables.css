@@ -85,11 +85,29 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color:white;
+    color: white;
 }
 
 .legend-color {
     width: 20px;
     height: 20px;
     border-radius: 50%;
+}
+
+.res-btn-alt {
+    padding: 6px 12px;
+    margin: 4px;
+    background-color: #eab308;
+    /* Yellow-600 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.res-btn-alt:hover {
+    background-color: #ca8a04;
+    /* Yellow-700 */
 }

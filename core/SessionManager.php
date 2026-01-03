@@ -54,6 +54,7 @@ class SessionManager {
         }
 
         return [
+            'id' => $_SESSION['user_id'] ?? 0,
             'username' => $_SESSION['username'],
             'email' => $_SESSION['email'] ?? '',
             'roles' => $roles,
