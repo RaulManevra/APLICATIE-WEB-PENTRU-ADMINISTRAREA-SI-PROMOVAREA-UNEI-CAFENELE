@@ -27,18 +27,22 @@
             <div id="profile-popup" class="profile-popup" hidden>
                 <button id="profile-close" class="profile-close" aria-label="Close">&times;</button>
                 <div class="profile-popup-content">
-                    <?php if(isset($upcomingReservation) && $upcomingReservation): ?>
-                        <div class="reservation-reminder" style="background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #27ae60; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                            <h4 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 0.95rem;">
-                                <i class="fa-solid fa-calendar-check" style="color: #27ae60; margin-right: 5px;"></i> Upcoming
+                    <?php if (isset($upcomingReservation) && $upcomingReservation): ?>
+                        <div class="reservation-reminder-modern">
+                            <h4>
+                                <i class="fa-solid fa-calendar-check"></i> Upcoming Reservation
                             </h4>
-                            <div style="font-size: 0.9rem; color: #555;">
-                                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                                    <span>Table:</span> 
+                            <div class="reservation-details">
+                                <div class="reservation-row">
+                                    <span>Name:</span>
+                                    <strong><?= htmlspecialchars($upcomingReservation['name'] ?? $currentUser['name'] ?? 'Guest') ?></strong>
+                                </div>
+                                <div class="reservation-row">
+                                    <span>Table:</span>
                                     <strong><?= htmlspecialchars($upcomingReservation['table_id']) ?></strong>
                                 </div>
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span>Time:</span> 
+                                <div class="reservation-row">
+                                    <span>Time:</span>
                                     <strong><?= date('d M, H:i', strtotime($upcomingReservation['reservation_time'])) ?></strong>
                                 </div>
                             </div>

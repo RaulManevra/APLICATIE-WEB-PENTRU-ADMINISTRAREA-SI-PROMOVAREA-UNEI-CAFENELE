@@ -65,7 +65,7 @@ $isLoggedIn = SessionManager::isLoggedIn();
     }
 
     .res-modal-content {
-        background-color: #fff;
+        background-color: #ffffffab;
         margin: 10% auto;
         padding: 30px;
         border-radius: 12px;
@@ -86,20 +86,31 @@ $isLoggedIn = SessionManager::isLoggedIn();
         font-size: 24px;
         font-weight: bold;
         cursor: pointer;
-        color: #aaa;
+        color: #a83131d1;
     }
 
     .res-close:hover {
-        color: #333;
+        color: #ff3c3cff;
     }
 
     .res-form input {
         width: 100%;
         padding: 12px;
-        margin: 10px 0;
+        margin-bottom: 10px;
         border: 1px solid #ddd;
-        border-radius: 6px;
+        border-radius: 10px;
         font-size: 16px;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .res-form label {
+        display: block;
+        font-weight: 600;
+        margin-top: 12px;
+        margin-bottom: 4px;
+        color: #333;
+        text-align: left;
     }
 
     .res-btn {
@@ -107,7 +118,7 @@ $isLoggedIn = SessionManager::isLoggedIn();
         color: white;
         border: none;
         padding: 12px 20px;
-        border-radius: 6px;
+        border-radius: 20px;
         cursor: pointer;
         font-size: 16px;
         width: 100%;
@@ -115,7 +126,7 @@ $isLoggedIn = SessionManager::isLoggedIn();
     }
 
     .res-btn:hover {
-        background: #219150;
+        background: #35e67fff;
     }
 
     @keyframes fadeIn {
@@ -217,8 +228,17 @@ $isLoggedIn = SessionManager::isLoggedIn();
             <input type="hidden" id="res_table_id_input" name="table_id">
             <input type="hidden" name="action" value="create">
 
-            <label>Date & Time</label>
-            <input type="datetime-local" name="date" required min="<?= date('Y-m-d\TH:i') ?>">
+            <!-- 1. Name Input -->
+            <label for="res-name">Name</label>
+            <input type="text" id="res-name" name="name" placeholder="Your Name" required>
+
+            <!-- 2. Date Input -->
+            <label for="res-date">Date</label>
+            <input type="date" id="res-date" name="date" required min="<?= date('Y-m-d') ?>">
+
+            <!-- 3. Time Input -->
+            <label for="res-time">Time</label>
+            <input type="time" id="res-time" name="time" required>
 
             <button type="submit" class="res-btn">Confirm Reservation</button>
         </form>
