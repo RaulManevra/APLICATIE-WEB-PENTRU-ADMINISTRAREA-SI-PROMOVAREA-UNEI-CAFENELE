@@ -19,19 +19,43 @@ $result = $conn->query($sql);
 <section class="menu-section">
     <div class="menu-container">
         <h2 class="section-title">Our Coffee Selection</h2>
-        
+
+        <div class="menu-search">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                    type="text"
+                    id="menuSearchInput"
+                    placeholder="Search here" />
+                <span class="search-pill">Search</span>
+            </div>
+        </div>
+
+        <div class="no-results" style="display: none;">
+            <span class="not-found-pill">Sorry, no products found!</span>
+        </div>
+
         <?php if ($result && $result->num_rows > 0): ?>
             <div class="menu-grid">
-                <?php while($row = $result->fetch_assoc()): ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
                     <div class="product-card animate-on-scroll">
                         <div class="product-image">
                             <!-- Use relative path from root is assumed, or ensure path from DB is correct -->
                             <img src="<?= htmlspecialchars($row['image_path']) ?>" alt="<?= htmlspecialchars($row['name']) ?>" loading="lazy">
                         </div>
                         <div class="product-info">
-                            <h3 class="product-name"><?= htmlspecialchars($row['name']) ?></h3>
-                            <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
-                            <div class="product-price"><i class="fa-solid fa-cart-shopping"></i><?= number_format($row['price'], 2) ?> RON</div>
+                            <div class="product-header">
+                                <h3 class="product-name">
+                                    <?= htmlspecialchars($row['name']) ?>
+                                </h3>
+                                <div class="product-price">
+                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    <?= number_format($row['price'], 2) ?> RON
+                                </div>
+                            </div>
+                            <p class="product-description">
+                                <?= htmlspecialchars($row['description']) ?>
+                            </p>
                         </div>
                     </div>
                 <?php endwhile; ?>
@@ -43,3 +67,28 @@ $result = $conn->query($sql);
         <?php endif; ?>
     </div>
 </section>
+
+<script>
+    const searchInput = document.getElementById('menuSearchInput');
+    const products = document.querySelectorAll('.product-card');
+    const noResults = document.querySelector('.no-results');
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        let anyVisible = false;
+
+        products.forEach(product => {
+            const name = product.querySelector('.product-name').textContent.toLowerCase();
+            if (name.includes(query)) {
+                product.style.display = 'block';
+                anyVisible = true;
+            } else {
+                product.style.display = 'none';
+            }
+        });
+
+        if (noResults) {
+            noResults.style.display = anyVisible ? 'none' : 'flex';
+        }
+    });
+</script>

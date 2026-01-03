@@ -30,6 +30,7 @@ if ($currentUser && isset($conn)) {
     <link rel="stylesheet" href="assets/css/modal.css">
     <link rel="stylesheet" href="assets/css/navbar.css">
     <link rel="stylesheet" href="assets/css/popup.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
 </head>
 

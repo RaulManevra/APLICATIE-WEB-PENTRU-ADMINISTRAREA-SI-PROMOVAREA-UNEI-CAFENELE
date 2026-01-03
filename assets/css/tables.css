@@ -7,31 +7,36 @@
 }
 
 .tables-intro h2 {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    font-weight:700;
+    letter-spacing: -0.02em;
     color: #e3e3e3;
     margin-bottom: 20px;
     font-family: "Playfair Display", serif;
 }
 
 .tables-intro p {
-    color: #dddddd;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #e3e5e9;
     margin-bottom: 40px;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
 }
 
 .map-container {
     position: relative;
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
     height: 600px;
-    margin: 0 auto;
-    background: #f0f0f0;
-    border: 3px solid #6f4e37;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin: auto;
+    background: #ffffff;
+    border-radius: 16px;
+    padding:32px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     overflow: hidden;
     background-image: radial-gradient(#d7ccc8 1px, transparent 1px);
     background-size: 20px 20px;
+    order:1;
+    border:2px solid rgba(0, 0, 0, 0.1);
 }
 
 .map-table {
@@ -49,6 +54,20 @@
     cursor: default;
     border: 2px solid rgba(0, 0, 0, 0.1);
 }
+.map-layout {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+    background:rgba(168, 168, 168, 0.184);
+    backdrop-filter: blur(10px);
+    border-radius:20px;
+    padding:24px 48px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+    border:1px solid rgba(255, 255, 255, 0.192);
+}
 
 .map-table:hover {
     transform: scale(1.1);
@@ -56,15 +75,22 @@
 }
 
 .status-libera {
-    background-color: #2ecc71;
+    background: #22c55e;
 }
 
 .status-ocupata {
-    background-color: #e74c3c;
+    background: #ef4444;
 }
 
 .status-rezervata {
-    background-color: #f1c40f;
+    background: #f59e0b;
+}
+.badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: white;
 }
 
 .status-inactiva {
@@ -77,8 +103,14 @@
 .legend {
     display: flex;
     justify-content: center;
+    flex-direction: column;
     gap: 20px;
     margin-top: 30px;
+    background: rgba(4, 2, 32, 0.463);
+    padding: 20px;
+    border-radius: 16px;
+    backdrop-filter: blur(6px);
+    order:2;
 }
 
 .legend-item {
@@ -86,6 +118,10 @@
     align-items: center;
     gap: 8px;
     color: white;
+    background: rgba(6, 5, 28, 0.819);
+    border:1px solid rgba(233, 233, 233, 0.533);
+    border-radius:99px;
+    padding: 6px 12px;
 }
 
 .legend-color {
@@ -110,4 +146,19 @@
 .res-btn-alt:hover {
     background-color: #ca8a04;
     /* Yellow-700 */
+}
+@media (max-width: 900px) {
+    .map-layout {
+        grid-template-columns: 1fr;
+    }
+
+    /* Flip order on mobile */
+    .legend {
+        order: 1;
+        margin-bottom: 20px;
+    }
+
+    .map-container {
+        order: 2;
+    }
 }

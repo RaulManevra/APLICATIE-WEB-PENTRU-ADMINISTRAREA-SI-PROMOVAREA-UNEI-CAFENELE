@@ -24,7 +24,7 @@ $resSql = "
 $resResult = $conn->query($resSql);
 $activeReservations = [];
 if ($resResult) {
-    while($r = $resResult->fetch_assoc()) {
+    while ($r = $resResult->fetch_assoc()) {
         $activeReservations[$r['table_id']] = $r['reservation_time'];
     }
 }
@@ -32,7 +32,7 @@ if ($resResult) {
 // Background Logic
 $bgPath = null;
 $bgDirRel = 'assets/uploads/floor_plan/';
-$bgDirAbs = __DIR__ . '/../../' . $bgDirRel; 
+$bgDirAbs = __DIR__ . '/../../' . $bgDirRel;
 $extensions = ['png', 'jpg', 'jpeg', 'gif'];
 foreach ($extensions as $ext) {
     if (file_exists($bgDirAbs . 'layout.' . $ext)) {
@@ -42,7 +42,7 @@ foreach ($extensions as $ext) {
         break;
     }
 }
-if(!$bgPath) $bgStyle = "";
+if (!$bgPath) $bgStyle = "";
 
 $isLoggedIn = SessionManager::isLoggedIn();
 ?>
@@ -52,113 +52,158 @@ $isLoggedIn = SessionManager::isLoggedIn();
 <style>
     /* Modal Styles (Embedded for simplicity or move to css) */
     .res-modal {
-        display: none; 
-        position: fixed; 
-        z-index: 9999; 
-        left: 0; top: 0; width: 100%; height: 100%; 
-        overflow: auto; 
-        background-color: rgba(0,0,0,0.5);
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(5px);
     }
+
     .res-modal-content {
         background-color: #fff;
-        margin: 10% auto; 
-        padding: 30px; 
+        margin: 10% auto;
+        padding: 30px;
         border-radius: 12px;
-        width: 90%; max-width: 400px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         animation: fadeIn 0.3s;
         text-align: center;
     }
-    .res-modal h3 { margin-top: 0; color: #333; }
-    .res-close { float: right; font-size: 24px; font-weight: bold; cursor: pointer; color: #aaa; }
-    .res-close:hover { color: #333; }
+
+    .res-modal h3 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .res-close {
+        float: right;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #aaa;
+    }
+
+    .res-close:hover {
+        color: #333;
+    }
+
     .res-form input {
-        width: 100%; padding: 12px; margin: 10px 0;
-        border: 1px solid #ddd; border-radius: 6px;
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 6px;
         font-size: 16px;
     }
+
     .res-btn {
-        background: #27ae60; color: white; border: none;
-        padding: 12px 20px; border-radius: 6px;
-        cursor: pointer; font-size: 16px; width: 100%;
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
         transition: background 0.2s;
     }
-    .res-btn:hover { background: #219150; }
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(-20px);} to {opacity: 1; transform: translateY(0);} }
-    
+
+    .res-btn:hover {
+        background: #219150;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .map-table.clickable:hover {
         cursor: pointer;
         transform: scale(1.05);
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-        border: 2px solid white !important;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        border: 1px solid black !important;
     }
 </style>
 
 <div class="tables-page">
     <div class="tables-intro">
         <h2>Live Table Availability</h2>
-        <p>Click on a green table to make a reservation (Verified Users Only).</p>
+        <p>Tap an available table to reserve (Verified Users Only).</p>
     </div>
 
     <!-- Map Container -->
-    <div class="map-container" style="<?= $bgStyle ?>">
-        <?php if ($result && $result->num_rows > 0): ?>
-            <?php while($row = $result->fetch_assoc()): ?>
-                <?php 
+    <div class="map-layout">
+        <div class="map-container" style="<?= $bgStyle ?>">
+            <?php if ($result && $result->num_rows > 0): ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <?php
                     $id = $row['ID'];
                     $x = $row['x_pos'] ?? 10;
                     $y = $row['y_pos'] ?? 10;
                     $w = $row['width'] ?? 60;
                     $h = $row['height'] ?? 60;
                     $shape = $row['shape'] ?? 'circle';
-                    
+
                     $borderRadius = '50%';
-                    if($shape === 'square' || $shape === 'rectangle') $borderRadius = '8px';
-                    
+                    if ($shape === 'square' || $shape === 'rectangle') $borderRadius = '8px';
+
                     $status = strtolower(trim($row['Status'] ?? 'inactiva'));
-                    
+
                     // Dynamic Override
                     if ($status !== 'inactiva') {
-                         if (isset($activeReservations[$id])) {
-                             $status = 'rezervata'; 
-                         } elseif ($status !== 'ocupata' && $status !== 'libera') {
-                             // Fallback if DB has weird value, default to ocupata or keep as is?
-                             // Keep as is.
-                         }
+                        if (isset($activeReservations[$id])) {
+                            $status = 'rezervata';
+                        } elseif ($status !== 'ocupata' && $status !== 'libera') {
+                            // Fallback if DB has weird value, default to ocupata or keep as is?
+                            // Keep as is.
+                        }
                     }
 
                     $statusClass = 'status-' . str_replace(' ', '-', $status);
-                    
+
                     // Clickable only if Libera
                     $isClickable = ($status === 'libera');
                     $clickAttr = $isClickable ? "onclick='openResModal($id)'" : "";
                     $cursorClass = $isClickable ? "clickable" : "";
-                ?>
-                <div class="map-table <?= $statusClass ?> <?= $cursorClass ?>" 
-                     style="left: <?= $x ?>%; top: <?= $y ?>%; width: <?= $w ?>px; height: <?= $h ?>px; border-radius: <?= $borderRadius ?>;" 
-                     title="Table <?= $id ?> - <?= ucfirst($status) ?>"
-                     <?= $clickAttr ?>>
-                    <?= $id ?>
-                </div>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <p style="padding: 20px;">Layout not available.</p>
-        <?php endif; ?>
-    </div>
+                    ?>
+                    <div class="map-table <?= $statusClass ?> <?= $cursorClass ?>"
+                        style="left: <?= $x ?>%; top: <?= $y ?>%; width: <?= $w ?>px; height: <?= $h ?>px; border-radius: <?= $borderRadius ?>;"
+                        title="Table <?= $id ?> - <?= ucfirst($status) ?>"
+                        <?= $clickAttr ?>>
+                        <?= $id ?>
+                    </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p style="padding: 20px;">Layout not available.</p>
+            <?php endif; ?>
+        </div>
 
-    <div class="legend">
-        <div class="legend-item">
-            <div class="legend-color status-libera"></div>
-            <span>Available (Click to Reserve)</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color status-ocupata"></div>
-            <span>Occupied</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color status-rezervata"></div>
-            <span>Reserved/Busy</span>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color status-libera"></div>
+                <span class="badge available">Available (Click to Reserve)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-ocupata"></div>
+                <span class="badge occupied">Occupied</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-rezervata"></div>
+                <span class="badge reserved">Reserved/Busy</span>
+            </div>
         </div>
     </div>
 </div>
@@ -171,10 +216,10 @@ $isLoggedIn = SessionManager::isLoggedIn();
         <form id="reservation-form" class="res-form">
             <input type="hidden" id="res_table_id_input" name="table_id">
             <input type="hidden" name="action" value="create">
-            
+
             <label>Date & Time</label>
             <input type="datetime-local" name="date" required min="<?= date('Y-m-d\TH:i') ?>">
-            
+
             <button type="submit" class="res-btn">Confirm Reservation</button>
         </form>
     </div>
@@ -182,15 +227,15 @@ $isLoggedIn = SessionManager::isLoggedIn();
 
 <script>
     const isLoggedIn = <?= $isLoggedIn ? 'true' : 'false' ?>;
-    
+
     function openResModal(id) {
         // Dynamic Check
         fetch('controllers/check_session.php')
             .then(r => r.json())
             .then(data => {
                 if (!data.loggedIn) {
-                    if(confirm("Reservations can only be made by verified users. \nDo you want to login now?")) {
-                        window.location.href = "index.php?page=login"; 
+                    if (confirm("Reservations can only be made by verified users. \nDo you want to login now?")) {
+                        window.location.href = "index.php?page=login";
                     }
                     return;
                 }
@@ -223,44 +268,46 @@ $isLoggedIn = SessionManager::isLoggedIn();
         if (csrf) formData.append('csrf_token', csrf.value);
 
         fetch('controllers/reservation_handler.php', {
-            method: 'POST',
-            body: formData,
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                alert("Reservation confirmed!");
-                closeResModal();
-                if(window.loadPage) window.loadPage('tables'); 
-                else location.reload();
-            } else {
-                if (data.conflict) {
-                     // Advanced Conflict Handling
-                     const modalBody = document.querySelector('.res-modal-content');
-                     
-                     let altHtml = '';
-                     if (data.alternative_tables && data.alternative_tables.length > 0) {
-                         altHtml = `<div style="margin-top:10px;">
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Reservation confirmed!");
+                    closeResModal();
+                    if (window.loadPage) window.loadPage('tables');
+                    else location.reload();
+                } else {
+                    if (data.conflict) {
+                        // Advanced Conflict Handling
+                        const modalBody = document.querySelector('.res-modal-content');
+
+                        let altHtml = '';
+                        if (data.alternative_tables && data.alternative_tables.length > 0) {
+                            altHtml = `<div style="margin-top:10px;">
                                       <strong>Available Tables at ${document.querySelector('input[name="date"]').value.replace('T', ' ')}:</strong><br>
                                       ${data.alternative_tables.map(tid => 
                                           `<button type="button" class="res-btn-alt" onclick="switchTable(${tid})">Table ${tid}</button>`
                                       ).join(' ')}
                                     </div>`;
-                     } else {
-                         altHtml = `<p>No other tables available at this time.</p>`;
-                     }
+                        } else {
+                            altHtml = `<p>No other tables available at this time.</p>`;
+                        }
 
-                     const nextDate = new Date(data.next_available);
-                     // Format for input: YYYY-MM-DDTHH:mm
-                     // Adjust to local timezone string 
-                     // Simple hack for ISO string locally
-                     const tzOffset = nextDate.getTimezoneOffset() * 60000; // offset in milliseconds
-                     const localISOTime = (new Date(nextDate - tzOffset)).toISOString().slice(0, 16);
-                     
-                     const currentTableId = document.getElementById('res_table_id_input').value;
+                        const nextDate = new Date(data.next_available);
+                        // Format for input: YYYY-MM-DDTHH:mm
+                        // Adjust to local timezone string 
+                        // Simple hack for ISO string locally
+                        const tzOffset = nextDate.getTimezoneOffset() * 60000; // offset in milliseconds
+                        const localISOTime = (new Date(nextDate - tzOffset)).toISOString().slice(0, 16);
 
-                     const conflictHtml = `
+                        const currentTableId = document.getElementById('res_table_id_input').value;
+
+                        const conflictHtml = `
                         <div id="conflict-resolution" style="background:#fff3cd; padding:10px; border:1px solid #ffeeba; margin-top:10px; border-radius:5px; color:#856404;">
                             <p><strong>Refused:</strong> ${data.message}</p>
                             <div style="margin-top:10px;">
@@ -273,58 +320,58 @@ $isLoggedIn = SessionManager::isLoggedIn();
                             <button type="button" onclick="resetForm()" style="margin-top:15px; background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">Cancel / Pick Manually</button>
                         </div>
                      `;
-                     
-                     // Inject into modal
-                     // Hide form temporarily? Or just append?
-                     // Let's replace the form or append below it.
-                     const existing = document.getElementById('conflict-resolution');
-                     if(existing) existing.remove();
-                     
-                     const form = document.getElementById('reservation-form');
-                     form.style.display = 'none'; // Hide form
-                } else {
-                    // Generic Error (Constraint violation etc)
-                    console.warn("Reservation Error:", data);
-                    
-                    const modalContent = document.querySelector('.res-modal-content');
-                    
-                    // Remove old errors/conflicts
-                    const oldConflict = document.getElementById('conflict-resolution');
-                    if(oldConflict) oldConflict.remove();
-                    
-                    let errorBox = document.getElementById('res-error-box');
-                    if(errorBox) errorBox.remove();
-                    
-                    // Create new error box
-                    errorBox = document.createElement('div');
-                    errorBox.id = 'res-error-box';
-                    errorBox.style.cssText = 'background:#f8d7da; color:#721c24; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #f5c6cb; font-weight:bold; animation: fadeIn 0.3s;';
-                    errorBox.innerHTML = `⚠️ Reservation Failed:<br><span style="font-weight:normal;">${data.message || data.error || "Unknown Error"}</span>`;
-                    
-                    // Insert at the VERY TOP of content
-                    modalContent.insertBefore(errorBox, modalContent.firstChild); // Before close button? No, close button is float.
-                    // Let's insert after H3 title? Or just prepend.
-                    // Prepend is safer.
-                    
-                    // Make sure form is visible (if hidden by state)
-                    const form = document.getElementById('reservation-form');
-                    form.style.display = 'block';
-                    
-                    // Scroll to top
-                    modalContent.scrollTop = 0;
+
+                        // Inject into modal
+                        // Hide form temporarily? Or just append?
+                        // Let's replace the form or append below it.
+                        const existing = document.getElementById('conflict-resolution');
+                        if (existing) existing.remove();
+
+                        const form = document.getElementById('reservation-form');
+                        form.style.display = 'none'; // Hide form
+                    } else {
+                        // Generic Error (Constraint violation etc)
+                        console.warn("Reservation Error:", data);
+
+                        const modalContent = document.querySelector('.res-modal-content');
+
+                        // Remove old errors/conflicts
+                        const oldConflict = document.getElementById('conflict-resolution');
+                        if (oldConflict) oldConflict.remove();
+
+                        let errorBox = document.getElementById('res-error-box');
+                        if (errorBox) errorBox.remove();
+
+                        // Create new error box
+                        errorBox = document.createElement('div');
+                        errorBox.id = 'res-error-box';
+                        errorBox.style.cssText = 'background:#f8d7da; color:#721c24; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #f5c6cb; font-weight:bold; animation: fadeIn 0.3s;';
+                        errorBox.innerHTML = `⚠️ Reservation Failed:<br><span style="font-weight:normal;">${data.message || data.error || "Unknown Error"}</span>`;
+
+                        // Insert at the VERY TOP of content
+                        modalContent.insertBefore(errorBox, modalContent.firstChild); // Before close button? No, close button is float.
+                        // Let's insert after H3 title? Or just prepend.
+                        // Prepend is safer.
+
+                        // Make sure form is visible (if hidden by state)
+                        const form = document.getElementById('reservation-form');
+                        form.style.display = 'block';
+
+                        // Scroll to top
+                        modalContent.scrollTop = 0;
+                    }
                 }
-            }
-        })
-        .catch(err => {
-            console.error("Fetch Error:", err);
-            alert("Connection Failed: " + err);
-        })
-        .finally(() => {
-            btn.textContent = originalText;
-            btn.disabled = false;
-        });
+            })
+            .catch(err => {
+                console.error("Fetch Error:", err);
+                alert("Connection Failed: " + err);
+            })
+            .finally(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
     });
-    
+
     // Helper to resolve conflict
     window.switchTable = function(newId) {
         document.getElementById('conflict-resolution').remove();
@@ -349,10 +396,10 @@ $isLoggedIn = SessionManager::isLoggedIn();
 
     window.resetForm = function() {
         const c = document.getElementById('conflict-resolution');
-        if(c) c.remove();
+        if (c) c.remove();
         document.getElementById('reservation-form').style.display = 'block';
     };
-    
+
     // Outside click
     window.onclick = function(event) {
         const modal = document.getElementById('reservation-modal');
