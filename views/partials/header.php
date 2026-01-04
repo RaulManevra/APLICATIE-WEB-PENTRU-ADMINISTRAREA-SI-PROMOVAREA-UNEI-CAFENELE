@@ -35,7 +35,7 @@
                             <div class="reservation-details">
                                 <div class="reservation-row">
                                     <span>Name:</span>
-                                    <strong><?= htmlspecialchars($upcomingReservation['name'] ?? $currentUser['name'] ?? 'Guest') ?></strong>
+                                    <strong><?= htmlspecialchars($upcomingReservation['reservation_name'] ?? $currentUser['username'] ?? 'Guest') ?></strong>
                                 </div>
                                 <div class="reservation-row">
                                     <span>Table:</span>

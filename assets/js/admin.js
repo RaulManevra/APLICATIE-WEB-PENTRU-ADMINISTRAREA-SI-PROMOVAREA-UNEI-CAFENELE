@@ -972,14 +972,36 @@
         });
     };
 
-    // Initial Load based on default visible section
-    // Check which section is active or default to menu
+    // Initial Load Logic - Ensure Active State
+    const activeLink = document.querySelector('.sidebar-nav .nav-link.active');
+    if (!activeLink) {
+        // Default to Dashboard if none active
+        const dashboardLink = document.querySelector('.sidebar-nav .nav-link[data-section="dashboard"]');
+        if (dashboardLink) dashboardLink.classList.add('active');
+        // Ensure Dashboard section is shown
+        const dashboardSection = document.getElementById('section-dashboard');
+        if (dashboardSection) {
+            sections.forEach(s => s.style.display = 'none');
+            dashboardSection.style.display = 'block';
+        }
+    } else {
+        const sectionId = activeLink.getAttribute('data-section');
+        if (sectionId) {
+            sections.forEach(s => s.style.display = 'none');
+            const sec = document.getElementById('section-' + sectionId);
+            if (sec) sec.style.display = 'block';
+        }
+    }
+
+    // Check data loading based on potential active section
     if (document.getElementById('section-menu').style.display !== 'none') {
         loadProducts();
     } else if (document.getElementById('section-slider').style.display !== 'none') {
         loadSliderImages();
     } else if (document.getElementById('section-tables').style.display !== 'none') {
         loadTables();
+    } else if (document.getElementById('section-reservations').style.display !== 'none') {
+        loadReservations();
     }
 
     // Reservations Logic
@@ -1024,19 +1046,14 @@
 
             const renderRow = (r, isHistory) => {
                 const isBlocked = parseInt(r.is_blacklisted) === 1;
-                // shorten buttons for history to save space? Keep same consistency.
-                const btnText = isBlocked ? 'Unblacklist' : 'Blacklist'; // Shortened
+                const btnText = isBlocked ? 'Unblacklist' : 'Blacklist';
 
                 let cols = `
                     <td>${r.reservation_time}</td>
                     <td>Table ${r.table_id}</td>
+                    <td><strong>${safe(r.reservation_name || 'N/A')}</strong></td>
                     <td>${r.username}</td>
-                `;
-                if (!isHistory) {
-                    cols += `<td>${r.email}</td>`;
-                }
-
-                cols += `
+                    <td>${r.email}</td>
                     <td>
                         <button class="btn ${isBlocked ? 'btn-success' : 'btn-warning'} btn-sm" onclick="window.toggleBlacklist(${r.user_id}, ${isBlocked})" title="${btnText} User" style="margin-right:5px;">
                             <i class="fas fa-${isBlocked ? 'check' : 'ban'}"></i>

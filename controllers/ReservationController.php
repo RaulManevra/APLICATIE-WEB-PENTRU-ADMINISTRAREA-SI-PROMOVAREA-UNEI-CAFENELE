@@ -57,22 +57,34 @@ class ReservationController {
 
         // Validate Inputs
         $tableId = intval($_POST['table_id'] ?? 0);
-        $dateStr = $_POST['date'] ?? ''; // YYYY-MM-DD HH:MM
-        
-        if ($tableId <= 0 || empty($dateStr)) {
-            sendError("Invalid table or date.");
+        $dateStr = $_POST['date'] ?? ''; // YYYY-MM-DD
+        $timeStr = $_POST['time'] ?? ''; // HH:MM
+        $resName = trim($_POST['name'] ?? '');
+
+        if ($tableId <= 0 || empty($dateStr) || empty($timeStr)) {
+            sendError("Invalid table, date, or time.");
         }
+
+        if (empty($resName)) {
+            sendError("Please provide a name for the reservation.");
+        }
+        if (strlen($resName) > 50) {
+            sendError("Name is too long (max 50 chars).");
+        }
+        // Basic sanitization is handled by prepared statement, but let's strip tags to be safe for display
+        $resName = htmlspecialchars($resName, ENT_QUOTES, 'UTF-8');
 
         // Parse Date
         try {
-            $date = new DateTime($dateStr);
+            $fullDateStr = $dateStr . ' ' . $timeStr;
+            $date = new DateTime($fullDateStr);
             $now = new DateTime();
             
             if ($date < $now) {
                 sendError("Cannot reserve in the past.");
             }
         } catch (Exception $e) {
-            sendError("Invalid date format.");
+            sendError("Invalid date/time format.");
         }
 
         $resTime = $date->format('Y-m-d H:i:s');
@@ -202,8 +214,8 @@ class ReservationController {
         }
 
         // Insert
-        $stmt = $this->conn->prepare("INSERT INTO reservations (user_id, table_id, reservation_time) VALUES (?, ?, ?)");
-        $stmt->bind_param("iis", $userId, $tableId, $resTime);
+        $stmt = $this->conn->prepare("INSERT INTO reservations (user_id, table_id, reservation_time, reservation_name) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiss", $userId, $tableId, $resTime, $resName);
         
         if ($stmt->execute()) {
             sendSuccess(['message' => 'Reservation confirmed!']);

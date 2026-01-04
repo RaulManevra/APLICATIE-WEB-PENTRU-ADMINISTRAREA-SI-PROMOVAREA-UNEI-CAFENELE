@@ -219,6 +219,10 @@ $isLoggedIn = SessionManager::isLoggedIn();
     </div>
 </div>
 
+<?php
+$currentUser = SessionManager::getCurrentUserData();
+$displayUsername = $currentUser ? htmlspecialchars($currentUser['username']) : 'Guest';
+?>
 <!-- Reservation Modal -->
 <div id="reservation-modal" class="res-modal">
     <div class="res-modal-content">
@@ -230,7 +234,9 @@ $isLoggedIn = SessionManager::isLoggedIn();
 
             <!-- 1. Name Input -->
             <label for="res-name">Name</label>
-            <input type="text" id="res-name" name="name" placeholder="Your Name" required>
+            <input type="text" id="res-name" name="name" 
+                   value="<?= $displayUsername !== 'Guest' ? $displayUsername : '' ?>" 
+                   placeholder="Your Name" required maxlength="50">
 
             <!-- 2. Date Input -->
             <label for="res-date">Date</label>

@@ -177,12 +177,13 @@ require_admin();
                 <h2>Reservations</h2>
             </div>
             <div class="table-container">
-                <h3>Active & Upcoming</h3>
+                <h3 class="section-subtitle">Active & Upcoming</h3>
                 <table class="data-table" id="reservations-table">
                     <thead>
                         <tr>
                             <th>DateTime</th>
                             <th>Table</th>
+                            <th>Name</th>
                             <th>User</th>
                             <th>Email</th>
                             <th>Actions</th>
@@ -205,7 +206,9 @@ require_admin();
                                 <tr>
                                     <th>DateTime</th>
                                     <th>Table</th>
+                                    <th>Name</th>
                                     <th>User</th>
+                                    <th>Email</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>

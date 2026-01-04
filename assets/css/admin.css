@@ -130,6 +130,19 @@ body {
     font-weight: 700;
 }
 
+
+
+.section-subtitle {
+    margin: 20px 0 15px 10px;
+    font-size: 1.25rem;
+    color: #34495e;
+    font-weight: 600;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 10px;
+    display: inline-block;
+    min-width: 200px;
+}
+
 /* Buttons */
 .btn {
     padding: 12px 24px;
@@ -143,13 +156,17 @@ body {
     align-items: center;
     gap: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(
-        135deg,           /* diagonal gradient */
-        #1b3a2b 0%,       /* deep forest green */
-        #2e6b3f 40%,      /* medium leafy green */
-        #4ca66b 70%,      /* lighter green */
-        #7ed09a 100%      /* soft minty green */
-    );
+    background: linear-gradient(135deg,
+            /* diagonal gradient */
+            #1b3a2b 0%,
+            /* deep forest green */
+            #2e6b3f 40%,
+            /* medium leafy green */
+            #4ca66b 70%,
+            /* lighter green */
+            #7ed09a 100%
+            /* soft minty green */
+        );
     color: white;
     background-size: 200% 100%;
     background-position: right;
@@ -157,13 +174,17 @@ body {
 }
 
 .btn-secondary {
-    background: linear-gradient(
-        135deg,           /* diagonal gradient */
-        #1b3a2b 0%,       /* deep forest green */
-        #2e6b3f 40%,      /* medium leafy green */
-        #4ca66b 70%,      /* lighter green */
-        #7ed09a 100%      /* soft minty green */
-    );
+    background: linear-gradient(135deg,
+            /* diagonal gradient */
+            #1b3a2b 0%,
+            /* deep forest green */
+            #2e6b3f 40%,
+            /* medium leafy green */
+            #4ca66b 70%,
+            /* lighter green */
+            #7ed09a 100%
+            /* soft minty green */
+        );
     color: white;
     background-size: 200% 100%;
     background-position: right;
@@ -172,7 +193,7 @@ body {
 
 .btn-secondary:hover {
     box-shadow: 0 6px 12px rgba(111, 78, 55, 0.3);
-    color:white;
+    color: white;
     background-position: left;
 }
 
@@ -187,22 +208,22 @@ body {
 .btn-success:hover {
     box-shadow: 0 6px 12px rgba(67, 160, 71, 0.3);
 }
-.btn-3{
-    width: 100%;     
-    height: 100px;       
-    background: linear-gradient(
-        90deg,        
-        #0d3b66,         
-        #1e6091,        
-        #3da5d9,        
-        #7fc8f8          
-    );
-    background-size: 200% 100%; 
-    background-position: right; 
-    transition: background-position 1s ease; 
+
+.btn-3 {
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(90deg,
+            #0d3b66,
+            #1e6091,
+            #3da5d9,
+            #7fc8f8);
+    background-size: 200% 100%;
+    background-position: right;
+    transition: background-position 1s ease;
 }
+
 .btn-3:hover {
-    background-position: left; 
+    background-position: left;
     box-shadow: 0 6px 12px rgba(13, 59, 102, 0.3);
 }
 
@@ -302,7 +323,7 @@ body {
     border: none;
     width: 90%;
     max-width: 500px;
-    height:100%;
+    height: 100%;
     border-radius: 16px;
     position: relative;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -555,7 +576,8 @@ body {
     background-color: white;
     font-size: 0.9rem;
     cursor: pointer;
-    letter-spacing: 1px;;
+    letter-spacing: 1px;
+    ;
 }
 
 .table-status-select:focus {
