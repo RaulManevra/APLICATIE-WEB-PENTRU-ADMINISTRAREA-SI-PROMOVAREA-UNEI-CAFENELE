@@ -561,3 +561,10 @@
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+[2026-01-06 18:12:06] [INFO] Checking MySQL server status...
+[2026-01-06 18:12:06] [INFO] MySQL is already running.
+[2026-01-06 18:12:08] [ACTION] IMPORT SELECTED
+[2026-01-06 18:12:08] [INFO] Dropping and recreating database...
+[2026-01-06 18:12:09] [INFO] Importing data from SQL file...
+[2026-01-06 18:12:09] [INFO] Database imported successfully!
+[2026-01-06 18:12:11] [INFO] User exited menu.

@@ -9,6 +9,7 @@
             <li><a href="?page=about" class="nav-link" data-page="about">About</a></li>
             <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
             <li><a href="?page=tables" class="nav-link" data-page="tables">Tables</a></li>
+            <li><a href="?page=cart" class="nav-link" data-page="cart"><i class="fa-solid fa-cart-shopping"></i> Cart</a></li>
             <li id="admin-link-li" style="<?php echo in_array('admin', $currentUserRoles) ? '' : 'display: none;'; ?>">
                 <a href="?page=admin" class="nav-link" data-page="admin">Admin</a>
             </li>
@@ -62,6 +63,7 @@
             <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
             <li><a href="?page=contact" class="nav-link" data-page="contact">Contact</a></li>
             <li><a href="?page=tables" class="nav-link" data-page="tables">Tables</a></li>
+            <li><a href="?page=cart" class="nav-link" data-page="cart">Cart</a></li>
         </div>
     </div>
 </div>

@@ -11,6 +11,50 @@ import { updateHeaderUI } from './modules/ui.js';
 // ===== EVENT LISTENERS =====
 
 // 1. Form Submission (Login/Register)
+document.addEventListener("click", async e => {
+    const btn = e.target.closest('.add-to-cart-btn');
+    if (btn) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const productId = btn.dataset.id;
+        if (!productId) return;
+
+        // Visual feedback
+        const icon = btn.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = "fa-solid fa-spinner fa-spin"; // Loading state
+
+        try {
+            const formData = new FormData();
+            formData.append('action', 'add');
+            formData.append('product_id', productId);
+            formData.append('quantity', 1);
+
+            const res = await safeFetch('?page=cart_handler&action=add', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                // Success feedback
+                icon.className = "fa-solid fa-check";
+                setTimeout(() => {
+                    icon.className = originalClass;
+                }, 1500);
+
+                // Optional: Update badge if we had one
+                // updateCartBadge(data.data.total_items);
+            } else {
+                showModal(data.message || "Failed to add to cart.");
+                icon.className = originalClass;
+            }
+        } catch (err) {
+            console.error(err);
+            showModal("An error occurred. Please try again.");
+            icon.className = originalClass;
+        }
+    }
+});
+
 document.addEventListener("submit", async e => {
     const form = e.target;
     if (form.matches("form[action*='controllers/register_handler.php'], form[action*='controllers/login_handler.php'], form[action*='controllers/profile_handler.php']")) {

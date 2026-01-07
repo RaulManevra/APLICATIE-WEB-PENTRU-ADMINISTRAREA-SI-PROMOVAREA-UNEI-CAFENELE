@@ -53,10 +53,154 @@
                     // Start Auto-Refresh (5 minutes = 300,000 ms)
                     reservationInterval = setInterval(loadReservations, 300000);
                     console.log("Auto-refresh enabled for reservations (every 5m).");
+                } else if (targetId === 'orders') {
+                    loadOrders();
+                    // Auto-refresh for orders too?
                 }
             }
         });
     });
+
+    // --- Orders Logic ---
+    const refreshOrdersBtn = document.getElementById('refresh-orders-btn');
+    if (refreshOrdersBtn) {
+        refreshOrdersBtn.onclick = loadOrders;
+    }
+
+    function loadOrders() {
+        console.log("Fetching orders...");
+        const tbody = document.querySelector('#orders-table tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading...</td></tr>';
+
+        const formData = new FormData();
+        formData.append('action', 'get_all');
+        // Note: index.php routes ?page=order_handler to OrderController
+        // We typically use admin_handler for admin stuff, but I created OrderController separately.
+        // Let's use ?page=order_handler for now as per plan.
+        // But admin.js uses appendCsrf global. Verify if Order_handler checks CSRF?
+        // OrderController checks session role admin.
+        // output.php output format matches.
+
+        fetch('?page=order_handler&action=get_all', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    renderOrders(data.data.orders);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Error loading orders.</td></tr>';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Connection Error.</td></tr>';
+            });
+    }
+
+    function renderOrders(orders) {
+        const tbody = document.querySelector('#orders-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!orders || orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No orders found.</td></tr>';
+            return;
+        }
+
+        orders.forEach(o => {
+            const tr = document.createElement('tr');
+
+            // Format items
+            let itemsHtml = '<ul style="list-style:none; padding:0; margin:0; font-size:0.9rem;">';
+            o.items.forEach(item => {
+                itemsHtml += `<li>${item.quantity}x ${safe(item.name)}</li>`;
+            });
+            itemsHtml += '</ul>';
+
+            // Status Badge
+            let statusColor = '#999';
+            if (o.status === 'pending') statusColor = '#f39c12';
+            if (o.status === 'completed') statusColor = '#27ae60';
+            if (o.status === 'cancelled') statusColor = '#c0392b';
+
+            const badge = `<span style="background:${statusColor}; color:white; padding:4px 8px; border-radius:4px; font-size:0.8rem; text-transform:uppercase;">${o.status}</span>`;
+
+            // Actions
+            let actions = '';
+            if (o.status === 'pending') {
+                actions += `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${o.id}, 'completed')" style="margin-right:5px;">Check</button>`;
+                actions += `<button class="btn btn-sm btn-danger" onclick="updateOrderStatus(${o.id}, 'cancelled')">Cancel</button>`;
+            } else {
+                actions += `<button class="btn btn-sm btn-danger" onclick="deleteOrder(${o.id})"><i class="fas fa-trash"></i></button>`;
+            }
+
+            tr.innerHTML = `
+                <td>#${o.id}</td>
+                <td>
+                    <strong>${safe(o.username)}</strong><br>
+                    <small>${safe(o.email)}</small>
+                </td>
+                <td>${o.pickup_time}</td>
+                <td>${itemsHtml}</td>
+                <td>${parseFloat(o.total_price).toFixed(2)} RON</td>
+                <td>${badge}</td>
+                <td>${actions}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    window.updateOrderStatus = function (id, status) {
+        if (!confirm(`Mark order #${id} as ${status}?`)) return;
+
+        const formData = new FormData();
+        formData.append('action', 'update_status');
+        formData.append('order_id', id);
+        formData.append('status', status);
+
+        fetch('?page=order_handler&action=update_status', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    loadOrders();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(e => alert("Network Error"));
+    };
+
+    window.deleteOrder = function (id) {
+        if (!confirm(`Delete order #${id}? This cannot be undone.`)) return;
+
+        const formData = new FormData();
+        formData.append('action', 'delete');
+        formData.append('order_id', id);
+
+        fetch('?page=order_handler&action=delete', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    loadOrders();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(e => alert("Network Error"));
+    };
 
     // --- Generic Modal Logic ---
     const modals = document.querySelectorAll('.modal');

@@ -62,9 +62,27 @@ require_admin();
         <section id="section-orders" class="admin-section" style="display: none;">
             <div class="header-actions">
                 <h2>Running Orders</h2>
+                <button id="refresh-orders-btn" class="btn btn-secondary">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
             </div>
-            <div class="placeholder-content">
-                <p>Order management interface coming soon.</p>
+            <div class="table-container">
+                <table class="data-table" id="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Pickup Time</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-list">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
             </div>
         </section>
 

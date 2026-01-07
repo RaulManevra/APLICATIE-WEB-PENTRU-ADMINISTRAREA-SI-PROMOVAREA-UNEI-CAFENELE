@@ -1,7 +1,25 @@
 <?php
+ob_start();
 require_once __DIR__ . '/core/security.php'; // starts session and sets secure cookie params
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/controllers/ReservationController.php';
+
+// Simple router for controllers that need to run before output or via AJAX
+if (isset($_GET['action']) || isset($_POST['action'])) {
+    $page = $_GET['page'] ?? '';
+    if ($page === 'cart_handler') {
+        require_once __DIR__ . '/controllers/CartController.php';
+        $controller = new CartController($conn);
+        $controller->handleRequest();
+        exit;
+    }
+    if ($page === 'order_handler') {
+        require_once __DIR__ . '/controllers/OrderController.php';
+        $controller = new OrderController($conn);
+        $controller->handleRequest();
+        exit;
+    }
+}
 
 $userData = SessionManager::getCurrentUserData();
 $currentUser = $userData['username'] ?? null;
@@ -59,12 +77,16 @@ if ($currentUser && isset($conn)) {
                 'admin' => 'views/pages/admin.php',
                 'tables' => 'views/pages/tables.php',
                 'profile_picture_upload' => 'views/forms/profile_picture_upload.php',
+                'cart' => 'views/pages/cart.php',
+                'cart_handler' => 'controllers/CartController.php',
             ], JSON_UNESCAPED_UNICODE); ?>
         };
         // Backwards compatibility if needed, or just use APP_CONFIG.currentUser
         window.CURRENT_USER = window.APP_CONFIG.currentUser; 
         window.CURRENT_USER_ROLES = window.APP_CONFIG.currentUserRoles;
     </script>
+
+    <script type="module" src="assets/js/main.js"></script>
 
     <script type="module" src="assets/js/main.js"></script>
 </body>

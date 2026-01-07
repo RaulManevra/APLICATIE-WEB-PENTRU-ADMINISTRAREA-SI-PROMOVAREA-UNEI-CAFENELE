@@ -15,6 +15,21 @@ $sql = "SELECT * FROM products WHERE category = 'coffee' ORDER BY name ASC";
 $result = $conn->query($sql);
 ?>
 <link rel="stylesheet" href="assets/css/menu.css">
+<style>
+    .add-to-cart-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: inherit;
+        font-size: 1.2rem;
+        padding: 5px;
+        transition: transform 0.2s, color 0.2s;
+    }
+    .add-to-cart-btn:hover {
+        transform: scale(1.2);
+        color: #D2691E;
+    }
+</style>
 
 <section class="menu-section">
     <div class="menu-container">
@@ -49,7 +64,9 @@ $result = $conn->query($sql);
                                     <?= htmlspecialchars($row['name']) ?>
                                 </h3>
                                 <div class="product-price">
-                                    <i class="fa-solid fa-cart-shopping"></i>
+                                    <button class="add-to-cart-btn" data-id="<?= $row['id'] ?>" title="Add to Cart">
+                                        <i class="fa-solid fa-cart-shopping"></i>
+                                    </button>
                                     <?= number_format($row['price'], 2) ?> RON
                                 </div>
                             </div>
