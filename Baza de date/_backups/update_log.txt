@@ -568,3 +568,24 @@
 [2026-01-06 18:12:09] [INFO] Importing data from SQL file...
 [2026-01-06 18:12:09] [INFO] Database imported successfully!
 [2026-01-06 18:12:11] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Thu 01/08/2026 13:08:33.83 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/08/2026 13:08:37.30 
+====================================== 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/08/2026 13:08:38.15 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 

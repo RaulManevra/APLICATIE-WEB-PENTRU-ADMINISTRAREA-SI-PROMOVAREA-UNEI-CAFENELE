@@ -16,7 +16,7 @@ header("Permissions-Policy: geolocation=(), microphone=()");
 header("X-XSS-Protection: 1; mode=block");
 
 // Basic CSP — adjust if you use external CDNs
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.googleusercontent.com https://*.google.com;");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cdn.jsdelivr.net; img-src 'self' data: https://*.googleusercontent.com https://*.google.com;");
 
 require_once __DIR__ . '/SessionManager.php';
 

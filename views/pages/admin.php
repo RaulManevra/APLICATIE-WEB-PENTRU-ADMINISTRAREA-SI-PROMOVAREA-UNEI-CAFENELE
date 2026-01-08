@@ -10,6 +10,8 @@ require_admin();
 ?>
 <input type="hidden" id="csrf-token-global" value="<?= csrf_token() ?>">
 <link rel="stylesheet" href="assets/css/admin.css?v=<?= time(); ?>">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="admin-wrapper">
     <!-- Sidebar -->
@@ -25,17 +27,23 @@ require_admin();
             <a href="#" class="nav-link" data-section="orders">
                 <i class="fas fa-receipt"></i> Running Orders
             </a>
+            <a href="#" class="nav-link" data-section="reservations">
+                <i class="fas fa-calendar-alt"></i> Reservations
+            </a>
             <a href="#" class="nav-link" data-section="menu">
                 <i class="fas fa-coffee"></i> Menu Management
             </a>
-            <a href="#" class="nav-link" data-section="slider">
-                <i class="fas fa-images"></i> Slider Settings
-            </a>
             <a href="#" class="nav-link" data-section="tables">
-                <i class="fas fa-chair"></i> Table Management
+                <i class="fas fa-chair"></i> Floor Plan
             </a>
-            <a href="#" class="nav-link" data-section="reservations">
-                <i class="fas fa-calendar-alt"></i> Reservations
+             <a href="#" class="nav-link" data-section="users">
+                <i class="fas fa-users"></i> Users
+            </a>
+            <a href="#" class="nav-link" data-section="slider">
+                <i class="fas fa-images"></i> Slider
+            </a>
+            <a href="#" class="nav-link" data-section="settings">
+                <i class="fas fa-cogs"></i> Settings
             </a>
         </nav>
         <div class="sidebar-footer">
@@ -49,40 +57,114 @@ require_admin();
     <main class="admin-content">
         <!-- Dashboard Section -->
         <section id="section-dashboard" class="admin-section">
-            <div class="header-actions">
+            <div class="dashboard-header">
                 <h2>Dashboard Overview</h2>
+                <div class="cafe-status-toggle">
+                    <span>Cafe Status:</span>
+                    <select id="global-cafe-status" onchange="updateCafeStatus(this.value)">
+                        <option value="open">Open</option>
+                        <option value="busy">Busy</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
             </div>
-            <div class="dashboard-stats">
-                <p>Welcome to the Mazi Coffee Admin Panel.</p>
-                <!-- Add stats here later -->
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e8f5e9; color: #2e7d32;"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Reservations (Today)</span>
+                        <h3 id="stat-res-today">-</h3>
+                        <small id="stat-res-total">Upcoming: -</small>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fff3e0; color: #ef6c00;"><i class="fas fa-chair"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Active Tables</span>
+                        <h3 id="stat-active-tables">-</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e3f2fd; color: #1565c0;"><i class="fas fa-coffee"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Menu Items</span>
+                        <h3 id="stat-menu-items">-</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                     <!-- Quick Action for Walk-in -->
+                     <button class="btn btn-secondary" onclick="openQuickReserve()" style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                        <i class="fas fa-user-plus" style="font-size: 1.5rem; margin-bottom: 5px;"></i>
+                        Walk-In Reservation
+                     </button>
+                </div>
             </div>
+
+            <div class="dashboard-split" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <!-- Main Chart -->
+                <div class="chart-container" style="flex: 2; min-width: 300px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee;">
+                    <h4>Orders Overview (Last 7 Days)</h4>
+                    <canvas id="reservationsChart"></canvas>
+                </div>
+
+                <!-- Notes Board -->
+                <div class="notes-container" style="flex: 1; min-width: 250px; background: #fffaf0; padding: 20px; border-radius: 12px; border: 1px solid #fae5ba;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <h4 style="margin:0; color: #795548;"><i class="fas fa-sticky-note"></i> Staff Notes</h4>
+                        <small id="notes-status" style="color: green; display:none;">Saved</small>
+                    </div>
+                    <textarea id="admin-notes" style="width: 100%; height: 200px; border: none; background: transparent; resize: none; font-family: 'Courier New', monospace;" placeholder="Type notes here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Recent Activity & Quick Tools -->
+            <div class="recent-section" style="margin-top: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>Recent Reservations</h3>
+                    <div>
+                        <button class="btn btn-sm btn-primary" onclick="exportData('reservations')"><i class="fas fa-file-csv"></i> Export Reservations</button>
+                        <button class="btn btn-sm btn-secondary" onclick="exportData('users')"><i class="fas fa-file-csv"></i> Export Users</button>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Name</th>
+                            <th>Create Time</th>
+                            <th>Reservation Date</th>
+                            <th>ID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-activity-list">
+                        <!-- Populated JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Newsletter Widget -->
+             <div class="newsletter-widget" style="margin-top: 30px; background: #f0f4c3; padding: 20px; border-radius: 12px;">
+                <details>
+                    <summary style="font-weight: bold; cursor: pointer; color: #827717;">Send Newsletter / Announcement</summary>
+                    <div style="margin-top: 15px;">
+                        <input type="text" id="news-subject" class="form-control" placeholder="Subject" style="margin-bottom: 10px;">
+                        <textarea id="news-body" class="form-control" placeholder="Message to all users..." style="margin-bottom: 10px;"></textarea>
+                        <button class="btn btn-success" onclick="sendNewsletter()">Send Email</button>
+                    </div>
+                </details>
+             </div>
         </section>
 
         <!-- Running Orders Section -->
         <section id="section-orders" class="admin-section" style="display: none;">
             <div class="header-actions">
                 <h2>Running Orders</h2>
-                <button id="refresh-orders-btn" class="btn btn-secondary">
-                    <i class="fas fa-sync"></i> Refresh
-                </button>
             </div>
-            <div class="table-container">
-                <table class="data-table" id="orders-table">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Customer</th>
-                            <th>Pickup Time</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orders-list">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
+            <div class="placeholder-content">
+                <p>Order management interface coming soon.</p>
+                <!-- Reuse logic from previous if needed, but for now placeholder is fine or implement if requested separately -->
             </div>
         </section>
 
@@ -130,9 +212,8 @@ require_admin();
         <!-- Table Management Section -->
         <section id="section-tables" class="admin-section" style="display: none;">
         <div class="header-actions">
-                <h2>Table Management</h2>
+                <h2>Floor Plan & Tables</h2>
                 <div class="table-controls" style="display: flex; align-items: center; gap: 15px;">
-                    <span style="font-weight: bold; color: #2c3e50;">Total Tables:</span>
                     <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px; border-radius: 8px; border: 1px solid #ddd;">
                         <button id="remove-table-btn" class="btn btn-danger btn-sm" style="padding: 5px 12px; margin: 0;"><i class="fas fa-minus"></i></button>
                         <span id="table-count-display" style="font-size: 1.2rem; font-weight: bold; min-width: 30px; text-align: center;">-</span>
@@ -182,9 +263,6 @@ require_admin();
             </div>
 
             <div id="tables-grid" class="tables-grid" style="display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid #ddd; padding-top: 20px;">
-
-            <div id="tables-grid" class="tables-grid" style="display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid #ddd; padding-top: 20px;">
-                <!-- List view still useful for status updates -->
                 <p>Detailed List:</p>
             </div>
         </section>
@@ -237,13 +315,90 @@ require_admin();
                     </div>
                 </details>
             </div>
+
+            <div class="deleted-section" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 20px;">
+                <details>
+                    <summary style="font-size: 1.2rem; font-weight: bold; cursor: pointer; color: #c0392b;">
+                        View Deleted Reservations <i class="fas fa-trash" style="font-size: 0.8rem; margin-left: 5px;"></i>
+                    </summary>
+                    <div class="table-container" style="margin-top: 15px;">
+                        <table class="data-table" id="deleted-reservations-table" style="background: #fff0f0;">
+                            <thead>
+                                <tr>
+                                    <th>DateTime</th>
+                                    <th>Table</th>
+                                    <th>Name</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deleted-reservations-list">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+            </div>
         </section>
+
+        <!-- Users Section (NEW) -->
+        <section id="section-users" class="admin-section" style="display: none;">
+             <div class="header-actions">
+                <h2>User Management</h2>
+                <input type="text" id="user-search" placeholder="Search by name or email..." class="form-control" style="width: 300px;">
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Points</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Settings Section (NEW) -->
+        <section id="section-settings" class="admin-section" style="display: none;">
+            <div class="header-actions">
+                <h2>Business Settings</h2>
+            </div>
+            
+            <div class="settings-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee;">
+                <h3>Working Hours Schedule</h3>
+                <p>Configure when the cafe is open. Reservations and Orders will only be allowed during these times.</p>
+                <form id="schedule-form">
+                    <table class="data-table" style="width: 100%; max-width: 600px;">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Open Time</th>
+                                <th>Close Time</th>
+                                <th>Closed?</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-list">
+                            <!-- Populated JS -->
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-success" style="margin-top: 20px;">Save Schedule</button>
+                </form>
+            </div>
+        </section>
+
     </main>
 </div>
 
-<!-- Add/Edit Modal -->
+<!-- Add/Edit Product Modal -->
 <div id="product-modal" class="modal">
-    <!-- Existing Product Modal Content -->
     <div class="modal-content">
         <span class="close-modal" data-target="product-modal">&times;</span>
         <h3 id="modal-title">Add Product</h3>
@@ -335,6 +490,60 @@ require_admin();
             <div class="form-actions">
                 <button type="submit" class="btn btn-success">Add Slide</button>
             </div>
+        </form>
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div id="user-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" data-target="user-modal">&times;</span>
+        <h3>User Details</h3>
+        <div id="user-details-content">
+            <!-- Populated via JS -->
+             <p>Loading...</p>
+        </div>
+        <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+             <h4>Actions</h4>
+             <button id="blacklist-btn" class="btn btn-danger" style="width: 100%;">Toggle Blacklist</button>
+             <textarea id="blacklist-reason" placeholder="Reason for blacklisting (required)" style="width:100%; margin-top: 10px; display:none;"></textarea>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Reservation Modal -->
+<div id="quick-reserve-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" data-target="quick-reserve-modal">&times;</span>
+        <h3>Walk-In / Quick Reservation</h3>
+        <form id="quick-reserve-form">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <input type="hidden" name="action" value="create">
+            <input type="hidden" name="entity" value="reservation">
+            <input type="hidden" name="is_admin_walkin" value="1">
+            
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" name="name" required placeholder="Guest Name">
+            </div>
+            
+             <div class="form-group">
+                 <label>Table</label>
+                 <!-- Ideally populated dynamically, but simple input for now or select -->
+                 <input type="number" name="table_id" required placeholder="Table ID" min="1">
+             </div>
+
+            <div class="form-group">
+                <label>Date & Time</label>
+                <input type="datetime-local" name="reservation_time" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Email (Optional)</label>
+                <input type="email" name="email" placeholder="For confirmation">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Reservation</button>
         </form>
     </div>
 </div>

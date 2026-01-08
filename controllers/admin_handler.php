@@ -9,6 +9,8 @@ require_once __DIR__ . '/ProductController.php';
 
 // 1. Ensure strictly JSON response
 header('Content-Type: application/json; charset=utf-8');
+ini_set('display_errors', '0'); // Suppress HTML errors
+error_reporting(E_ALL); // Log errors instead
 
 // 2. CSRF Check (Assuming verify_csrf is available from security.php or csrf.php)
 require_once __DIR__ . '/../core/csrf.php';
@@ -52,6 +54,15 @@ if ($entity === 'slider') {
 } elseif ($entity === 'reservation') {
     require_once __DIR__ . '/ReservationController.php';
     $controller = new ReservationController($conn);
+} elseif ($entity === 'dashboard') {
+    require_once __DIR__ . '/DashboardController.php';
+    $controller = new DashboardController($conn);
+} elseif ($entity === 'settings') {
+    require_once __DIR__ . '/SettingsController.php';
+    $controller = new SettingsController($conn);
+} elseif ($entity === 'user') {
+    require_once __DIR__ . '/UserController.php';
+    $controller = new UserController($conn);
 } else {
     $controller = new ProductController($conn);
 }

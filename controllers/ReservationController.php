@@ -43,27 +43,84 @@ class ReservationController {
         $user = SessionManager::getCurrentUserData();
         $userId = $user['id'];
 
-        // Check if Blacklisted
-        $stmt = $this->conn->prepare("SELECT is_blacklisted, blacklist_reason FROM users WHERE id = ?");
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if ($row = $res->fetch_assoc()) {
-            if ($row['is_blacklisted']) {
-                sendError("You are restricted from making reservations. Please talk to an employee for more details.");
+        // Check if Admin Walk-in
+        $isAdminWalkin = false;
+        if (isset($_POST['is_admin_walkin']) && $_POST['is_admin_walkin'] == '1') {
+            // Verify actual admin role
+            $currentUser = SessionManager::getCurrentUserData();
+            if (in_array('admin', $currentUser['roles'])) {
+                $isAdminWalkin = true;
             }
         }
-        $stmt->close();
+
+        // Check if Blacklisted (Skip for Admin Walk-in)
+        if (!$isAdminWalkin) {
+            $stmt = $this->conn->prepare("SELECT is_blacklisted, blacklist_reason FROM users WHERE id = ?");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            if ($row = $res->fetch_assoc()) {
+                if ($row['is_blacklisted']) {
+                    sendError("You are restricted from making reservations. Please talk to an employee for more details.");
+                }
+            }
+            $stmt->close();
+        }
 
         // Validate Inputs
         $tableId = intval($_POST['table_id'] ?? 0);
         $dateStr = $_POST['date'] ?? ''; // YYYY-MM-DD
         $timeStr = $_POST['time'] ?? ''; // HH:MM
+        
+        // Handle DateTime-Local input from Admin Walk-in (format: YYYY-MM-DDTHH:MM)
+        if (isset($_POST['reservation_time']) && !empty($_POST['reservation_time'])) {
+            $dtLocal = $_POST['reservation_time'];
+            $timestamp = strtotime($dtLocal);
+            if ($timestamp) {
+                $dateStr = date('Y-m-d', $timestamp);
+                $timeStr = date('H:i', $timestamp);
+            }
+        }
+
         $resName = trim($_POST['name'] ?? '');
 
         if ($tableId <= 0 || empty($dateStr) || empty($timeStr)) {
-            sendError("Invalid table, date, or time.");
+             sendError("Invalid table, date, or time.");
         }
+
+        // --- WORKING HOURS CHECK (Skip for Admin Walk-in) ---
+        if (!$isAdminWalkin) {
+            $requestTime = new DateTime($dateStr . ' ' . $timeStr);
+            $dayOfWeek = (int)$requestTime->format('w');
+            
+            $stmtS = $this->conn->prepare("SELECT open_time, close_time, is_closed FROM schedule WHERE day_of_week = ?");
+            $stmtS->bind_param("i", $dayOfWeek);
+            $stmtS->execute();
+            $resS = $stmtS->get_result();
+            $schedule = $resS->fetch_assoc();
+            $stmtS->close();
+
+            if (!$schedule) {
+                 if ($dayOfWeek === 0) $schedule = ['is_closed' => 1];
+                 elseif ($dayOfWeek === 6) $schedule = ['is_closed' => 0, 'open_time' => '08:00:00', 'close_time' => '17:00:00'];
+                 else $schedule = ['is_closed' => 0, 'open_time' => '07:00:00', 'close_time' => '17:00:00'];
+            }
+
+            if ($schedule['is_closed']) {
+                sendError("We are closed on " . $requestTime->format('l') . "s.");
+            }
+
+            $openTime = new DateTime($dateStr . ' ' . $schedule['open_time']);
+            $closeTime = new DateTime($dateStr . ' ' . $schedule['close_time']);
+            
+            $lastSeating = clone $closeTime;
+            $lastSeating->modify('-45 minutes');
+
+            if ($requestTime < $openTime || $requestTime > $lastSeating) {
+                sendError("Reservations available between " . $openTime->format('H:i') . " and " . $lastSeating->format('H:i') . ".");
+            }
+        }
+        // ---------------------------
 
         if (empty($resName)) {
             sendError("Please provide a name for the reservation.");
@@ -71,7 +128,6 @@ class ReservationController {
         if (strlen($resName) > 50) {
             sendError("Name is too long (max 50 chars).");
         }
-        // Basic sanitization is handled by prepared statement, but let's strip tags to be safe for display
         $resName = htmlspecialchars($resName, ENT_QUOTES, 'UTF-8');
 
         // Parse Date
@@ -80,8 +136,9 @@ class ReservationController {
             $date = new DateTime($fullDateStr);
             $now = new DateTime();
             
-            if ($date < $now) {
-                sendError("Cannot reserve in the past.");
+            if ($date < $now && !$isAdminWalkin) { // Admin can book past? Maybe not useful, but forgiving slightly? Let's force future for consistency unless explicitly needed. Actually, "Walk-in" is NOW.
+                 // If walk-in is "now", but server time vs client time small diff?
+                 // Let's allow slightly past for Admin (e.g. 5 mins ago).
             }
         } catch (Exception $e) {
             sendError("Invalid date/time format.");
@@ -89,31 +146,30 @@ class ReservationController {
 
         $resTime = $date->format('Y-m-d H:i:s');
 
-        // User Constraint: One reservation per day.
-        // Check if user already has a reservation on the requested Date (Y-m-d).
-        $targetDate = $date->format('Y-m-d');
-        
-        $stmt = $this->conn->prepare("SELECT id FROM reservations WHERE user_id = ? AND DATE(reservation_time) = ?");
-        $stmt->bind_param("is", $userId, $targetDate);
-        $stmt->execute();
-        if ($stmt->get_result()->num_rows > 0) {
-            sendError("You can only make one reservation per day.");
-        }
-        $stmt->close();
+        // User Constraint: One reservation per day (Skip for Admin)
+        if (!$isAdminWalkin) {
+            $targetDate = $date->format('Y-m-d');
+            $stmt = $this->conn->prepare("SELECT id FROM reservations WHERE user_id = ? AND DATE(reservation_time) = ?");
+            $stmt->bind_param("is", $userId, $targetDate);
+            $stmt->execute();
+            if ($stmt->get_result()->num_rows > 0) {
+                sendError("You can only make one reservation per day.");
+            }
+            $stmt->close();
 
-        //  User Constraint: No pending upcoming reservations.
-        // Cannot make a new one if you have one currently active or in the future.
-        $oneHourAgo = clone $now;
-        $oneHourAgo->modify('-1 hour');
-        $checkTimeStr = $oneHourAgo->format('Y-m-d H:i:s');
-        
-        $stmt = $this->conn->prepare("SELECT id FROM reservations WHERE user_id = ? AND reservation_time > ?");
-        $stmt->bind_param("is", $userId, $checkTimeStr);
-        $stmt->execute();
-        if ($stmt->get_result()->num_rows > 0) {
-             sendError("You already have an upcoming reservation. Please complete it before booking another.");
+            //  User Constraint: No pending upcoming reservations (Skip for Admin)
+            $oneHourAgo = clone $now;
+            $oneHourAgo->modify('-1 hour');
+            $checkTimeStr = $oneHourAgo->format('Y-m-d H:i:s');
+            
+            $stmt = $this->conn->prepare("SELECT id FROM reservations WHERE user_id = ? AND reservation_time > ?");
+            $stmt->bind_param("is", $userId, $checkTimeStr);
+            $stmt->execute();
+            if ($stmt->get_result()->num_rows > 0) {
+                 sendError("You already have an upcoming reservation. Please complete it before booking another.");
+            }
+            $stmt->close();
         }
-        $stmt->close();
 
         // Overlap Check: Minimum 20 mins between reservations for same table
         // Existing R: [Time, Time + ~1h (implied duration?)]
@@ -153,6 +209,7 @@ class ReservationController {
         $stmt = $this->conn->prepare("
             SELECT reservation_time FROM reservations 
             WHERE table_id = ? 
+            AND status != 'deleted'
             AND TIMESTAMPDIFF(MINUTE, reservation_time, ?) > -80 
             AND TIMESTAMPDIFF(MINUTE, reservation_time, ?) < 60
         ");
@@ -187,7 +244,8 @@ class ReservationController {
                 AND t.ID != ?
                 AND t.ID NOT IN (
                     SELECT table_id FROM reservations 
-                    WHERE TIMESTAMPDIFF(MINUTE, reservation_time, ?) > -80 
+                    WHERE status != 'deleted'
+                    AND TIMESTAMPDIFF(MINUTE, reservation_time, ?) > -80 
                     AND TIMESTAMPDIFF(MINUTE, reservation_time, ?) < 60
                 )
                 LIMIT 5
@@ -228,23 +286,52 @@ class ReservationController {
         // Admin Only
         $this->requireAdmin();
 
-        // List future and recent past? Or all? Let's limit to recent.
-        // And join users.
         $sql = "
             SELECT r.*, u.username, u.email, u.is_blacklisted, u.blacklist_reason 
             FROM reservations r
             JOIN users u ON r.user_id = u.id
-            ORDER BY r.reservation_time DESC
-            LIMIT 100
+            ORDER BY r.reservation_time ASC
         ";
         
         $result = $this->conn->query($sql);
-        $data = [];
+        $active = [];
+        $history = [];
+        $now = new DateTime();
+        
+        // Threshold: Active if less than 2 hours old (assuming overlap) or future
+        $threshold = clone $now;
+        $threshold->modify('-2 hours');
+
         while ($row = $result->fetch_assoc()) {
-            $data[] = $row;
+            if (isset($row['status']) && $row['status'] === 'deleted') {
+                $deleted[] = $row;
+                continue;
+            }
+            $resTime = new DateTime($row['reservation_time']);
+            if ($resTime > $threshold) {
+                $active[] = $row;
+            } else {
+                $history[] = $row;
+            }
+        }
+        
+        // Sort history desc
+        usort($history, function($a, $b) {
+            return strtotime($b['reservation_time']) - strtotime($a['reservation_time']);
+        });
+
+        // Sort deleted desc
+        if (isset($deleted)) {
+            usort($deleted, function($a, $b) {
+                return strtotime($b['reservation_time']) - strtotime($a['reservation_time']);
+            });
         }
 
-        sendSuccess(['data' => $data]);
+        sendSuccess(['data' => [
+            'active' => $active, 
+            'history' => $history,
+            'deleted' => $deleted ?? []
+        ]]);
     }
 
     private function toggleBlacklist() {
@@ -295,7 +382,7 @@ class ReservationController {
         $resId = intval($_POST['id'] ?? 0);
         if ($resId <= 0) sendError("Invalid Reservation ID");
 
-        $stmt = $this->conn->prepare("DELETE FROM reservations WHERE id = ?");
+        $stmt = $this->conn->prepare("UPDATE reservations SET status = 'deleted' WHERE id = ?");
         $stmt->bind_param("i", $resId);
 
         if ($stmt->execute()) {

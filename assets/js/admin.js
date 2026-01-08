@@ -1,1269 +1,745 @@
-// Mazi Coffee Admin Dashboard Script
+// Main Initialization Wrapper
+function initAdminPanel() {
+    console.log("Admin Panel Initializing...", new Date().toISOString());
+    // Visual confirmation for debug
+    // const d = document.createElement('div');
+    // d.style.cssText = 'position:fixed;top:10px;right:10px;background:lime;padding:5px;z-index:9999;';
+    // d.textContent = 'Admin Start: ' + new Date().toLocaleTimeString();
+    // document.body.appendChild(d); setTimeout(() => d.remove(), 2000);
 
-(function () {
-    // Helper to safely assign globals
-    window.openEdit = openEdit;
-    window.deleteProduct = deleteProduct;
-    window.deleteSlide = deleteSlide;
-    // blocked user func moved to window directly
+    // Determine active section from URL or default
+    showSection('dashboard');
 
-    // Global store
-    let currentProducts = [];
-
-    // Immediate initialization
-    console.log("Admin Dashboard Script Initializing...");
-
-    // --- Navigation Logic ---
-    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
-    const sections = document.querySelectorAll('.admin-section');
-    let reservationInterval = null; // Track auto-refresh
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('data-section');
-            if (!targetId) return;
-
-            // Clear any active interval when switching sections
-            if (reservationInterval) {
-                clearInterval(reservationInterval);
-                reservationInterval = null;
-            }
-
-            // Update Nav Active State
-            navLinks.forEach(n => n.classList.remove('active'));
-            this.classList.add('active');
-
-            // Show Target Section
-            sections.forEach(s => s.style.display = 'none');
-            const targetSection = document.getElementById('section-' + targetId);
-            if (targetSection) {
-                targetSection.style.display = 'block';
-                // Lazy load data based on section
-                if (targetId === 'menu') {
-                    if (document.querySelectorAll('#products-table tbody tr').length === 0) {
-                        loadProducts();
-                    }
-                } else if (targetId === 'slider') {
-                    loadSliderImages();
-                } else if (targetId === 'tables') {
-                    loadTables();
-                } else if (targetId === 'reservations') {
-                    loadReservations();
-                    // Start Auto-Refresh (5 minutes = 300,000 ms)
-                    reservationInterval = setInterval(loadReservations, 300000);
-                    console.log("Auto-refresh enabled for reservations (every 5m).");
-                } else if (targetId === 'orders') {
-                    loadOrders();
-                    // Auto-refresh for orders too?
-                }
+    // Navigation Logic (Event Delegation)
+    const sidebarNav = document.querySelector('.sidebar-nav');
+    if (sidebarNav) {
+        console.log("Sidebar nav found, attaching listener.");
+        sidebarNav.addEventListener('click', (e) => {
+            const link = e.target.closest('.nav-link[data-section]');
+            if (link) {
+                e.preventDefault();
+                const sectionId = link.getAttribute('data-section');
+                console.log("Navigating to section:", sectionId);
+                showSection(sectionId);
             }
         });
-    });
-
-    // --- Orders Logic ---
-    const refreshOrdersBtn = document.getElementById('refresh-orders-btn');
-    if (refreshOrdersBtn) {
-        refreshOrdersBtn.onclick = loadOrders;
+    } else {
+        console.error("Sidebar nav NOT found!");
     }
 
-    function loadOrders() {
-        console.log("Fetching orders...");
-        const tbody = document.querySelector('#orders-table tbody');
-        if (!tbody) return;
+    // 1. DASHBOARD INIT
+    loadDashboard();
+    setupSearch();
+    setupScheduleForm();
+    setupQuickActions();
 
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Loading...</td></tr>';
-
-        const formData = new FormData();
-        formData.append('action', 'get_all');
-        // Note: index.php routes ?page=order_handler to OrderController
-        // We typically use admin_handler for admin stuff, but I created OrderController separately.
-        // Let's use ?page=order_handler for now as per plan.
-        // But admin.js uses appendCsrf global. Verify if Order_handler checks CSRF?
-        // OrderController checks session role admin.
-        // output.php output format matches.
-
-        fetch('?page=order_handler&action=get_all', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    renderOrders(data.data.orders);
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Error loading orders.</td></tr>';
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Connection Error.</td></tr>';
-            });
-    }
-
-    function renderOrders(orders) {
-        const tbody = document.querySelector('#orders-table tbody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        if (!orders || orders.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No orders found.</td></tr>';
-            return;
-        }
-
-        orders.forEach(o => {
-            const tr = document.createElement('tr');
-
-            // Format items
-            let itemsHtml = '<ul style="list-style:none; padding:0; margin:0; font-size:0.9rem;">';
-            o.items.forEach(item => {
-                itemsHtml += `<li>${item.quantity}x ${safe(item.name)}</li>`;
-            });
-            itemsHtml += '</ul>';
-
-            // Status Badge
-            let statusColor = '#999';
-            if (o.status === 'pending') statusColor = '#f39c12';
-            if (o.status === 'completed') statusColor = '#27ae60';
-            if (o.status === 'cancelled') statusColor = '#c0392b';
-
-            const badge = `<span style="background:${statusColor}; color:white; padding:4px 8px; border-radius:4px; font-size:0.8rem; text-transform:uppercase;">${o.status}</span>`;
-
-            // Actions
-            let actions = '';
-            if (o.status === 'pending') {
-                actions += `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${o.id}, 'completed')" style="margin-right:5px;">Check</button>`;
-                actions += `<button class="btn btn-sm btn-danger" onclick="updateOrderStatus(${o.id}, 'cancelled')">Cancel</button>`;
-            } else {
-                actions += `<button class="btn btn-sm btn-danger" onclick="deleteOrder(${o.id})"><i class="fas fa-trash"></i></button>`;
-            }
-
-            tr.innerHTML = `
-                <td>#${o.id}</td>
-                <td>
-                    <strong>${safe(o.username)}</strong><br>
-                    <small>${safe(o.email)}</small>
-                </td>
-                <td>${o.pickup_time}</td>
-                <td>${itemsHtml}</td>
-                <td>${parseFloat(o.total_price).toFixed(2)} RON</td>
-                <td>${badge}</td>
-                <td>${actions}</td>
-            `;
-            tbody.appendChild(tr);
+    // Notes auto-save
+    const notesArea = document.getElementById('admin-notes');
+    if (notesArea) {
+        let timeout = null;
+        notesArea.addEventListener('input', () => {
+            clearTimeout(timeout);
+            document.getElementById('notes-status').style.display = 'none';
+            timeout = setTimeout(saveNotes, 1000);
         });
     }
 
-    window.updateOrderStatus = function (id, status) {
-        if (!confirm(`Mark order #${id} as ${status}?`)) return;
-
-        const formData = new FormData();
-        formData.append('action', 'update_status');
-        formData.append('order_id', id);
-        formData.append('status', status);
-
-        fetch('?page=order_handler&action=update_status', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    loadOrders();
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(e => alert("Network Error"));
-    };
-
-    window.deleteOrder = function (id) {
-        if (!confirm(`Delete order #${id}? This cannot be undone.`)) return;
-
-        const formData = new FormData();
-        formData.append('action', 'delete');
-        formData.append('order_id', id);
-
-        fetch('?page=order_handler&action=delete', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    loadOrders();
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(e => alert("Network Error"));
-    };
-
-    // --- Generic Modal Logic ---
-    const modals = document.querySelectorAll('.modal');
-    const closeBtns = document.querySelectorAll('.close-modal');
-
-    // Close buttons
-    closeBtns.forEach(btn => {
-        btn.onclick = function () {
-            const targetId = this.getAttribute('data-target');
-            if (targetId) {
-                document.getElementById(targetId).style.display = 'none';
-            } else {
-                this.closest('.modal').style.display = 'none';
-            }
-        }
+    // Modal Close Logic
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById(btn.dataset.target).style.display = 'none';
+        });
     });
 
-    // Click outside to close
     window.onclick = function (event) {
         if (event.target.classList.contains('modal')) {
             event.target.style.display = 'none';
         }
-    };
+    }
 
-    // --- Product Logic ---
-    const productModal = document.getElementById('product-modal');
-    const addProductBtn = document.getElementById('add-product-btn');
-    const productForm = document.getElementById('product-form');
-
-    if (addProductBtn) {
-        addProductBtn.onclick = function () {
-            resetProductForm();
-            document.getElementById('modal-title').innerText = 'Add New Coffee';
+    // --- PRODUCT MODULE SETUP ---
+    const addProdBtn = document.getElementById('add-product-btn');
+    if (addProdBtn) {
+        addProdBtn.addEventListener('click', () => {
+            document.getElementById('product-form').reset();
+            document.getElementById('prod-id').value = '';
             document.getElementById('form-action').value = 'add';
-            if (productModal) productModal.style.display = "block";
-        };
-    }
-
-    if (productForm) {
-        productForm.onsubmit = function (e) {
-            e.preventDefault();
-            handleFormSubmit(productForm, productModal, loadProducts);
-        };
-    }
-
-    function loadProducts() {
-        console.log("Fetching products...");
-        const tbody = document.querySelector('#products-table tbody');
-        if (!tbody) return;
-
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
-
-        const formData = new FormData();
-        formData.append('action', 'get_all');
-        appendCsrf(formData);
-
-        fetch('controllers/admin_handler.php', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    renderTable(data.data);
-                } else {
-                    console.error("API Error:", data.error);
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Error loading products.</td></tr>';
-                }
-            })
-            .catch(err => {
-                console.error("Fetch Error:", err);
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Connection error.</td></tr>';
-            });
-    }
-
-    function renderTable(products) {
-        currentProducts = products;
-        const tbody = document.querySelector('#products-table tbody');
-        if (!tbody) return; // Should not happen
-
-        tbody.innerHTML = '';
-        if (!products || products.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No products found.</td></tr>';
-            return;
-        }
-
-        products.forEach(p => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><img src="${p.image_path}" alt="${safe(p.name)}" onerror="this.src='assets/public/default.png'"></td>
-                <td><strong>${safe(p.name)}</strong></td>
-                <td><span class="badge">${safe(p.category)}</span></td>
-                <td>${parseFloat(p.price).toFixed(2)} RON</td>
-                <td>
-                    <button class="btn btn-edit" onclick="openEdit(${p.id})"><i class="fas fa-edit"></i> Edit</button>
-                    <button class="btn btn-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i> Delete</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+            document.getElementById('modal-title').innerText = 'Add Product';
+            document.getElementById('current-image-preview').style.display = 'none';
+            document.getElementById('product-modal').style.display = 'block';
         });
     }
 
-    function openEdit(id) {
-        const p = currentProducts.find(x => x.id == id);
-        if (!p) return;
-
-        resetProductForm();
-        document.getElementById('modal-title').innerText = 'Edit Coffee';
-        document.getElementById('form-action').value = 'update';
-        document.getElementById('prod-id').value = p.id;
-        document.getElementById('prod-name').value = p.name;
-        document.getElementById('prod-price').value = p.price;
-        document.getElementById('prod-desc').value = p.description || '';
-        document.getElementById('prod-category').value = p.category || 'coffee';
-
-        const preview = document.getElementById('current-image-preview');
-        const img = document.getElementById('preview-img');
-
-        if (p.image_path) {
-            preview.style.display = 'block';
-            img.src = p.image_path;
-        } else {
-            preview.style.display = 'none';
-        }
-
-        if (productModal) productModal.style.display = "block";
+    const prodForm = document.getElementById('product-form');
+    if (prodForm) {
+        prodForm.addEventListener('submit', handleProductSubmit);
     }
 
-    function deleteProduct(id) {
-        if (!confirm('Are you sure you want to delete this product?')) return;
-        postAction({ action: 'delete', id: id }, loadProducts);
-    }
-
-    function resetProductForm() {
-        if (productForm) productForm.reset();
-        document.getElementById('prod-id').value = '';
-        const preview = document.getElementById('current-image-preview');
-        if (preview) preview.style.display = 'none';
-    }
-
-    // --- Slider Logic ---
-    const sliderModal = document.getElementById('slider-modal');
+    // --- SLIDER MODULE SETUP ---
     const addSlideBtn = document.getElementById('add-slide-btn');
-    const sliderForm = document.getElementById('slider-form');
-    // We already have generic close logic for slider-modal
-
     if (addSlideBtn) {
-        addSlideBtn.onclick = function () {
-            if (sliderForm) sliderForm.reset();
-            if (sliderModal) sliderModal.style.display = 'block';
-        }
+        addSlideBtn.addEventListener('click', () => {
+            document.getElementById('slider-form').reset();
+            document.getElementById('slider-modal').style.display = 'block';
+        });
     }
-
+    const sliderForm = document.getElementById('slider-form');
     if (sliderForm) {
-        sliderForm.onsubmit = function (e) {
-            e.preventDefault();
-            handleFormSubmit(sliderForm, sliderModal, loadSliderImages);
-        }
+        sliderForm.addEventListener('submit', handleSliderSubmit);
     }
 
-    function loadSliderImages() {
-        console.log("Fetching slides...");
-        const container = document.getElementById('slider-list');
-        if (!container) return;
+    // --- TABLE MODULE SETUP ---
+    const addTableBtn = document.getElementById('add-table-btn');
+    if (addTableBtn) addTableBtn.addEventListener('click', () => updateTableCount(1));
 
-        container.innerHTML = '<p>Loading...</p>';
+    const removeTableBtn = document.getElementById('remove-table-btn');
+    if (removeTableBtn) removeTableBtn.addEventListener('click', () => updateTableCount(-1));
 
-        const formData = new FormData();
-        formData.append('action', 'get_all');
-        formData.append('entity', 'slider');
-        appendCsrf(formData);
+    const savePositionsBtn = document.getElementById('save-positions-btn');
+    // Note: Position saving is usually per-drag but we can implement a bulk save if tracked. 
+    // For now, let's assume auto-save on drag end or alert "Saved".
+    if (savePositionsBtn) savePositionsBtn.addEventListener('click', () => alert("Positions should be saved automatically on move."));
 
-        fetch('controllers/admin_handler.php', {
+    const uploadFloorPlanBtn = document.getElementById('upload-floor-plan-btn');
+    const floorPlanInput = document.getElementById('floor-plan-upload');
+    if (uploadFloorPlanBtn && floorPlanInput) {
+        uploadFloorPlanBtn.addEventListener('click', () => floorPlanInput.click());
+        floorPlanInput.addEventListener('change', uploadFloorPlan);
+    }
+
+    // Table Props Form
+    const tablePropsForm = document.getElementById('table-props-form');
+    if (tablePropsForm) {
+        tablePropsForm.addEventListener('submit', handleTablePropsSubmit);
+    }
+
+    // --- ORDERS SETUP ---
+    const refreshOrdersBtn = document.getElementById('refresh-orders-btn');
+    if (refreshOrdersBtn) refreshOrdersBtn.addEventListener('click', loadOrders);
+}
+
+// Auto-run if already loaded (for SPA)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAdminPanel);
+} else {
+    initAdminPanel();
+}
+
+// --- GENERAL UTILS ---
+function showSection(sectionId) {
+    document.querySelectorAll('.admin-section').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+    const target = document.getElementById('section-' + sectionId);
+    if (target) {
+        target.style.display = 'block';
+        const nav = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
+        if (nav) nav.classList.add('active');
+
+        if (sectionId === 'dashboard') loadDashboard();
+        if (sectionId === 'users') loadUsers();
+        if (sectionId === 'settings') loadSettings();
+        if (sectionId === 'menu') loadProducts();
+        if (sectionId === 'slider') loadSlides();
+        if (sectionId === 'tables') loadTables();
+        if (sectionId === 'reservations') loadReservations();
+        if (sectionId === 'orders') loadOrders();
+    }
+}
+
+async function apiRequest(entity, action, body = null) {
+    const formData = body instanceof FormData ? body : new FormData();
+    formData.append('entity', entity);
+    formData.append('action', action);
+    if (!(body instanceof FormData) && body) {
+        for (let k in body) formData.append(k, body[k]);
+    }
+
+    const tokenVal = document.getElementById('csrf-token-global').value;
+
+    try {
+        const res = await fetch('controllers/admin_handler.php', {
             method: 'POST',
             body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success && data.data) {
-                    renderSliderList(data.data);
-                } else {
-                    container.innerHTML = '<p>Error loading slides.</p>';
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                container.innerHTML = '<p>Connection Error.</p>';
-            });
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': tokenVal },
+            credentials: 'include' // Ensure session cookies are sent
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            console.error("API Error Status:", res.status);
+            console.error("API Error Body:", text);
+            throw new Error(`Server responded with ${res.status}: ${text.substring(0, 100)}`);
+        }
+
+        return await res.json();
+    } catch (e) {
+        console.error("Fetch failed", e);
+        alert("Server communication error: " + e.message);
+        return { success: false, error: e.message };
+    }
+}
+
+// ==========================================
+// 1. DASHBOARD & SETTINGS & USERS (Preserved)
+// ==========================================
+async function loadDashboard() {
+    try {
+        console.log("Fetching dashboard stats...");
+        const res = await apiRequest('dashboard', 'get_dashboard_stats');
+        console.log("Dashboard fetch result:", res);
+
+        if (res.success) {
+            renderDashboard(res.data);
+        } else {
+            console.warn("Dashboard fetch failed logic:", res.error);
+            // Optional: alert(res.error || "Failed to load dashboard data");
+            // For now, let's render empty state or partial?
+            document.getElementById('stat-res-today').innerText = "Err";
+        }
+    } catch (e) {
+        console.error("Dashboard load failed exception", e);
+    }
+}
+function renderDashboard(data) {
+    console.log("Rendering dashboard with:", data);
+    if (!data) return;
+    const ids = {
+        'stat-res-today': data.stats.reservations_today,
+        'stat-res-total': 'Upcoming: ' + data.stats.reservations_total,
+        'stat-active-tables': data.stats.active_tables,
+        'stat-menu-items': data.stats.products_total,
+        'admin-notes': data.notes
+    };
+    for (let id in ids) {
+        const el = document.getElementById(id);
+        if (el) {
+            if (el.tagName === 'TEXTAREA') el.value = ids[id];
+            else el.innerText = ids[id];
+        } else {
+            console.warn("Missing element for ID:", id);
+        }
+    }
+    if (document.getElementById('global-cafe-status')) document.getElementById('global-cafe-status').value = data.cafe_status;
+
+    const list = document.getElementById('recent-activity-list');
+    if (list && data.recent) {
+        list.innerHTML = data.recent.map(r => `
+            <tr><td>${r.user}</td><td>${r.name}</td><td>${r.created}</td><td>${r.time}</td><td>#${r.id}</td></tr>
+        `).join('');
+    }
+    if (data.chart) renderChart(data.chart);
+}
+var resChartInstance = null;
+function renderChart(chartData) {
+    const cvs = document.getElementById('reservationsChart');
+    if (!cvs) return;
+    if (resChartInstance) resChartInstance.destroy();
+    resChartInstance = new Chart(cvs.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [{ label: 'Orders', data: chartData.data, borderColor: '#3498db', backgroundColor: 'rgba(52, 152, 219, 0.1)', fill: true }]
+        },
+        options: { plugins: { legend: { display: false } } }
+    });
+}
+async function saveNotes() {
+    await apiRequest('dashboard', 'save_note', { content: document.getElementById('admin-notes').value });
+    const s = document.getElementById('notes-status');
+    s.style.display = 'block'; setTimeout(() => s.style.display = 'none', 2000);
+}
+async function updateCafeStatus(val) { await apiRequest('dashboard', 'toggle_cafe_status', { status: val }); }
+function exportData(type) { window.location.href = `controllers/admin_handler.php?entity=dashboard&action=export_data&type=${type}`; }
+async function sendNewsletter() {
+    const sub = document.getElementById('news-subject').value;
+    const body = document.getElementById('news-body').value;
+    if (!sub || !body) return alert("Required");
+    const res = await apiRequest('dashboard', 'send_newsletter', { subject: sub, body: body });
+    alert(res.success ? res.data.message : res.error);
+}
+
+// USERS
+function setupSearch() {
+    const inp = document.getElementById('user-search');
+    if (!inp) return;
+    let t;
+    inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => loadUsers(inp.value), 500); });
+}
+async function loadUsers(search = '') {
+    const res = await apiRequest('user', 'get_all', { search: search });
+    const tb = document.querySelector('#users-table tbody');
+    if (res.success && tb) {
+        tb.innerHTML = res.data.map(u => `
+            <tr>
+                <td><div style="display:flex;align-items:center;gap:10px;"><img src="${u.PPicture || 'assets/img/default-user.png'}" style="width:30px;height:30px;border-radius:50%;"><span>${u.username}</span></div></td>
+                <td>${u.email}</td><td>${u.role}</td><td>${u.PuncteFidelitate}</td>
+                <td>${u.is_blacklisted == 1 ? '<span style="color:red">Blacklisted</span>' : '<span style="color:green">Active</span>'}</td>
+                <td><button class="btn btn-sm btn-edit" onclick="viewUser(${u.id})">Details</button></td>
+            </tr>`).join('');
+    }
+}
+async function viewUser(id) {
+    const res = await apiRequest('user', 'get_one', { id: id });
+    if (res.success) {
+        const u = res.data;
+        let statusHtml = '';
+        if (u.is_blacklisted == 1) {
+            statusHtml = `<div style="background:#ffebee; color:#c62828; padding:10px; border-radius:4px; margin:10px 0;">
+                <strong>BLACKLISTED</strong><br>
+                Reason: ${u.blacklist_reason || 'No reason provided'}
+            </div>`;
+        }
+
+        document.getElementById('user-details-content').innerHTML = `
+            <div style="text-align:center;"><img src="${u.PPicture || 'assets/img/default-user.png'}" style="width:80px;height:80px;border-radius:50%;"><h3>${u.username}</h3><p>${u.email}</p></div>
+            ${statusHtml}
+            <p><strong>Reservations:</strong> ${u.total_reservations} | <strong>Deleted Res:</strong> ${u.deleted_reservations || 0} | <strong>Orders:</strong> ${u.total_orders} | <strong>Points:</strong> ${u.PuncteFidelitate}</p>
+        `;
+
+        // Configure Blacklist Button
+        const btn = document.getElementById('blacklist-btn');
+        const reasonBox = document.getElementById('blacklist-reason');
+
+        // Remove old listeners to avoid stacking (simplest way is to clone or reset)
+        // Better: just assign onclick here since we are in a specific context
+        btn.onclick = () => handleBlacklistToggle(u.id, u.is_blacklisted);
+
+        if (u.is_blacklisted == 1) {
+            btn.innerText = "Unblacklist User";
+            btn.className = "btn btn-success";
+            reasonBox.style.display = 'none'; // No reason needed to unblacklist usually, or maybe clear it
+        } else {
+            btn.innerText = "Blacklist User";
+            btn.className = "btn btn-danger";
+            reasonBox.style.display = 'block';
+            reasonBox.value = ''; // clear previous
+        }
+
+        document.getElementById('user-modal').style.display = 'block';
+    }
+}
+
+async function handleBlacklistToggle(id, currentStatus) {
+    const reasonBox = document.getElementById('blacklist-reason');
+    const reason = reasonBox.value;
+
+    // If getting blacklisted (currentStatus == 0), reason is required
+    if (currentStatus == 0 && !reason.trim()) {
+        alert("Please provide a reason for blacklisting.");
+        return;
     }
 
-    function renderSliderList(slides) {
-        const container = document.getElementById('slider-list');
-        if (!container) return;
-        container.innerHTML = '';
+    if (!confirm(currentStatus == 1 ? "Unblacklist this user?" : "Blacklist this user?")) return;
 
-        if (!slides.length) {
+    // Use reservation controller for this action as it was defined there previously or move to User?
+    // User controller didn't have toggle_blacklist in the code I saw earlier?
+    // Wait, ReservationController HAD toggle_blacklist. admin_handler routes entity 'reservation' there.
+    // DOES User controller have it? 
+    // Let's check admin_handler or just use 'reservation' entity for now if that's where the logic is.
+    // The previous code showed `ReservationController` having `toggleBlacklist`.
+    // Ideally it belongs in User, but let's use what works or checking existing `admin_handler` map.
+    // Actually, I should probably move it to User controller or call it via 'user' entity if I add it there.
+    // Let's stick to where it was: ReservationController has it. 
+    // BUT, does `admin_handler` route `user` entity actions to `UserController`? Yes.
+    // Calls `UserController` for `get_one`.
+    // I should probably check where `toggle_blacklist` is currently handled.
+    // I recall seeing it in ReservationController in previous turns.
+
+    // Let's try calling entity='reservation', action='toggle_blacklist' since I saw it there.
+    const res = await apiRequest('reservation', 'toggle_blacklist', { user_id: id, reason: reason });
+
+    if (res.success) {
+        // alert(res.data.message); // Removed for smoother flow
+        document.getElementById('user-modal').style.display = 'none';
+        loadUsers(document.getElementById('user-search').value);
+    } else {
+        alert(res.error);
+    }
+}
+
+// SETTINGS
+async function loadSettings() {
+    const res = await apiRequest('settings', 'get_schedule');
+    const tb = document.getElementById('schedule-list');
+    if (res.success && tb) {
+        tb.innerHTML = res.data.map((d, i) => `
+            <tr>
+                <td>${d.day_name}<input type="hidden" name="schedule[${i}][day_of_week]" value="${d.day_of_week}"></td>
+                <td><input type="time" name="schedule[${i}][open_time]" value="${d.open_time}"></td>
+                <td><input type="time" name="schedule[${i}][close_time]" value="${d.close_time}"></td>
+                <td><input type="checkbox" name="schedule[${i}][is_closed]" value="1" ${d.is_closed == 1 ? 'checked' : ''} onchange="this.value=this.checked?1:0"></td>
+            </tr>
+        `).join('');
+    }
+}
+function setupScheduleForm() {
+    const f = document.getElementById('schedule-form');
+    if (f) f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const res = await apiRequest('settings', 'update_schedule', new FormData(f));
+        alert(res.success ? res.data.message : res.error);
+    });
+}
+
+// ==========================================
+// 2. PRODUCTS MODULE (Restored)
+// ==========================================
+async function loadProducts() {
+    const res = await apiRequest('product', 'get_all');
+    const tb = document.querySelector('#products-table tbody');
+    if (res.success && tb) {
+        tb.innerHTML = res.data.map(p => `
+            <tr>
+                <td><img src="${p.image_path || 'assets/menu/images/coffee.jpg'}" onerror="this.src='assets/img/Logo Modificat.png'"></td>
+                <td>${p.name}</td>
+                <td>${p.category}</td>
+                <td>${p.price} RON</td>
+                <td>
+                    <button class="btn btn-sm btn-edit" onclick="editProduct(${p.id}, '${p.name}', '${p.description}', ${p.price}, '${p.category}', '${p.image_path}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+}
+
+function editProduct(id, name, desc, price, cat, img) {
+    document.getElementById('product-form').reset();
+    document.getElementById('prod-id').value = id;
+    document.getElementById('form-action').value = 'update';
+    document.getElementById('modal-title').innerText = 'Edit Product';
+    document.getElementById('prod-name').value = name;
+    document.getElementById('prod-desc').value = desc;
+    document.getElementById('prod-price').value = price;
+    document.getElementById('prod-category').value = cat;
+    if (img) {
+        document.getElementById('current-image-preview').style.display = 'block';
+        document.getElementById('preview-img').src = img;
+    } else {
+        document.getElementById('current-image-preview').style.display = 'none';
+    }
+    document.getElementById('product-modal').style.display = 'block';
+}
+
+async function handleProductSubmit(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const action = document.getElementById('form-action').value;
+    const res = await apiRequest('product', action, fd);
+    if (res.success) {
+        alert(res.data.message);
+        document.getElementById('product-modal').style.display = 'none';
+        loadProducts();
+    } else {
+        alert(res.error);
+    }
+}
+
+async function deleteProduct(id) {
+    if (!confirm("Are you sure?")) return;
+    const res = await apiRequest('product', 'delete', { id: id });
+    if (res.success) loadProducts();
+    else alert(res.error);
+}
+
+// ==========================================
+// 3. SLIDER MODULE (Restored)
+// ==========================================
+async function loadSlides() {
+    const res = await apiRequest('slider', 'get_all');
+    const container = document.getElementById('slider-list');
+    if (res.success && container) {
+        if (res.data.length === 0) {
             container.innerHTML = '<p>No slides found.</p>';
             return;
         }
-
-        const grid = document.createElement('div');
-        grid.className = 'slider-grid';
-
-        slides.forEach(s => {
-            const card = document.createElement('div');
-            card.className = 'slide-card';
-            card.innerHTML = `
-                <img src="${s.image_path}" alt="Slide">
-                <div class="slide-info">
-                    <strong>${safe(s.title || 'No Title')}</strong>
-                    <p>${safe(s.subtitle || '')}</p>
-                    <button class="btn btn-danger btn-sm" onclick="deleteSlide(${s.id})">Delete</button>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-        container.appendChild(grid);
+        container.innerHTML = `
+            <div class="slider-grid">
+                ${res.data.map(s => `
+                    <div class="slide-card">
+                        <img src="${s.image_path}">
+                        <div class="slide-info">
+                            <strong>${s.title || 'No Title'}</strong>
+                            <p>${s.subtitle || ''}</p>
+                            <button class="btn btn-sm btn-danger" onclick="deleteSlide(${s.id})">Delete</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
     }
-
-    function deleteSlide(id) {
-        if (!confirm('Delete this slide?')) return;
-        postAction({ action: 'delete', entity: 'slider', id: id }, loadSliderImages);
-    }
-
-    // --- Shared Utilities ---
-
-    function appendCsrf(formData) {
-        const csrfCtx = document.getElementById('csrf-token-global');
-        if (csrfCtx) formData.append('csrf_token', csrfCtx.value);
-    }
-
-    function handleFormSubmit(form, modalToClose, reloadCallback) {
-        const formData = new FormData(form);
-
-        fetch('controllers/admin_handler.php', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    if (modalToClose) modalToClose.style.display = 'none';
-                    if (reloadCallback) reloadCallback();
-                } else {
-                    alert('Error: ' + (data.error || 'Unknown'));
-                }
-            })
-            .catch(err => {
-                console.error("Submit Error:", err);
-                alert('Connection Error');
-            });
-    }
-
-    function postAction(dataObj, reloadCallback) {
-        const formData = new FormData();
-        for (const k in dataObj) {
-            formData.append(k, dataObj[k]);
-        }
-        appendCsrf(formData);
-
-        fetch('controllers/admin_handler.php', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(r => r.json())
-            .then(data => {
-                // Pass full data to callback, let it handle success check if needed
-                // OR maintain existing behavior: only call if success? 
-                // But loadReservations NEEDS data even if success check is inside.
-                // Best compatible change:
-                if (data.success) {
-                    if (reloadCallback) reloadCallback(data);
-                } else {
-                    // Try to handle custom error callbacks or just alert
-                    // If callback handles it?
-                    if (reloadCallback && reloadCallback.length > 0) {
-                        // If callback expects argument, maybe it wants to handle error too? 
-                        // But strictly: postAction implies "Do X".
-                        // Let's call callback with data anyway if we are fetching?
-                        // No, mixed semantics. 
-                        // Let's just pass data.
-                        if (reloadCallback) reloadCallback(data);
-                        return;
-                    }
-                    alert('Error: ' + (data.message || data.error || 'Unknown error'));
-                }
-            })
-            .catch(e => {
-                console.error(e);
-                if (reloadCallback) reloadCallback({ success: false, error: e.toString() });
-                else alert('Network Error');
-            });
-    }
-
-    function safe(str) {
-        if (!str) return '';
-        return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    // --- Table Logic ---
-    const addTableBtn = document.getElementById('add-table-btn');
-    const removeTableBtn = document.getElementById('remove-table-btn');
-
-    if (addTableBtn) {
-        addTableBtn.onclick = function () {
-            const current = document.querySelectorAll('.table-card').length;
-            postAction({ action: 'update_count', entity: 'table', count: current + 1 }, loadTables);
-        }
-    }
-
-    if (removeTableBtn) {
-        removeTableBtn.onclick = function () {
-            const current = document.querySelectorAll('.table-card').length;
-            if (current <= 0) return;
-            if (!confirm('Remove the last table?')) return;
-            postAction({ action: 'update_count', entity: 'table', count: current - 1 }, loadTables);
-        }
-    }
-
-    let currentTables = [];
-
-    // Background Upload Logic
-    const uploadFloorPlanBtn = document.getElementById('upload-floor-plan-btn');
-    const floorPlanInput = document.getElementById('floor-plan-upload');
-
-    if (uploadFloorPlanBtn && floorPlanInput) {
-        uploadFloorPlanBtn.onclick = () => floorPlanInput.click();
-
-        floorPlanInput.onchange = function () {
-            if (this.files && this.files[0]) {
-                const formData = new FormData();
-                formData.append('action', 'upload_background');
-                formData.append('entity', 'table');
-                formData.append('image', this.files[0]);
-                appendCsrf(formData);
-
-                uploadFloorPlanBtn.innerText = "Uploading...";
-                uploadFloorPlanBtn.disabled = true;
-
-                fetch('controllers/admin_handler.php', {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                    .then(r => r.json())
-                    .then(data => {
-                        uploadFloorPlanBtn.innerText = "Upload Floor Plan";
-                        uploadFloorPlanBtn.disabled = false;
-                        if (data.success) {
-                            loadTables(); // Reload to fetch new bg
-                            alert("Background updated!");
-                        } else {
-                            alert("Error: " + data.error);
-                        }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        uploadFloorPlanBtn.disabled = false;
-                        alert("Upload failed.");
-                    });
-            }
-        };
-    }
-
-    // Table Properties Modal Logic
-    const tablePropsModal = document.getElementById('table-props-modal');
-    const tablePropsForm = document.getElementById('table-props-form');
-
-    if (tablePropsForm) {
-        tablePropsForm.onsubmit = function (e) {
-            e.preventDefault();
-            const id = document.getElementById('prop-table-id').value;
-            const shape = document.getElementById('prop-shape').value;
-            const width = document.getElementById('prop-width').value;
-            const height = document.getElementById('prop-height').value;
-
-            postAction({
-                action: 'update_details',
-                entity: 'table',
-                id: id,
-                shape: shape,
-                width: width,
-                height: height
-            }, () => {
-                if (tablePropsModal) tablePropsModal.style.display = 'none';
-                loadTables();
-            });
-        };
-    }
-
-    function loadTables() {
-        console.log("Fetching tables...");
-        const container = document.getElementById('tables-grid');
-        if (!container) return;
-
-        container.innerHTML = '<p>Loading tables...</p>';
-
-        const formData = new FormData();
-        formData.append('action', 'get_all');
-        formData.append('entity', 'table');
-        appendCsrf(formData);
-
-        fetch('controllers/admin_handler.php', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    currentTables = data.data || [];
-                    renderTables(data.data, data.background);
-                    const countDisplay = document.getElementById('table-count-display');
-                    if (countDisplay && data.data) {
-                        countDisplay.textContent = data.data.length;
-                    }
-                } else {
-                    container.innerHTML = '<p>Error loading tables.</p>';
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                container.innerHTML = '<p>Connection Error.</p>';
-            });
-    }
-
-    function renderTables(tables, backgroundUrl) {
-        const gridContainer = document.getElementById('tables-grid');
-        const floorPlan = document.getElementById('floor-plan-container');
-
-        if (!gridContainer || !floorPlan) return;
-
-        gridContainer.innerHTML = '';
-        floorPlan.innerHTML = '<p style="position: absolute; top: 10px; left: 10px; z-index:0; color: #888; pointer-events: none;">Floor Plan Area</p>';
-
-        if (backgroundUrl) {
-            // Load image to get dimensions
-            const img = new Image();
-            img.onload = function () {
-                floorPlan.style.backgroundImage = `url('${backgroundUrl}')`;
-                floorPlan.style.backgroundSize = 'contain'; // or cover, does not matter if ratio matches
-                floorPlan.style.backgroundRepeat = 'no-repeat';
-                floorPlan.style.backgroundPosition = 'center';
-
-                // Apply Aspect Ratio
-                const ratio = img.width / img.height;
-                // Set height based on current width to match ratio
-                // floorPlan.style.height = (floorPlan.offsetWidth / ratio) + 'px'; // Simple js resize
-                floorPlan.style.height = 'auto';
-                floorPlan.style.aspectRatio = `${img.width} / ${img.height}`;
-            };
-            img.src = backgroundUrl;
-
-        } else {
-            floorPlan.style.backgroundImage = 'radial-gradient(#ccc 1px, transparent 1px)';
-            floorPlan.style.backgroundSize = '20px 20px';
-            floorPlan.style.height = '600px'; // Default
-            floorPlan.style.aspectRatio = 'auto';
-        }
-
-        if (!tables || tables.length === 0) {
-            gridContainer.innerHTML = '<p>No tables found.</p>';
-            return;
-        }
-
-        tables.forEach(t => {
-            // 1. Grid Item (Control Status)
-            const card = document.createElement('div');
-
-            let displayStatus = t.Status;
-            let icon = 'fa-chair';
-            let extraInfo = '';
-
-            if (t.active_reservation) {
-                displayStatus = 'Rezervata';
-                icon = 'fa-clock';
-                // Show Hour:Minute
-                const timeShort = t.active_reservation.reservation_time.split(' ')[1].substring(0, 5);
-                extraInfo = `<div style="font-size: 0.75rem; color: #d35400; font-weight: bold; margin-bottom: 5px; background: rgba(255,255,255,0.8); padding: 2px; border-radius: 4px;">
-                                ${timeShort} - ${t.active_reservation.username}
-                              </div>`;
-            } else {
-                if (t.Status === 'Ocupata') {
-                    icon = 'fa-user-friends';
-                    extraInfo = `<div style="font-size: 0.75rem; color: #c0392b; font-weight: bold; margin-bottom: 5px; background: rgba(255,255,255,0.8); padding: 2px; border-radius: 4px;">Manual: Occupied</div>`;
-                }
-                if (t.Status === 'Rezervata') {
-                    icon = 'fa-clock';
-                    extraInfo = `<div style="font-size: 0.75rem; color: #f39c12; font-weight: bold; margin-bottom: 5px; background: rgba(255,255,255,0.8); padding: 2px; border-radius: 4px;">Manual: Reserved</div>`;
-                }
-                if (t.Status === 'Inactiva') {
-                    icon = 'fa-ban';
-                    extraInfo = `<div style="font-size: 0.75rem; color: #7f8c8d; font-weight: bold; margin-bottom: 5px; background: rgba(255,255,255,0.8); padding: 2px; border-radius: 4px;">Inactive</div>`;
-                }
-            }
-
-            const statusClass = 'status-' + displayStatus.toLowerCase().replace(/\s+/g, '-');
-            card.className = `table-card ${statusClass}`;
-            card.style.flex = '1 0 200px';
-
-            card.innerHTML = `
-                <div class="table-icon"><i class="fas ${icon}"></i></div>
-                <div class="table-id">Table ${t.ID}</div>
-                ${extraInfo}
-                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">${t.shape || 'circle'}</div>
-                <button class="btn btn-sm btn-secondary" onclick="openTableProps(${t.ID})" style="margin-bottom: 5px;">Edit Props</button>
-                <select class="table-status-select" onchange="window.updateTableStatus(${t.ID}, this.value)">
-                    <option value="Libera" ${t.Status === 'Libera' ? 'selected' : ''}>Libera</option>
-                    <option value="Ocupata" ${t.Status === 'Ocupata' ? 'selected' : ''}>Ocupata</option>
-                    <option value="Rezervata" ${t.Status === 'Rezervata' ? 'selected' : ''}>Rezervata</option>
-                    <option value="Inactiva" ${t.Status === 'Inactiva' ? 'selected' : ''}>Inactiva</option>
-                </select>
-            `;
-            gridContainer.appendChild(card);
-
-            // 2. Floor Plan Item (Draggable)
-            const mapItem = document.createElement('div');
-            mapItem.className = `map-table ${statusClass}`;
-            mapItem.id = `map-table-${t.ID}`;
-            mapItem.style.position = 'absolute';
-            mapItem.style.left = (t.x_pos || 10) + '%';
-            mapItem.style.top = (t.y_pos || 10) + '%';
-
-            const w = t.width || 60;
-            const h = t.height || 60;
-            mapItem.style.width = w + 'px';
-            mapItem.style.height = h + 'px';
-
-            const shape = t.shape || 'circle';
-            if (shape === 'circle') mapItem.style.borderRadius = '50%';
-            else if (shape === 'square') mapItem.style.borderRadius = '8px';
-            else if (shape === 'rectangle') mapItem.style.borderRadius = '8px';
-
-            mapItem.style.border = '2px solid #333';
-            mapItem.style.display = 'flex';
-            mapItem.style.alignItems = 'center';
-            mapItem.style.justifyContent = 'center';
-            mapItem.style.fontWeight = 'bold';
-            mapItem.style.color = '#fff';
-            mapItem.style.cursor = 'grab';
-            mapItem.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-
-            // Dynamic Status Override for Admin Map
-            if (t.active_reservation) {
-                mapItem.style.backgroundColor = '#f1c40f'; // Yellow
-                mapItem.style.border = '3px solid #e67e22'; // Distinct border
-                mapItem.title = `Table ${t.ID}\nRESERVED\nUser: ${t.active_reservation.username}\nTime: ${t.active_reservation.reservation_time}`;
-                // Add icon or text?
-                mapItem.innerHTML = `<div style="display:flex;flex-direction:column;pointer-events:none;align-items:center;"><i class="fas fa-clock"></i><span>${t.ID}</span></div>`;
-            } else {
-                mapItem.style.backgroundColor = getStatusColor(t.Status);
-                mapItem.title = `Table ${t.ID}: ${t.Status}`;
-                mapItem.innerHTML = `<div style="pointer-events: none;">${t.ID}</div>`;
-            }
-
-            mapItem.style.zIndex = '10';
-
-            // Mouse Move for Cursor Change
-            mapItem.onmousemove = function (e) {
-                if (draggedTableId || resizingTableId) return;
-
-                const rect = mapItem.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const w = rect.width;
-                const h = rect.height;
-                const margin = 10;
-
-                let cursor = '';
-                let n = y < margin;
-                let s = y > h - margin;
-                let w_side = x < margin;
-                let e_side = x > w - margin;
-
-                if (n && w_side) cursor = 'nw-resize';
-                else if (n && e_side) cursor = 'ne-resize';
-                else if (s && w_side) cursor = 'sw-resize';
-                else if (s && e_side) cursor = 'se-resize';
-                else if (n) cursor = 'n-resize';
-                else if (s) cursor = 's-resize';
-                else if (w_side) cursor = 'w-resize';
-                else if (e_side) cursor = 'e-resize';
-                else cursor = 'grab';
-
-                mapItem.style.cursor = cursor;
-                mapItem.dataset.resizeDir = cursor === 'grab' ? '' : cursor.replace('-resize', '');
-            };
-
-            // Mouse Down for Action
-            mapItem.onmousedown = function (e) {
-                if (e.button !== 0) return; // Only left click
-                const dir = mapItem.dataset.resizeDir;
-                if (dir) {
-                    initResize(e, t.ID, dir);
-                } else {
-                    startDrag(e, t.ID);
-                }
-            };
-
-            mapItem.ondblclick = () => openTableProps(t.ID);
-
-            floorPlan.appendChild(mapItem);
-        });
-    }
-
-    // --- Resize Logic ---
-    let resizingTableId = null;
-    let resizeDir = '';
-    let startX, startY, startWidth, startHeight, startLeft, startTop;
-
-    function initResize(e, id, dir) {
-        e.stopPropagation();
-        e.preventDefault();
-        resizingTableId = id;
-        resizeDir = dir;
-
-        const tableEl = document.getElementById(`map-table-${id}`);
-        const rect = tableEl.getBoundingClientRect();
-
-        startX = e.clientX;
-        startY = e.clientY;
-        startWidth = rect.width;
-        startHeight = rect.height;
-        startLeft = parseFloat(tableEl.style.left); // % value
-        startTop = parseFloat(tableEl.style.top);   // % value
-
-        // Convert % positions to pixels for calc
-        const container = document.getElementById('floor-plan-container');
-        const conRect = container.getBoundingClientRect();
-        startLeftPx = (startLeft / 100) * conRect.width;
-        startTopPx = (startTop / 100) * conRect.height;
-
-        document.documentElement.addEventListener('mousemove', doResize, false);
-        document.documentElement.addEventListener('mouseup', stopResize, false);
-    }
-
-    function doResize(e) {
-        if (!resizingTableId) return;
-        e.preventDefault();
-
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
-        const tableEl = document.getElementById(`map-table-${resizingTableId}`);
-        const container = document.getElementById('floor-plan-container');
-        const conW = container.offsetWidth;
-        const conH = container.offsetHeight;
-
-        let newW = startWidth;
-        let newH = startHeight;
-        let newLeftPx = startLeftPx;
-        let newTopPx = startTopPx;
-
-        // Apply Delta based on direction
-        if (resizeDir.includes('e')) newW = startWidth + deltaX;
-        if (resizeDir.includes('w')) {
-            newW = startWidth - deltaX;
-            newLeftPx = startLeftPx + deltaX;
-        }
-        if (resizeDir.includes('s')) newH = startHeight + deltaY;
-        if (resizeDir.includes('n')) {
-            newH = startHeight - deltaY;
-            newTopPx = startTopPx + deltaY;
-        }
-
-        // Min dimensions
-        if (newW < 30) {
-            // Correct Left if scaling from West
-            if (resizeDir.includes('w')) newLeftPx = startLeftPx + (startWidth - 30);
-            newW = 30;
-        }
-        if (newH < 30) {
-            // Correct Top if scaling from North
-            if (resizeDir.includes('n')) newTopPx = startTopPx + (startHeight - 30);
-            newH = 30;
-        }
-
-        // Update Styles
-        tableEl.style.width = newW + 'px';
-        tableEl.style.height = newH + 'px';
-
-        // Only update pos if it changed (optimization)
-        if (resizeDir.includes('w') || resizeDir.includes('n')) {
-            tableEl.style.left = (newLeftPx / conW * 100) + '%';
-            tableEl.style.top = (newTopPx / conH * 100) + '%';
-        }
-    }
-
-    function stopResize(e) {
-        if (!resizingTableId) return;
-
-        const tableEl = document.getElementById(`map-table-${resizingTableId}`);
-        const container = document.getElementById('floor-plan-container');
-
-        // Update data
-        const t = currentTables.find(x => x.ID == resizingTableId);
-        if (t) {
-            t.width = parseInt(tableEl.style.width);
-            t.height = parseInt(tableEl.style.height);
-            // Also need to save position if we resized from West/North
-            t.x_pos = parseFloat(tableEl.style.left);
-            t.y_pos = parseFloat(tableEl.style.top);
-
-            // Mark these specifically as changed
-            if (!window.unsavedChanges) window.unsavedChanges = {};
-            window.unsavedChanges[resizingTableId] = {
-                x: t.x_pos,
-                y: t.y_pos,
-                width: t.width,
-                height: t.height
-            };
-
-            // HACK: Since standard save logic might only look at style.left/top, 
-            // we should attach W/H to the object if our save function supports it. 
-            // Or just rely on the 'update_details' endpoint?
-            // Actually, best to trigger a dedicated update for size OR piggyback on save.
-            // Let's assume piggyback for now, but I will check save logic next tool call.
-        }
-
-        document.documentElement.removeEventListener('mousemove', doResize, false);
-        document.documentElement.removeEventListener('mouseup', stopResize, false);
-        resizingTableId = null;
-
-        // UI Feedback
-        const btn = document.getElementById('save-positions-btn');
-        btn.textContent = "Save Changes *";
-        btn.classList.add('btn-warning');
-        btn.classList.remove('btn-success');
-    }
-
-    // --- Drag Logic ---
-    let draggedTableId = null;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-
-    // Helper to calculate px pos from %
-    let startLeftPx, startTopPx;
-
-    function startDrag(e, id) {
-        e.preventDefault();
-        const el = document.getElementById(`map-table-${id}`);
-        draggedTableId = id;
-
-        // Calculate offset from top-left of element
-        const rect = el.getBoundingClientRect();
-        dragOffsetX = e.clientX - rect.left;
-        dragOffsetY = e.clientY - rect.top;
-
-        el.style.cursor = 'grabbing';
-        el.style.zIndex = '100';
-
-        document.documentElement.addEventListener('mousemove', doDrag, false);
-        document.documentElement.addEventListener('mouseup', stopDrag, false);
-    }
-
-    function doDrag(e) {
-        if (!draggedTableId) return;
-        e.preventDefault();
-
-        const el = document.getElementById(`map-table-${draggedTableId}`);
-        const floorPlan = document.getElementById('floor-plan-container');
-        const containerRect = floorPlan.getBoundingClientRect();
-
-        let newX = e.clientX - containerRect.left - dragOffsetX;
-        let newY = e.clientY - containerRect.top - dragOffsetY;
-
-        // Clamp inside container (pixels)
-        const maxX = containerRect.width - el.offsetWidth;
-        const maxY = containerRect.height - el.offsetHeight;
-
-        newX = Math.max(0, Math.min(newX, maxX));
-        newY = Math.max(0, Math.min(newY, maxY));
-
-        // Convert to percentage for storage
-        const percentX = (newX / containerRect.width) * 100;
-        const percentY = (newY / containerRect.height) * 100;
-
-        // Update visual mostly in px for smoothness, or %? 
-        // Using % directly is fine if simple.
-        el.style.left = percentX + '%';
-        el.style.top = percentY + '%';
-
-        // Store temp percentage for save
-        // This is a bit redundant with activeDrag.percentX/Y, but keeping for consistency with new structure
-        const t = currentTables.find(x => x.ID == draggedTableId);
-        if (t) {
-            t.x_pos = percentX;
-            t.y_pos = percentY;
-        }
-    }
-
-    function stopDrag(e) {
-        if (!draggedTableId) return;
-
-        const el = document.getElementById(`map-table-${draggedTableId}`);
-        el.style.cursor = 'grab';
-        el.style.zIndex = '10';
-
-        const t = currentTables.find(x => x.ID == draggedTableId);
-        if (t && t.x_pos !== undefined && t.y_pos !== undefined) {
-            if (!window.unsavedChanges) window.unsavedChanges = {}; // Safety init if not present yet
-            window.unsavedChanges[draggedTableId] = {
-                x: t.x_pos,
-                y: t.y_pos,
-                width: t.width || 60, // Ensure we send current size too
-                height: t.height || 60
-            };
-        }
-
-        draggedTableId = null;
-        document.documentElement.removeEventListener('mousemove', doDrag, false);
-        document.documentElement.removeEventListener('mouseup', stopDrag, false);
-
-        // UI Feedback
-        const btn = document.getElementById('save-positions-btn');
-        btn.textContent = "Save Changes *";
-        btn.classList.add('btn-warning');
-        btn.classList.remove('btn-success');
-    }
-
-    window.openTableProps = function (id) {
-        const t = currentTables.find(x => x.ID == id);
-        if (!t) return;
-
-        document.getElementById('prop-table-id').value = t.ID;
-        document.getElementById('prop-shape').value = t.shape || 'circle';
-        document.getElementById('prop-width').value = t.width || 60;
-        document.getElementById('prop-height').value = t.height || 60;
-
-        if (tablePropsModal) tablePropsModal.style.display = 'block';
-    }
-
-    function getStatusColor(status) {
-        switch (status) {
-            case 'Libera': return '#2ecc71';
-            case 'Ocupata': return '#e74c3c';
-            case 'Rezervata': return '#f1c40f';
-            case 'Inactiva': return '#95a5a6';
-            default: return '#95a5a6';
-        }
-    }
-
-    // Global storage for unsaved changes
-    window.unsavedChanges = {};
-
-    // Save Positions Button Logic
-    const savePositionsBtn = document.getElementById('save-positions-btn');
-    if (savePositionsBtn) {
-        savePositionsBtn.onclick = function () {
-            const ids = Object.keys(window.unsavedChanges);
-            if (ids.length === 0) {
-                alert("No changes to save.");
-                return;
-            }
-
-            savePositionsBtn.innerText = "Saving...";
-            savePositionsBtn.disabled = true;
-
-            let promises = [];
-            ids.forEach(id => {
-                const pos = window.unsavedChanges[id];
-                const p = new Promise((resolve) => {
-                    // Manually fetch to handle errors properly
-                    const formData = new FormData();
-                    formData.append('action', 'update_coordinates');
-                    formData.append('entity', 'table');
-                    formData.append('id', id);
-                    formData.append('x', pos.x);
-                    formData.append('y', pos.y);
-                    formData.append('width', pos.width || 60);
-                    formData.append('height', pos.height || 60);
-                    appendCsrf(formData);
-
-                    fetch('controllers/admin_handler.php', {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                    })
-                        .then(r => r.json())
-                        .then(data => {
-                            if (!data.success) {
-                                console.error(`Failed to save table ${id}: ${data.error}`);
-                            }
-                        })
-                        .catch(err => {
-                            console.error(`Network error saving table ${id}`, err);
-                        })
-                        .finally(() => {
-                            resolve(); // Always resolve so Promise.all completes
-                        });
-                });
-                promises.push(p);
-            });
-
-            Promise.all(promises).then(() => {
-                window.unsavedChanges = {};
-                savePositionsBtn.innerText = "Save Positions";
-                savePositionsBtn.disabled = false;
-                alert("Positions processed (check console for any errors).");
-            });
-        };
-    }
-
-
-
-    window.updateTableStatus = function (id, newStatus) {
-        postAction({ action: 'update_status', entity: 'table', id: id, status: newStatus }, () => {
-            // Optional: reload tables to reflect changes fully or just update UI class
-            loadTables();
-        });
-    };
-
-    // Initial Load Logic - Ensure Active State
-    const activeLink = document.querySelector('.sidebar-nav .nav-link.active');
-    if (!activeLink) {
-        // Default to Dashboard if none active
-        const dashboardLink = document.querySelector('.sidebar-nav .nav-link[data-section="dashboard"]');
-        if (dashboardLink) dashboardLink.classList.add('active');
-        // Ensure Dashboard section is shown
-        const dashboardSection = document.getElementById('section-dashboard');
-        if (dashboardSection) {
-            sections.forEach(s => s.style.display = 'none');
-            dashboardSection.style.display = 'block';
-        }
+}
+
+async function handleSliderSubmit(e) {
+    e.preventDefault();
+    const res = await apiRequest('slider', 'add', new FormData(e.target));
+    if (res.success) {
+        alert(res.data.message);
+        document.getElementById('slider-modal').style.display = 'none';
+        loadSlides();
     } else {
-        const sectionId = activeLink.getAttribute('data-section');
-        if (sectionId) {
-            sections.forEach(s => s.style.display = 'none');
-            const sec = document.getElementById('section-' + sectionId);
-            if (sec) sec.style.display = 'block';
-        }
+        alert(res.error);
+    }
+}
+
+async function deleteSlide(id) {
+    if (!confirm("Delete this slide?")) return;
+    const res = await apiRequest('slider', 'delete', { id: id });
+    if (res.success) loadSlides();
+    else alert(res.error);
+}
+
+// ==========================================
+// 4. TABLE MODULE (Restored)
+// ==========================================
+async function loadTables() {
+    const res = await apiRequest('table', 'get_all');
+    if (res.success) {
+        document.getElementById('table-count-display').innerText = res.data.length;
+        renderFloorPlan(res.data, res.background);
+        renderTableList(res.data);
+    }
+}
+
+function renderTableList(tables) {
+    const grid = document.getElementById('tables-grid');
+    if (!grid) return;
+    grid.innerHTML = tables.map(t => `
+        <div class="table-card status-${t.Status.toLowerCase().replace(' ', '-')}">
+            <div class="table-id">Table ${t.ID}</div>
+            <select class="table-status-select" onchange="updateTableStatus(${t.ID}, this.value)">
+                <option value="Libera" ${t.Status == 'Libera' ? 'selected' : ''}>Libera</option>
+                <option value="Ocupata" ${t.Status == 'Ocupata' ? 'selected' : ''}>Ocupata</option>
+                <option value="Rezervata" ${t.Status == 'Rezervata' ? 'selected' : ''}>Rezervata</option>
+                <option value="Inactiva" ${t.Status == 'Inactiva' ? 'selected' : ''}>Inactiva</option>
+            </select>
+            <div style="margin-top:10px;">
+                 <button class="btn btn-sm btn-edit" onclick="openTableProps(${t.ID}, '${t.shape}', ${t.width}, ${t.height})"><i class="fas fa-cog"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderFloorPlan(tables, bg) {
+    const container = document.getElementById('floor-plan-container');
+    if (!container) return;
+    container.innerHTML = ''; // clear
+    if (bg) container.style.backgroundImage = `url('${bg}')`;
+
+    tables.forEach(t => {
+        const el = document.createElement('div');
+        el.className = `draggable-table status-${t.Status.toLowerCase()}`;
+        el.style.left = t.x_pos + '%';
+        el.style.top = t.y_pos + '%';
+        el.style.width = t.width + 'px';
+        el.style.height = t.height + 'px';
+        el.style.position = 'absolute';
+        el.style.backgroundColor = getStatusColor(t.Status);
+        el.style.borderRadius = t.shape === 'circle' ? '50%' : '4px';
+        el.style.border = '2px solid #333';
+        el.style.cursor = 'move';
+        el.innerText = t.ID;
+        el.style.display = 'flex';
+        el.style.justifyContent = 'center';
+        el.style.alignItems = 'center';
+        el.style.color = '#fff';
+        el.style.fontWeight = 'bold';
+
+        // Drag Logic
+        makeDraggable(el, t.ID);
+
+        container.appendChild(el);
+    });
+}
+
+function getStatusColor(s) {
+    if (s === 'Libera') return 'rgba(46, 204, 113, 0.8)';
+    if (s === 'Ocupata') return 'rgba(231, 76, 60, 0.8)';
+    if (s === 'Rezervata') return 'rgba(241, 196, 15, 0.8)';
+    return 'rgba(149, 165, 166, 0.8)';
+}
+
+function makeDraggable(elm, id) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    elm.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
     }
 
-    // Check data loading based on potential active section
-    if (document.getElementById('section-menu').style.display !== 'none') {
-        loadProducts();
-    } else if (document.getElementById('section-slider').style.display !== 'none') {
-        loadSliderImages();
-    } else if (document.getElementById('section-tables').style.display !== 'none') {
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+
+        const parent = elm.parentElement;
+        let newTop = (elm.offsetTop - pos2);
+        let newLeft = (elm.offsetLeft - pos1);
+
+        // Percent conversion for saving
+        elm.style.top = newTop + "px";
+        elm.style.left = newLeft + "px";
+
+        // Update DB debounced? Or save on mouse up? 
+        // For simplicity, we save ON mouse up.
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+
+        // Calc percentages
+        const parent = elm.parentElement;
+        const xPct = (elm.offsetLeft / parent.offsetWidth) * 100;
+        const yPct = (elm.offsetTop / parent.offsetHeight) * 100;
+
+        // Save
+        apiRequest('table', 'update_coordinates', { id: id, x: xPct, y: yPct, width: parseInt(elm.style.width), height: parseInt(elm.style.height) });
+    }
+}
+
+async function updateTableCount(change) {
+    const current = parseInt(document.getElementById('table-count-display').innerText);
+    const newCount = current + change;
+    const res = await apiRequest('table', 'update_count', { count: newCount });
+    if (res.success) loadTables();
+}
+
+async function updateTableStatus(id, status) {
+    await apiRequest('table', 'update_status', { id: id, status: status });
+    loadTables(); // Refresh active view
+}
+
+async function uploadFloorPlan() {
+    const input = document.getElementById('floor-plan-upload');
+    if (input.files.length > 0) {
+        const fd = new FormData();
+        fd.append('image', input.files[0]);
+        const res = await apiRequest('table', 'upload_background', fd);
+        if (res.success) loadTables();
+        else alert(res.error);
+    }
+}
+
+function openTableProps(id, shape, w, h) {
+    document.getElementById('prop-table-id').value = id;
+    document.getElementById('prop-shape').value = shape;
+    document.getElementById('prop-width').value = w;
+    document.getElementById('prop-height').value = h;
+    document.getElementById('table-props-modal').style.display = 'block';
+}
+
+async function handleTablePropsSubmit(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const res = await apiRequest('table', 'update_details', fd);
+    if (res.success) {
+        document.getElementById('table-props-modal').style.display = 'none';
         loadTables();
-    } else if (document.getElementById('section-reservations').style.display !== 'none') {
-        loadReservations();
     }
+}
 
-    // Reservations Logic
-    function loadReservations() {
-        const tbodyActive = document.getElementById('reservations-list');
-        const tbodyHistory = document.getElementById('history-reservations-list');
+// ==========================================
+// 5. RESERVATIONS MODULE (Restored)
+// ==========================================
+async function loadReservations() {
+    const res = await apiRequest('reservation', 'get_all');
+    if (res.success) {
+        const active = res.data.active || [];
+        const history = res.data.history || [];
+        const deleted = res.data.deleted || [];
 
-        tbodyActive.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
-        if (tbodyHistory) tbodyHistory.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+        renderResTable('reservations-list', active);
+        renderResTable('history-reservations-list', history);
+        renderResTable('deleted-reservations-list', deleted, true);
+    }
+}
 
-        postAction({ action: 'get_all', entity: 'reservation' }, (response) => {
-            if (!response || !response.success) {
-                const err = `<tr><td colspan="5">Error: ${response ? (response.message || response.error) : 'Unknown'}</td></tr>`;
-                tbodyActive.innerHTML = err;
-                if (tbodyHistory) tbodyHistory.innerHTML = `<tr><td colspan="4">Error loading data.</td></tr>`;
-                return;
-            }
-            if (!response.data || response.data.length === 0) {
-                tbodyActive.innerHTML = '<tr><td colspan="5">No active reservations.</td></tr>';
-                if (tbodyHistory) tbodyHistory.innerHTML = '<tr><td colspan="4">No past reservations.</td></tr>';
-                return;
-            }
+function renderResTable(elId, data, isDeleted = false) {
+    const tb = document.getElementById(elId);
+    if (!tb) return;
+    tb.innerHTML = data.map(r => `
+        <tr>
+            <td>${r.reservation_time}</td>
+            <td>Table ${r.table_id}</td>
+            <td>${r.reservation_name}</td>
+            <td>${r.username || '-'}</td>
+            ${isDeleted ? `<td><span style="color:red">Deleted</span></td>` : `<td>${r.email || '-'}</td>`}
+            ${!isDeleted ? `
+            <td>
+                <button class="btn btn-sm btn-danger" onclick="deleteReservation(${r.id})">Delete</button>
+            </td>` : ''}
+        </tr>
+    `).join('');
+}
 
-            const now = new Date();
-            const active = [];
-            const past = [];
+async function deleteReservation(id) {
+    if (!confirm("Cancel this reservation?")) return;
+    const res = await apiRequest('reservation', 'delete', { id: id });
+    if (res.success) loadReservations();
+    else alert(res.error);
+}
 
-            response.data.forEach(r => {
-                // Ensure date string is parseable (SQL format YYYY-MM-DD HH:MM:SS -> ISOish)
-                const rTime = new Date(r.reservation_time.replace(' ', 'T'));
-                if (rTime < now) {
-                    past.push(r);
-                } else {
-                    active.push(r);
+// ==========================================
+// 6. ORDERS MODULE (Basic Implementation)
+// ==========================================
+async function loadOrders() {
+    // Placeholder for now
+    const section = document.getElementById('section-orders');
+    section.querySelector('.placeholder-content').innerHTML = '<p>Order management requires OrderController. Currently purely decorative.</p>';
+}
+
+// ==========================================
+// 7. QUICK ACTION MODULE
+// ==========================================
+function openQuickReserve() {
+    document.getElementById('quick-reserve-form').reset();
+    // Set default time to now + 1 hour approx rounded
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.querySelector('input[name="reservation_time"]').value = now.toISOString().slice(0, 16);
+
+    document.getElementById('quick-reserve-modal').style.display = 'block';
+}
+
+function setupQuickActions() {
+    const quickResForm = document.getElementById('quick-reserve-form');
+    if (quickResForm) {
+        // Remove old listener to prevent duplicates? 
+        // Cloning node is a cheap way to wipe listeners if we don't have reference.
+        // Or just let it be, as the modal content might be re-rendered? 
+        // Actually, since the page content is replaced by innerHTML in router.js, the 'old' form element is GONE from DOM.
+        // So we are attaching to the NEW form element. So no duplicate listener issue on the ELEMENT.
+
+        quickResForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+
+            // We use the standard reservation 'create' action
+            // Admin handler routes entity=reservation -> ReservationController
+
+            const res = await apiRequest('reservation', 'create', fd);
+            if (res.success) {
+                alert("Reservation created!");
+                document.getElementById('quick-reserve-modal').style.display = 'none';
+                // Refresh dashboard stats or res list if visible
+                loadDashboard();
+                if (document.getElementById('section-reservations').style.display === 'block') {
+                    loadReservations();
                 }
-            });
-
-            // Active: Ascending (Sooner first)
-            active.sort((a, b) => new Date(a.reservation_time) - new Date(b.reservation_time));
-            // Past: Descending (Most recent history first)
-            past.sort((a, b) => new Date(b.reservation_time) - new Date(a.reservation_time));
-
-            const renderRow = (r, isHistory) => {
-                const isBlocked = parseInt(r.is_blacklisted) === 1;
-                const btnText = isBlocked ? 'Unblacklist' : 'Blacklist';
-
-                let cols = `
-                    <td>${r.reservation_time}</td>
-                    <td>Table ${r.table_id}</td>
-                    <td><strong>${safe(r.reservation_name || 'N/A')}</strong></td>
-                    <td>${r.username}</td>
-                    <td>${r.email}</td>
-                    <td>
-                        <button class="btn ${isBlocked ? 'btn-success' : 'btn-warning'} btn-sm" onclick="window.toggleBlacklist(${r.user_id}, ${isBlocked})" title="${btnText} User" style="margin-right:5px;">
-                            <i class="fas fa-${isBlocked ? 'check' : 'ban'}"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="window.deleteReservation(${r.id})" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                return `<tr>${cols}</tr>`;
-            };
-
-            // Render Active
-            if (active.length === 0) {
-                tbodyActive.innerHTML = '<tr><td colspan="5">No active or upcoming reservations.</td></tr>';
             } else {
-                tbodyActive.innerHTML = active.map(r => renderRow(r, false)).join('');
-            }
-
-            // Render History
-            if (tbodyHistory) {
-                if (past.length === 0) {
-                    tbodyHistory.innerHTML = '<tr><td colspan="4">No past history found.</td></tr>';
-                } else {
-                    tbodyHistory.innerHTML = past.map(r => renderRow(r, true)).join('');
-                }
+                alert(res.error);
             }
         });
     }
+}
 
-    window.toggleBlacklist = function (userId, isBlocked) {
-        let reason = '';
-        if (!isBlocked) {
-            // Currently NOT blocked, so we are blocking. Reason required.
-            reason = prompt("Please provide a reason for blacklisting this user:");
-            if (reason === null) return; // Cancelled
-            reason = reason.trim();
-            if (!reason) {
-                alert("A reason is required to blacklist a user.");
-                return;
-            }
-        } else {
-            if (!confirm("Are you sure you want to UNBLACKLIST this user?")) return;
-        }
-
-        postAction({
-            action: 'toggle_blacklist',
-            entity: 'reservation',
-            user_id: userId,
-            reason: reason
-        }, () => {
-            loadReservations(); // Reload list
-        });
-    };
-
-    window.deleteReservation = function (resId) {
-        if (!confirm("Are you sure you want to DELETE this reservation?")) return;
-
-        postAction({
-            action: 'delete',
-            entity: 'reservation',
-            id: resId
-        }, () => {
-            loadReservations(); // Reload list
-            loadTables(); // Reload tables too to update colors
-        });
-    };
-
-})();

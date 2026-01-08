@@ -132,12 +132,42 @@ class CartController {
                  sendError("Pickup time must be at least 15 minutes from now.");
             }
             
-            // Optional: Check if store is open (hardcoded 8-22 for example?)
-            // For now, let's keep it simple.
+            // --- WORKING HOURS CHECK ---
+            $dayOfWeek = (int)$pickupTime->format('w');
+            
+            $stmtS = $this->conn->prepare("SELECT open_time, close_time, is_closed FROM schedule WHERE day_of_week = ?");
+            $stmtS->bind_param("i", $dayOfWeek);
+            $stmtS->execute();
+            $schedule = $stmtS->get_result()->fetch_assoc();
+            $stmtS->close();
+    
+            if (!$schedule) {
+                // Fallback default
+                if ($dayOfWeek === 0) $schedule = ['is_closed' => 1];
+                elseif ($dayOfWeek === 6) $schedule = ['is_closed' => 0, 'open_time' => '08:00:00', 'close_time' => '17:00:00'];
+                else $schedule = ['is_closed' => 0, 'open_time' => '07:00:00', 'close_time' => '17:00:00'];
+            }
+    
+            if ($schedule['is_closed']) {
+                sendError("We are closed on " . $pickupTime->format('l') . "s.");
+            }
+    
+            $openTime = new DateTime($pickupTime->format('Y-m-d') . ' ' . $schedule['open_time']);
+            $closeTime = new DateTime($pickupTime->format('Y-m-d') . ' ' . $schedule['close_time']);
+            
+            // Allow pickup until close time? Or 15 mins before?
+            $lastPickup = clone $closeTime;
+            $lastPickup->modify('-15 minutes'); // Orders must be picked up before strict close?
+    
+            if ($pickupTime < $openTime || $pickupTime > $lastPickup) {
+                sendError("Pickup available between " . $openTime->format('H:i') . " and " . $lastPickup->format('H:i') . ".");
+            }
+            // ---------------------------
             
         } catch (Exception $e) {
-            sendError("Invalid date format.");
+            sendError("Invalid date format or schedule check failed.");
         }
+
 
         if (empty($_SESSION['cart'])) {
             sendError("Cart is empty.");

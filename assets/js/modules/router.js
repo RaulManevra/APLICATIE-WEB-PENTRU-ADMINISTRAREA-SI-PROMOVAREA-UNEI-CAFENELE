@@ -110,14 +110,25 @@ export function loadPage(page, pushState = true) {
  */
 function executeScripts(container) {
     const scripts = container.querySelectorAll("script");
-    scripts.forEach(oldScript => {
+
+    // We need to execute them in order, specifically for dependencies (like Chart.js before admin.js)
+    // However, simply loop-replacing them triggers async loads for external scripts by default.
+    // We should recreate them and set .async = false to hint the browser (or handle loading manually).
+
+    Array.from(scripts).forEach(oldScript => {
         const newScript = document.createElement("script");
         Array.from(oldScript.attributes).forEach(attr => {
             newScript.setAttribute(attr.name, attr.value);
         });
 
+        // Force synchronous-like execution order for external scripts
+        newScript.async = false;
+
         // Clone text content (for inline scripts)
         newScript.textContent = oldScript.textContent;
+
+        // Logging for debug
+        console.log("EXEC SCRIPT:", newScript.src || "inline script");
 
         // Replace old script with new one to trigger execution
         oldScript.parentNode.replaceChild(newScript, oldScript);
