@@ -72,17 +72,33 @@ class DashboardController {
         $res = $this->conn->query("SELECT COUNT(*) as c FROM tables WHERE Status != 'Libera' AND Status != 'Inactiva'");
         if ($row = $res->fetch_assoc()) $stats['active_tables'] = $row['c'];
 
-        // 2. Chart Data (Last 7 Days)
-        $chartData = [];
+        // 2. Chart Data: Top 5 Selling Products (Last 7 Days)
+        $sevenDaysAgo = date('Y-m-d H:i:s', strtotime('-7 days'));
+        $chartSql = "
+            SELECT p.name, SUM(oi.quantity) as total_qty
+            FROM order_items oi
+            JOIN orders o ON oi.order_id = o.id
+            JOIN products p ON oi.product_id = p.id
+            WHERE o.created_at >= '$sevenDaysAgo'
+            GROUP BY p.id
+            ORDER BY total_qty DESC
+            LIMIT 5
+        ";
+        $chartRes = $this->conn->query($chartSql);
+        
         $labels = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = date('Y-m-d', strtotime("-$i days"));
-            $labels[] = date('D', strtotime($date));
-            
-            // Count Orders for this date (using created_at or pickup_time? Let's use created_at for "Activity")
-            $res = $this->conn->query("SELECT COUNT(*) as c FROM orders WHERE DATE(created_at) = '$date'");
-            $count = ($row = $res->fetch_assoc()) ? $row['c'] : 0;
-            $chartData[] = $count;
+        $chartData = [];
+        
+        if ($chartRes) {
+            while($row = $chartRes->fetch_assoc()) {
+                $labels[] = $row['name'];
+                $chartData[] = (int)$row['total_qty'];
+            }
+        }
+        
+        if (empty($labels)) {
+            $labels = ['No Sales'];
+            $chartData = [0];
         }
 
         // 3. Recent Activity (Last 5 Reservations)
@@ -170,6 +186,23 @@ class DashboardController {
         } elseif ($type === 'users') {
             $sql = "SELECT id, username, email, role, PuncteFidelitate FROM users";
             $filename = "users_export_" . date('Y-m-d') . ".csv";
+        } elseif ($type === 'sales') {
+            $sql = "
+                SELECT 
+                    o.id as OrderID, 
+                    o.created_at as Date, 
+                    u.username as Customer, 
+                    p.name as Product, 
+                    oi.quantity as Qty, 
+                    oi.price_at_time as UnitPrice, 
+                    (oi.quantity * oi.price_at_time) as LineTotal 
+                FROM order_items oi 
+                JOIN orders o ON oi.order_id = o.id 
+                LEFT JOIN users u ON o.user_id = u.id 
+                JOIN products p ON oi.product_id = p.id 
+                ORDER BY o.created_at DESC
+            ";
+            $filename = "sales_export_" . date('Y-m-d') . ".csv";
         } else {
             exit("Invalid export type");
         }

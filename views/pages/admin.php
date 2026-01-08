@@ -104,8 +104,11 @@ require_admin();
 
             <div class="dashboard-split" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <!-- Main Chart -->
-                <div class="chart-container" style="flex: 2; min-width: 300px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee;">
-                    <h4>Orders Overview (Last 7 Days)</h4>
+                <div class="chart-container" style="flex: 2; min-width: 300px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; height: 400px; position: relative;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h4 style="margin:0;">Top Selling Products (Last 7 Days)</h4>
+                        <button class="btn btn-sm btn-primary" onclick="exportData('sales')"><i class="fas fa-download"></i> Export Sales CSV</button>
+                    </div>
                     <canvas id="reservationsChart"></canvas>
                 </div>
 
