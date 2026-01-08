@@ -66,6 +66,9 @@ if ($entity === 'slider') {
 } elseif ($entity === 'user') {
     require_once __DIR__ . '/UserController.php';
     $controller = new UserController($conn);
+} elseif ($entity === 'order') {
+    require_once __DIR__ . '/OrderController.php';
+    $controller = new OrderController($conn);
 } else {
     $controller = new ProductController($conn);
 }

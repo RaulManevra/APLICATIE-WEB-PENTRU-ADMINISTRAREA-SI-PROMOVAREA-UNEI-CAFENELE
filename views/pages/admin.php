@@ -164,10 +164,10 @@ require_admin();
         <section id="section-orders" class="admin-section" style="display: none;">
             <div class="header-actions">
                 <h2>Running Orders</h2>
+                <button class="btn btn-sm btn-secondary" onclick="loadRunningOrders()"><i class="fas fa-sync"></i> Refresh</button>
             </div>
-            <div class="placeholder-content">
-                <p>Order management interface coming soon.</p>
-                <!-- Reuse logic from previous if needed, but for now placeholder is fine or implement if requested separately -->
+            <div id="running-orders-container" style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+                <p>Loading orders...</p>
             </div>
         </section>
 
@@ -224,13 +224,12 @@ require_admin();
                     </div>
                 </div>
                 <div style="margin-top: 10px; display: flex; gap: 10px;">
-                    <button id="save-positions-btn" class="btn btn-success btn-sm">Save Positions</button>
                     <button id="upload-floor-plan-btn" class="btn btn-3 btn-sm"><i class="fas fa-image"></i> Upload Floor Plan</button>
                     <input type="file" id="floor-plan-upload" style="display: none;" accept="image/*">
                 </div>
             </div>
             
-            <div id="floor-plan-container" class="floor-plan" style="position: relative; width: 100%; max-width: 800px; height: 600px; margin: 0 auto 20px auto; background: #e0e0e0; border: 2px solid #ccc; border-radius: 8px; overflow: hidden; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 100% 100%; background-repeat: no-repeat; background-position: center;">
+            <div id="floor-plan-container" class="floor-plan" style="position: relative; width: 100%; max-width: 800px; height: 600px; margin: 0 auto 20px auto; background: #e0e0e0; border: 2px solid #ccc; border-radius: 8px; overflow: hidden; background-image: radial-gradient(#ccc 1px, transparent 1px); background-repeat: no-repeat; background-position: center;">
                 <!-- Draggable Tables will be here -->
                 <p style="position: absolute; top: 10px; left: 10px; z-index:0; color: #888; pointer-events: none;">Floor Plan Area</p>
             </div>
@@ -252,16 +251,44 @@ require_admin();
                         </div>
                         <div class="form-group" style="display: flex; gap: 10px;">
                             <div style="flex:1">
-                                <label>Width (px)</label>
-                                <input type="number" id="prop-width" class="form-control" min="20" max="300">
+                                <label>Width (%)</label>
+                                <input type="number" id="prop-width" name="width" class="form-control" min="1" max="100" step="0.1">
                             </div>
                             <div style="flex:1">
-                                <label>Height (px)</label>
-                                <input type="number" id="prop-height" class="form-control" min="20" max="300">
+                                <label>Height (%)</label>
+                                <input type="number" id="prop-height" name="height" class="form-control" min="1" max="100" step="0.1">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%;">Update Table</button>
                     </form>
+                </div>
+            </div>
+
+            <!-- Crop Modal -->
+            <div id="crop-modal" class="modal">
+                <div class="modal-content" style="max-width: 95%; max-height: 95%; width: auto; height: auto; display:flex; flex-direction:column; align-items:center;">
+                    <span class="close-modal" data-target="crop-modal">&times;</span>
+                    <h2>Crop & Resize Floor Plan</h2>
+                    <p>Drag to move, Scroll or Slider to Zoom. The visible area inside the box will be saved.</p>
+                    
+                    <div id="crop-container-wrapper" style="position: relative; overflow: hidden; border: 2px solid #333; margin: 10px 0;">
+                        <!-- Image will be injected here via JS -->
+                        <img id="crop-target-img" style="position: absolute; transform-origin: 0 0; cursor: grab; max-width: none;">
+                        <!-- Guide Lines -->
+                        <div class="crop-guides"></div>
+                    </div>
+
+                    <div class="controls" style="display: flex; align-items: center; gap: 15px; margin-top: 10px; width: 100%; justify-content: center;">
+                        <button type="button" class="zoom-btn" id="zoom-out-btn"><i class="fas fa-search-minus"></i></button>
+                        <input type="range" id="crop-zoom-slider" min="0.1" max="3" step="0.01" value="1" style="width: 300px;">
+                        <button type="button" class="zoom-btn" id="zoom-in-btn"><i class="fas fa-search-plus"></i></button>
+                        <span id="zoom-level">100%</span>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button id="btn-save-crop" class="btn btn-success"><i class="fas fa-check"></i> Save & Upload</button>
+                        <button class="btn btn-danger close-modal" data-target="crop-modal">Cancel</button>
+                    </div>
                 </div>
             </div>
 

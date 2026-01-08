@@ -106,68 +106,102 @@ class CartController {
     }
 
     private function checkout() {
-        if (!isset($_SESSION['user_id'])) {
-             // For now require login.
-             // If handling guest checkout, we'd need email/name in post.
-             sendError("You must be logged in to checkout.");
-        }
+        // Fix for "Network Error": Suppress HTML output errors that break JSON
+        ini_set('display_errors', '0'); 
+        error_reporting(E_ALL);
 
-        $userId = $_SESSION['user_id'];
         $pickupTimeStr = $_POST['pickup_time'] ?? '';
+        $token = $_POST['token'] ?? '';
+        
+        $tableId = null;
+        $formattedTime = null;
+        $userId = $_SESSION['user_id'] ?? null;
 
-        if (empty($pickupTimeStr)) {
-            sendError("Pickup time is required.");
+        // --- TOKEN HANDLING (Moved Up) ---
+        $isTableOrder = false;
+
+        if (!empty($token)) {
+            $decoded = base64_decode($token);
+            // Expected format: "Table {id}" or "Website"
+            
+            if (strpos($decoded, 'Table ') === 0) {
+                // It is a Table Order
+                $isTableOrder = true;
+                $parts = explode(' ', $decoded);
+                if (isset($parts[1])) {
+                    $tableId = intval($parts[1]);
+                }
+                
+                // For Table orders, Pickup Time is NOW (Immediate)
+                $now = new DateTime();
+                $formattedTime = $now->format('Y-m-d H:i:s');
+            }
         }
 
-        // Validate Pickup Time
-        try {
-            $pickupTime = new DateTime($pickupTimeStr);
-            $now = new DateTime();
-            
-            // Allow only future times + buffer (e.g. 15 mins)
-            $buffer = clone $now;
-            $buffer->modify('+15 minutes');
-            
-            if ($pickupTime < $buffer) {
-                 sendError("Pickup time must be at least 15 minutes from now.");
+        // --- AUTH CHECK ---
+        if (!$userId) {
+            if ($isTableOrder) {
+                // Allow Guest Checkout for Table Orders
+                $userId = $this->getOrCreateGuestUser();
+            } else {
+                sendError("You must be logged in to checkout.");
             }
-            
-            // --- WORKING HOURS CHECK ---
-            $dayOfWeek = (int)$pickupTime->format('w');
-            
-            $stmtS = $this->conn->prepare("SELECT open_time, close_time, is_closed FROM schedule WHERE day_of_week = ?");
-            $stmtS->bind_param("i", $dayOfWeek);
-            $stmtS->execute();
-            $schedule = $stmtS->get_result()->fetch_assoc();
-            $stmtS->close();
-    
-            if (!$schedule) {
-                // Fallback default
-                if ($dayOfWeek === 0) $schedule = ['is_closed' => 1];
-                elseif ($dayOfWeek === 6) $schedule = ['is_closed' => 0, 'open_time' => '08:00:00', 'close_time' => '17:00:00'];
-                else $schedule = ['is_closed' => 0, 'open_time' => '07:00:00', 'close_time' => '17:00:00'];
-            }
-    
-            if ($schedule['is_closed']) {
-                sendError("We are closed on " . $pickupTime->format('l') . "s.");
-            }
-    
-            $openTime = new DateTime($pickupTime->format('Y-m-d') . ' ' . $schedule['open_time']);
-            $closeTime = new DateTime($pickupTime->format('Y-m-d') . ' ' . $schedule['close_time']);
-            
-            // Allow pickup until close time? Or 15 mins before?
-            $lastPickup = clone $closeTime;
-            $lastPickup->modify('-15 minutes'); // Orders must be picked up before strict close?
-    
-            if ($pickupTime < $openTime || $pickupTime > $lastPickup) {
-                sendError("Pickup available between " . $openTime->format('H:i') . " and " . $lastPickup->format('H:i') . ".");
-            }
-            // ---------------------------
-            
-        } catch (Exception $e) {
-            sendError("Invalid date format or schedule check failed.");
         }
 
+        // Standard Pickup Flow (Website or No Token)
+        if (!$isTableOrder) {
+            if (empty($pickupTimeStr)) {
+                sendError("Pickup time is required.");
+            }
+    
+            // Validate Pickup Time
+            try {
+                $pickupTime = new DateTime($pickupTimeStr);
+                $now = new DateTime();
+                
+                // Allow only future times + buffer (e.g. 15 mins)
+                $buffer = clone $now;
+                $buffer->modify('+15 minutes');
+                
+                if ($pickupTime < $buffer) {
+                     sendError("Pickup time must be at least 15 minutes from now.");
+                }
+                
+                // --- WORKING HOURS CHECK ---
+                $dayOfWeek = (int)$pickupTime->format('w');
+                
+                $stmtS = $this->conn->prepare("SELECT open_time, close_time, is_closed FROM schedule WHERE day_of_week = ?");
+                $stmtS->bind_param("i", $dayOfWeek);
+                $stmtS->execute();
+                $schedule = $stmtS->get_result()->fetch_assoc();
+                $stmtS->close();
+        
+                if (!$schedule) {
+                    if ($dayOfWeek === 0) $schedule = ['is_closed' => 1];
+                    elseif ($dayOfWeek === 6) $schedule = ['is_closed' => 0, 'open_time' => '08:00:00', 'close_time' => '17:00:00'];
+                    else $schedule = ['is_closed' => 0, 'open_time' => '07:00:00', 'close_time' => '17:00:00'];
+                }
+        
+                if ($schedule['is_closed']) {
+                    sendError("We are closed on " . $pickupTime->format('l') . "s.");
+                }
+        
+                $openTime = new DateTime($pickupTime->format('Y-m-d') . ' ' . $schedule['open_time']);
+                $closeTime = new DateTime($pickupTime->format('Y-m-d') . ' ' . $schedule['close_time']);
+                
+                $lastPickup = clone $closeTime;
+                $lastPickup->modify('-15 minutes');
+        
+                if ($pickupTime < $openTime || $pickupTime > $lastPickup) {
+                    sendError("Pickup available between " . $openTime->format('H:i') . " and " . $lastPickup->format('H:i') . ".");
+                }
+                
+                $formattedTime = $pickupTime->format('Y-m-d H:i:s');
+                
+            } catch (Exception $e) {
+                sendError("Invalid date format or schedule check failed.");
+            }
+        }
 
         if (empty($_SESSION['cart'])) {
             sendError("Cart is empty.");
@@ -200,15 +234,23 @@ class CartController {
         $this->conn->begin_transaction();
 
         try {
-            $stmt = $this->conn->prepare("INSERT INTO orders (user_id, pickup_time, total_price, status) VALUES (?, ?, ?, 'pending')");
-            $formattedTime = $pickupTime->format('Y-m-d H:i:s');
-            $stmt->bind_param("isd", $userId, $formattedTime, $totalPrice);
+            // Updated INSERT to include table_id
+            $stmt = $this->conn->prepare("INSERT INTO orders (user_id, pickup_time, total_price, status, table_id) VALUES (?, ?, ?, 'pending', ?)");
+            $stmt->bind_param("isdi", $userId, $formattedTime, $totalPrice, $tableId);
             
             if (!$stmt->execute()) {
                 throw new Exception("Order creation failed: " . $stmt->error);
             }
             $orderId = $stmt->insert_id;
             $stmt->close();
+            
+            // If Table Order, update table status to 'Ocupata'? 
+            // The prompt says: "will auto-select that table for the order". 
+            // In Admin "Running Orders" we implemented logic to set 'Ocupata' when assigning.
+            // Should we do it here? Yes, consistent.
+            if ($tableId) {
+                $this->conn->query("UPDATE tables SET Status='Ocupata' WHERE ID=$tableId");
+            }
 
             // Insert Items
             $stmtItems = $this->conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price_at_time) VALUES (?, ?, ?, ?)");
@@ -225,7 +267,10 @@ class CartController {
             // Clear Cart
             $_SESSION['cart'] = [];
             
-            sendSuccess(['message' => 'Order placed successfully!', 'order_id' => $orderId]);
+            // Custom Message
+            $msg = $isTableOrder ? "Order sent to kitchen (Table $tableId)." : "Order placed successfully!";
+            
+            sendSuccess(['message' => $msg, 'order_id' => $orderId]);
 
         } catch (Exception $e) {
             $this->conn->rollback();
@@ -268,5 +313,29 @@ class CartController {
             'total' => $grandTotal,
             'count' => array_sum($_SESSION['cart'])
         ]);
+    }
+
+
+    private function getOrCreateGuestUser() {
+        // defined guest email
+        $email = 'guest@mazicoffee.com';
+        
+        $stmt = $this->conn->prepare("SELECT id FROM users WHERE username = 'Guest'");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        
+        if ($row = $res->fetch_assoc()) {
+            return $row['id'];
+        }
+        
+        // Create Guest
+        $pass = password_hash('guest123', PASSWORD_DEFAULT);
+        $stmt2 = $this->conn->prepare("INSERT INTO users (username, email, password, role) VALUES ('Guest', ?, ?, 'user')");
+        $stmt2->bind_param("ss", $email, $pass);
+        if ($stmt2->execute()) {
+             return $stmt2->insert_id;
+        }
+        
+        throw new Exception("Failed to provision Guest account.");
     }
 }

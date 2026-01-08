@@ -67,9 +67,8 @@ class DashboardController {
         $res = $this->conn->query("SELECT COUNT(*) as c FROM products");
         if ($row = $res->fetch_assoc()) $stats['products_total'] = $row['c'];
 
-        // Active Tables (Occupied or Reserved Recently)
-        // Simplified: Status != 'Libera'
-        $res = $this->conn->query("SELECT COUNT(*) as c FROM tables WHERE Status != 'Libera' AND Status != 'Inactiva'");
+        // Active Tables
+        $res = $this->conn->query("SELECT COUNT(*) as c FROM tables WHERE Status = 'Ocupata' AND Status != 'Inactiva'");
         if ($row = $res->fetch_assoc()) $stats['active_tables'] = $row['c'];
 
         // 2. Chart Data: Top 5 Selling Products (Last 7 Days)
@@ -200,7 +199,7 @@ class DashboardController {
                 JOIN orders o ON oi.order_id = o.id 
                 LEFT JOIN users u ON o.user_id = u.id 
                 JOIN products p ON oi.product_id = p.id 
-                ORDER BY o.created_at DESC
+                ORDER BY o.id DESC
             ";
             $filename = "sales_export_" . date('Y-m-d') . ".csv";
         } else {

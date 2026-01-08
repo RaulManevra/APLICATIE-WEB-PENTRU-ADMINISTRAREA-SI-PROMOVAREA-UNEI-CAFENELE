@@ -93,19 +93,19 @@ class TableController {
         $id = intval($_POST['id'] ?? 0);
         $x = floatval($_POST['x'] ?? 0);
         $y = floatval($_POST['y'] ?? 0);
-        $w = intval($_POST['width'] ?? 60);
-        $h = intval($_POST['height'] ?? 60);
+        $w = floatval($_POST['width'] ?? 5);
+        $h = floatval($_POST['height'] ?? 5);
 
         if ($id <= 0) sendError("Invalid ID");
         
-        // Clamp values
+        // Clamp values (Percentages)
         $x = max(0, min(100, $x));
         $y = max(0, min(100, $y));
-        $w = max(20, $w);
-        $h = max(20, $h);
+        $w = max(1, min(100, $w)); // Min 1% width
+        $h = max(1, min(100, $h)); // Min 1% height
 
         $stmt = $this->conn->prepare("UPDATE tables SET x_pos=?, y_pos=?, width=?, height=? WHERE ID=?");
-        $stmt->bind_param("ddiii", $x, $y, $w, $h, $id);
+        $stmt->bind_param("ddddi", $x, $y, $w, $h, $id);
         
         if($stmt->execute()) {
             sendSuccess(['message' => 'Coordinates and size updated']);
@@ -117,20 +117,20 @@ class TableController {
     private function updateDetails() {
          $id = intval($_POST['id'] ?? 0);
          $shape = $_POST['shape'] ?? 'circle';
-         $width = intval($_POST['width'] ?? 60);
-         $height = intval($_POST['height'] ?? 60);
+         $width = floatval($_POST['width'] ?? 5);
+         $height = floatval($_POST['height'] ?? 5);
 
          if ($id <= 0) sendError("Invalid ID");
          
          $allowedShapes = ['circle', 'square', 'rectangle'];
          if (!in_array($shape, $allowedShapes)) sendError("Invalid shape");
          
-         // Clamp dimensions
-         $width = max(20, min(300, $width));
-         $height = max(20, min(300, $height));
+         // Clamp dimensions (%) 
+         $width = max(1, min(100, $width));
+         $height = max(1, min(100, $height));
 
          $stmt = $this->conn->prepare("UPDATE tables SET shape=?, width=?, height=? WHERE ID=?");
-         $stmt->bind_param("siii", $shape, $width, $height, $id);
+         $stmt->bind_param("sddi", $shape, $width, $height, $id);
          
          if($stmt->execute()) {
              sendSuccess(['message' => 'Table details updated']);

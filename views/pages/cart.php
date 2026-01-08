@@ -21,22 +21,24 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
     (function() {
         const cartContent = document.getElementById('cart-content');
 
+        // --- TOKEN LOGIC ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlToken = urlParams.get('token');
+        if (urlToken) {
+            sessionStorage.setItem('orderToken', urlToken);
+            // Clean URL? Optional.
+            window.history.replaceState({}, document.title, window.location.pathname + '?page=cart');
+        }
+
         async function loadCart() {
             try {
                 const formData = new FormData();
                 formData.append('action', 'get_cart');
                 
-                // Assuming we can use the same endpoint but routed via main.js or direct fetch if we knew the path.
-                // Since we are inside the view loaded by main.js, we can likely use a relative path or the known controller path if routed.
-                // However, our system uses specific controller handlers.
-                // We added ?page=cart_handler in index.php to route to CartController.
-                
                 const res = await fetch('?page=cart_handler&action=get_cart', { 
                     method: 'POST', 
                     body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
 
                 const text = await res.text();
@@ -45,16 +47,11 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                     data = JSON.parse(text);
                 } catch (e) {
                     console.error("JSON Parse Error:", e, "Response:", text);
-                    cartContent.innerHTML = `<p class="error-msg">Server Error: Invalid JSON response. <br><small>${text.substring(0, 200)}</small></p>`;
+                    cartContent.innerHTML = `<p class="error-msg">Server Error: Invalid JSON response.</p>`;
                     return;
                 }
 
                 if (data.success) {
-                    // Logic fix: sendSuccess merges data into the top level object.
-                    // So data.items and data.total are direct properties of 'data'.
-                    // data.data is undefined unless we wrapped it in 'data' key explicitly.
-                    // Based on CartController usage: sendSuccess(['items' => ..., 'total' => ...])
-                    // Correct usage is: renderCart(data);
                     renderCart(data); 
                 } else {
                     cartContent.innerHTML = `<p class="error-msg">${data.message}</p>`;
@@ -137,8 +134,6 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
             attachCartListeners();
         }
 
-
-
         function attachCartListeners() {
             cartContent.querySelectorAll('.qty-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
@@ -161,10 +156,68 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
             });
             
              cartContent.querySelectorAll('.checkout-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                   document.getElementById('checkout-modal').style.display = 'flex';
-                });
+                btn.addEventListener('click', handleCheckoutClick);
             });
+        }
+        
+        async function handleCheckoutClick() {
+            const token = sessionStorage.getItem('orderToken');
+            let isTable = false;
+            
+            if (token) {
+                try {
+                    const decoded = atob(token); // Base64 decode
+                    if (decoded.startsWith('Table ')) {
+                        isTable = true;
+                    }
+                } catch(e) {
+                    console.warn("Invalid token stored", e);
+                }
+            }
+            
+            if (isTable) {
+                // Skip Modal, Send Order Immediately
+                if (!confirm("Send order to kitchen?")) return;
+                await performCheckout(token, null); // Token handles table assignment
+            } else {
+                // Show Modal (Website or default)
+                document.getElementById('checkout-modal').style.display = 'flex';
+            }
+        }
+
+        async function performCheckout(token, pickupTime) {
+            const formData = new FormData();
+            formData.append('action', 'checkout');
+            if (token) formData.append('token', token);
+            if (pickupTime) formData.append('pickup_time', pickupTime);
+            
+            try {
+                const res = await fetch('?page=cart_handler&action=checkout', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                     console.error("Server Error:", text);
+                     alert("Server error during checkout. See console.");
+                     return;
+                }
+
+                if (data.success) {
+                    alert(data.message); // "Order sent to kitchen" or "Order placed"
+                    location.reload(); 
+                } else {
+                    alert("Checkout Failed: " + data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Network error.");
+            }
         }
 
         async function updateCartItem(id, qty) {
@@ -216,22 +269,71 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
         const checkoutForm = document.getElementById('checkout-form');
 
         closeBtn.onclick = () => modal.style.display = 'none';
-        window.onclick = (event) => {
-            if (event.target == modal) modal.style.display = 'none';
+
+        // Message Modal Logic
+        const msgModal = document.getElementById('message-modal');
+        const msgClose = msgModal.querySelector('.close-modal');
+        const msgTitle = document.getElementById('msg-modal-title');
+        const msgText = document.getElementById('msg-modal-text');
+        const msgBtn = document.getElementById('msg-modal-btn');
+        let msgCallback = null;
+
+        function showMessageModal(title, text, callback = null) {
+            msgTitle.innerText = title;
+            msgText.innerText = text;
+            msgCallback = callback;
+            msgModal.style.display = 'flex';
         }
 
-        checkoutForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const pickupTime = document.getElementById('pickup-time').value;
-            
-            if(!pickupTime) {
-                alert("Please select a pickup time.");
-                return;
-            }
+        const closeMsgModal = () => {
+            msgModal.style.display = 'none';
+            if (msgCallback) msgCallback();
+        };
 
+        msgClose.onclick = closeMsgModal;
+        msgBtn.onclick = closeMsgModal;
+        
+        window.onclick = (event) => {
+            if (event.target == modal) modal.style.display = 'none';
+            if (event.target == msgModal) closeMsgModal();
+        }
+
+        async function handleCheckoutClick() {
+            const token = sessionStorage.getItem('orderToken');
+            let isTable = false;
+            
+            if (token) {
+                try {
+                    const decoded = atob(token); 
+                    if (decoded.startsWith('Table ')) {
+                        isTable = true;
+                    }
+                } catch(e) { console.warn(e); }
+            }
+            
+            if (isTable) {
+                // Direct checkout for Table
+                await performCheckout(token, null);
+            } else {
+                // Check Login for Website Orders
+                const currentUser = window.APP_CONFIG ? window.APP_CONFIG.currentUser : null;
+                if (!currentUser) {
+                    showMessageModal("Login Required", "You must be logged in to place an order.", () => {
+                         // Optional: Redirect to login
+                         // loadPage('login'); // If I had access to loadPage here, but it's module based. Can use window.location or just message.
+                    });
+                    return;
+                }
+                
+                document.getElementById('checkout-modal').style.display = 'flex';
+            }
+        }
+
+        async function performCheckout(token, pickupTime) {
             const formData = new FormData();
             formData.append('action', 'checkout');
-            formData.append('pickup_time', pickupTime);
+            if (token) formData.append('token', token);
+            if (pickupTime) formData.append('pickup_time', pickupTime);
             
             try {
                 const res = await fetch('?page=cart_handler&action=checkout', {
@@ -240,27 +342,43 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 
-                // Robust error handling for non-JSON responses
                 const text = await res.text();
                 let data;
                 try {
                     data = JSON.parse(text);
                 } catch (e) {
                      console.error("Server Error:", text);
-                     alert("Server error during checkout. See console.");
+                     showMessageModal("Error", "Server error. Please check console.");
                      return;
                 }
 
                 if (data.success) {
-                    alert("Order Placed Successfully! Order ID: " + data.data.order_id);
-                    location.reload(); // Refresh to empty cart
+                    showMessageModal("Success", data.message, () => location.reload());
                 } else {
-                    alert("Checkout Failed: " + data.message);
+                    showMessageModal("Failed", data.message);
                 }
             } catch (err) {
                 console.error(err);
-                alert("Network error.");
+                showMessageModal("Error", "Network error.");
             }
+        }
+
+        // ... existing update/remove functions ...
+
+        checkoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pickupTime = document.getElementById('pickup-time').value;
+            
+            if(!pickupTime) {
+                showMessageModal("Required", "Please select a pickup time.");
+                return;
+            }
+            
+            // Hide pickup modal before processing
+            modal.style.display = 'none';
+            
+            const token = sessionStorage.getItem('orderToken');
+            await performCheckout(token, pickupTime);
         });
 
         loadCart();
@@ -276,12 +394,21 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
         <form id="checkout-form">
             <div class="form-group">
                 <label for="pickup-time">Pickup Time:</label>
-                <!-- Set min timestamp via JS later if needed, current implementation allows all but backend validates -->
                 <input type="datetime-local" id="pickup-time" name="pickup_time" required class="form-control">
                 <small>Must be at least 15 minutes from now.</small>
             </div>
             <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Confirm Order</button>
         </form>
+    </div>
+</div>
+
+<!-- Message Modal -->
+<div id="message-modal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+        <span class="close-modal">&times;</span>
+        <h2 id="msg-modal-title" style="color: #2a0e02;">Message</h2>
+        <p id="msg-modal-text" style="margin: 20px 0; font-size: 1.1rem;">...</p>
+        <button id="msg-modal-btn" class="btn-primary" style="width: 100px;">OK</button>
     </div>
 </div>
 

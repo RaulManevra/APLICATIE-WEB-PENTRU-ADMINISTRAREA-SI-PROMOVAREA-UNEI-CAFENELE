@@ -191,7 +191,7 @@ $isLoggedIn = SessionManager::isLoggedIn();
                     $cursorClass = $isClickable ? "clickable" : "";
                     ?>
                     <div class="map-table <?= $statusClass ?> <?= $cursorClass ?>"
-                        style="left: <?= $x ?>%; top: <?= $y ?>%; width: <?= $w ?>px; height: <?= $h ?>px; border-radius: <?= $borderRadius ?>;"
+                        style="left: <?= $x ?>%; top: <?= $y ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border-radius: <?= $borderRadius ?>;"
                         title="Table <?= $id ?> - <?= ucfirst($status) ?>"
                         <?= $clickAttr ?>>
                         <?= $id ?>
@@ -252,7 +252,7 @@ $displayUsername = $currentUser ? htmlspecialchars($currentUser['username']) : '
 </div>
 
 <script>
-    const isLoggedIn = <?= $isLoggedIn ? 'true' : 'false' ?>;
+    var isLoggedIn = <?= $isLoggedIn ? 'true' : 'false' ?>;
 
     function openResModal(id) {
         // Dynamic Check

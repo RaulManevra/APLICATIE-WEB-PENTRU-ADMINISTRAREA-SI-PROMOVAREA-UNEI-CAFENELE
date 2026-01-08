@@ -66,7 +66,7 @@ function initAdminPanel() {
     // ==========================================
     // ======== PRODUCT MODULE SETUP ============
     // ==========================================
-    
+
     const addProdBtn = document.getElementById('add-product-btn');
     if (addProdBtn) {
         addProdBtn.addEventListener('click', () => {
@@ -131,6 +131,9 @@ function initAdminPanel() {
     // ==========================================
     const refreshOrdersBtn = document.getElementById('refresh-orders-btn');
     if (refreshOrdersBtn) refreshOrdersBtn.addEventListener('click', loadOrders);
+
+    // Initialize Cropper (safely)
+    setupCropper();
 }
 
 // Auto-run if already loaded (for SPA)
@@ -162,7 +165,7 @@ function showSection(sectionId) {
         if (sectionId === 'slider') loadSlides();
         if (sectionId === 'tables') loadTables();
         if (sectionId === 'reservations') loadReservations();
-        if (sectionId === 'orders') loadOrders();
+        if (sectionId === 'orders') loadRunningOrders();
     }
 }
 
@@ -588,15 +591,31 @@ function renderFloorPlan(tables, bg) {
     const container = document.getElementById('floor-plan-container');
     if (!container) return;
     container.innerHTML = ''; // clear
-    if (bg) container.style.backgroundImage = `url('${bg}')`;
+
+    if (bg) {
+        // Load image to get dimensions for aspect ratio, mimicking tables.php logic
+        const img = new Image();
+        img.src = bg;
+        img.onload = function () {
+            const aspect = img.width / img.height;
+            container.style.backgroundImage = `url('${bg}')`;
+            container.style.backgroundSize = 'cover';
+            container.style.aspectRatio = `${img.width} / ${img.height}`;
+            container.style.height = 'auto'; // allow height to adjust based on width and aspect ratio
+        };
+    } else {
+        container.style.backgroundImage = 'none';
+        container.style.height = '600px'; // Fallback
+    }
 
     tables.forEach(t => {
         const el = document.createElement('div');
-        el.className = `draggable-table status-${t.Status.toLowerCase()}`;
+        el.className = `draggable-table status-${t.Status.toLowerCase()} shape-${t.shape}`;
         el.style.left = t.x_pos + '%';
         el.style.top = t.y_pos + '%';
-        el.style.width = t.width + 'px';
-        el.style.height = t.height + 'px';
+        // Now using percentages for width/height too
+        el.style.width = t.width + '%';
+        el.style.height = t.height + '%';
         el.style.position = 'absolute';
         el.style.backgroundColor = getStatusColor(t.Status);
         el.style.borderRadius = t.shape === 'circle' ? '50%' : '4px';
@@ -610,7 +629,17 @@ function renderFloorPlan(tables, bg) {
         el.style.fontWeight = 'bold';
 
         // Drag Logic
-        makeDraggable(el, t.ID);
+        // console.log("Making draggable:", t.ID, t); // Debug
+        makeDraggable(el, t.ID || t.id); // Handle case sensitivity
+
+        // Resize Logic
+        const directions = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+        directions.forEach(dir => {
+            const resizer = document.createElement('div');
+            resizer.className = 'resize-handle resize-' + dir;
+            el.appendChild(resizer);
+            makeResizable(el, resizer, dir, t.ID || t.id);
+        });
 
         container.appendChild(el);
     });
@@ -628,6 +657,11 @@ function makeDraggable(elm, id) {
     elm.onmousedown = dragMouseDown;
 
     function dragMouseDown(e) {
+        // Prevent drag if clicking resize handle
+        if (e.target.classList.contains('resize-handle')) return;
+
+        // console.log("Drag started for ID:", id); // Debug
+
         e = e || window.event;
         e.preventDefault();
         pos3 = e.clientX;
@@ -651,22 +685,136 @@ function makeDraggable(elm, id) {
         // Percent conversion for saving
         elm.style.top = newTop + "px";
         elm.style.left = newLeft + "px";
-
-        // Update DB debounced? Or save on mouse up? 
-        // For simplicity, we save ON mouse up.
     }
 
     function closeDragElement() {
         document.onmouseup = null;
         document.onmousemove = null;
 
-        // Calc percentages
+        // Calc percentages with Sub-Pixel Precision
         const parent = elm.parentElement;
-        const xPct = (elm.offsetLeft / parent.offsetWidth) * 100;
-        const yPct = (elm.offsetTop / parent.offsetHeight) * 100;
+        const parentRect = parent.getBoundingClientRect();
+        const elemRect = elm.getBoundingClientRect();
+        const style = window.getComputedStyle(parent);
+        const borderLeft = parseFloat(style.borderLeftWidth) || 0;
+        const borderTop = parseFloat(style.borderTopWidth) || 0;
+
+        const leftPx = elemRect.left - parentRect.left - borderLeft;
+        const topPx = elemRect.top - parentRect.top - borderTop;
+
+        const xPct = (leftPx / parent.clientWidth) * 100;
+        const yPct = (topPx / parent.clientHeight) * 100;
+
+        // Apply percentages to element so it remains responsive
+        elm.style.left = xPct + '%';
+        elm.style.top = yPct + '%';
+        // Width/Height in % as well? For drag, w/h doesn't change, but we should preserve % units.
+        // Actually, if we just drag, w/h is already set. We just need to make sure we don't save px.
+        // We can just send the current style width/height if it is %, or calculate it.
+        // It is safest to calculate wPct and hPct.
+        const wPct = (elemRect.width / parent.clientWidth) * 100;
+        const hPct = (elemRect.height / parent.clientHeight) * 100;
+
+        elm.style.width = wPct + '%';
+        elm.style.height = hPct + '%';
 
         // Save
-        apiRequest('table', 'update_coordinates', { id: id, x: xPct, y: yPct, width: parseInt(elm.style.width), height: parseInt(elm.style.height) });
+        apiRequest('table', 'update_coordinates', { id: id, x: xPct, y: yPct, width: wPct, height: hPct });
+    }
+}
+
+function makeResizable(elm, resizer, dir, id) {
+    let startX, startY, startWidth, startHeight, startLeft, startTop;
+
+    resizer.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        e.stopPropagation(); // Stop drag of table
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = elm.getBoundingClientRect();
+        startWidth = rect.width;
+        startHeight = rect.height;
+        startLeft = elm.offsetLeft;
+        startTop = elm.offsetTop;
+
+        document.documentElement.addEventListener('mousemove', doDrag, false);
+        document.documentElement.addEventListener('mouseup', stopDrag, false);
+    });
+
+    function doDrag(e) {
+        let dx = e.clientX - startX;
+        let dy = e.clientY - startY;
+
+        // Min dimensions
+        const minSize = 20;
+
+        let newW = startWidth;
+        let newH = startHeight;
+        let newL = startLeft;
+        let newT = startTop;
+
+        // Horizontal
+        if (dir.indexOf('e') !== -1) {
+            newW = Math.max(minSize, startWidth + dx);
+        }
+        if (dir.indexOf('w') !== -1) {
+            // changing left and width
+            // if width gets too small, stop changing left
+            if (startWidth - dx >= minSize) {
+                newW = startWidth - dx;
+                newL = startLeft + dx;
+            }
+        }
+
+        // Vertical
+        if (dir.indexOf('s') !== -1) {
+            newH = Math.max(minSize, startHeight + dy);
+        }
+        if (dir.indexOf('n') !== -1) {
+            if (startHeight - dy >= minSize) {
+                newH = startHeight - dy;
+                newT = startTop + dy;
+            }
+        }
+
+        elm.style.width = newW + 'px';
+        elm.style.height = newH + 'px';
+        elm.style.left = newL + 'px';
+        elm.style.top = newT + 'px';
+    }
+
+    function stopDrag(e) {
+        document.documentElement.removeEventListener('mousemove', doDrag, false);
+        document.documentElement.removeEventListener('mouseup', stopDrag, false);
+
+        // Save with Sub-Pixel Precision
+        const parent = elm.parentElement;
+        const parentRect = parent.getBoundingClientRect();
+        const elemRect = elm.getBoundingClientRect();
+        const style = window.getComputedStyle(parent);
+        const borderLeft = parseFloat(style.borderLeftWidth) || 0;
+        const borderTop = parseFloat(style.borderTopWidth) || 0;
+
+        const leftPx = elemRect.left - parentRect.left - borderLeft;
+        const topPx = elemRect.top - parentRect.top - borderTop;
+
+        // Apply percentages to element so it remains responsive
+        elm.style.left = xPct + '%';
+        elm.style.top = yPct + '%';
+
+        const wPct = (elemRect.width / parent.clientWidth) * 100;
+        const hPct = (elemRect.height / parent.clientHeight) * 100;
+
+        elm.style.width = wPct + '%';
+        elm.style.height = hPct + '%';
+
+        apiRequest('table', 'update_coordinates', {
+            id: id,
+            x: xPct,
+            y: yPct,
+            width: wPct,
+            height: hPct
+        });
     }
 }
 
@@ -685,12 +833,169 @@ async function updateTableStatus(id, status) {
 async function uploadFloorPlan() {
     const input = document.getElementById('floor-plan-upload');
     if (input.files.length > 0) {
-        const fd = new FormData();
-        fd.append('image', input.files[0]);
-        const res = await apiRequest('table', 'upload_background', fd);
-        if (res.success) loadTables();
-        else alert(res.error);
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            openCropModal(e.target.result);
+        };
+        reader.readAsDataURL(file);
     }
+}
+
+// Cropper State
+var cropState = {
+    img: null,
+    scale: 1,
+    panning: false,
+    startX: 0,
+    startY: 0,
+    translateX: 0,
+    translateY: 0
+};
+
+function openCropModal(imgSrc) {
+    const modal = document.getElementById('crop-modal');
+    const imgElement = document.getElementById('crop-target-img');
+    const container = document.getElementById('crop-container-wrapper');
+    const slider = document.getElementById('crop-zoom-slider');
+
+    // Set fixed size for crop box (mimicking floor plan box)
+    // We want the resulting image to be high quality but proportional.
+    // Let's use a standard 800x600 viewing box for the cropper.
+    container.style.width = '800px';
+    container.style.height = '600px';
+    container.style.backgroundColor = '#ccc';
+
+    imgElement.src = imgSrc;
+    imgElement.onload = function () {
+        // Init State
+        cropState.img = imgElement;
+        cropState.scale = 1;
+        cropState.translateX = 0;
+        cropState.translateY = 0;
+
+        // Initial Center
+        // imgElement.style.left = '0px';
+        // imgElement.style.top = '0px';
+        updateCropTransform();
+
+        slider.value = 1;
+        document.getElementById('zoom-level').innerText = '100%';
+        modal.style.display = 'flex';
+
+        initCropEvents();
+    };
+}
+
+function updateCropTransform() {
+    const img = cropState.img;
+    img.style.transform = `translate(${cropState.translateX}px, ${cropState.translateY}px) scale(${cropState.scale})`;
+}
+
+function initCropEvents() {
+    const container = document.getElementById('crop-container-wrapper');
+    const slider = document.getElementById('crop-zoom-slider');
+
+    // Zoom
+    slider.oninput = function () {
+        cropState.scale = parseFloat(this.value);
+        document.getElementById('zoom-level').innerText = Math.round(cropState.scale * 100) + '%';
+        updateCropTransform();
+    };
+
+    // Zoom Buttons
+    document.getElementById('zoom-in-btn').onclick = function () {
+        let val = parseFloat(slider.value);
+        val = Math.min(3, val + 0.01);
+        slider.value = val;
+        cropState.scale = val;
+        document.getElementById('zoom-level').innerText = Math.round(cropState.scale * 100) + '%';
+        updateCropTransform();
+    };
+
+    document.getElementById('zoom-out-btn').onclick = function () {
+        let val = parseFloat(slider.value);
+        val = Math.max(0.1, val - 0.01);
+        slider.value = val;
+        cropState.scale = val;
+        document.getElementById('zoom-level').innerText = Math.round(cropState.scale * 100) + '%';
+        updateCropTransform();
+    };
+
+    // Pan
+    container.onmousedown = function (e) {
+        e.preventDefault();
+        cropState.panning = true;
+        cropState.startX = e.clientX - cropState.translateX;
+        cropState.startY = e.clientY - cropState.translateY;
+        container.style.cursor = 'grabbing';
+    };
+
+    window.onmousemove = function (e) {
+        if (!cropState.panning) return;
+        e.preventDefault();
+        cropState.translateX = e.clientX - cropState.startX;
+        cropState.translateY = e.clientY - cropState.startY;
+        updateCropTransform();
+    };
+
+    window.onmouseup = function () {
+        if (cropState.panning) {
+            cropState.panning = false;
+            container.style.cursor = 'grab';
+        }
+    };
+}
+
+function setupCropper() {
+    const saveBtn = document.getElementById('btn-save-crop');
+    if (!saveBtn) return;
+
+    saveBtn.onclick = function () {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // The target dimensions (what fits in the box)
+        const targetW = 800;
+        const targetH = 600;
+        canvas.width = targetW;
+        canvas.height = targetH;
+
+        const img = cropState.img;
+        if (!img) return;
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, targetW, targetH);
+
+        ctx.save();
+        ctx.translate(cropState.translateX, cropState.translateY);
+        ctx.scale(cropState.scale, cropState.scale);
+        ctx.drawImage(img, 0, 0);
+        ctx.restore();
+
+        canvas.toBlob(async function (blob) {
+            const fd = new FormData();
+            fd.append('image', blob, 'floorplan_cropped.png');
+
+            const btn = document.getElementById('btn-save-crop');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            btn.disabled = true;
+
+            const res = await apiRequest('table', 'upload_background', fd);
+
+            btn.innerHTML = oldText;
+            btn.disabled = false;
+
+            if (res.success) {
+                document.getElementById('crop-modal').style.display = 'none';
+                alert("Floor plan updated!");
+                loadTables();
+            } else {
+                alert(res.error);
+            }
+        }, 'image/png');
+    };
 }
 
 function openTableProps(id, shape, w, h) {
@@ -755,10 +1060,114 @@ async function deleteReservation(id) {
 // ==========================================
 // =============== ORDERS ===================
 // ==========================================
-async function loadOrders() {
-    // Placeholder for now
-    const section = document.getElementById('section-orders');
-    section.querySelector('.placeholder-content').innerHTML = '<p>Order management requires OrderController. Currently purely decorative.</p>';
+var cachedTables = [];
+
+async function loadRunningOrders() {
+    const container = document.getElementById('running-orders-container');
+    if (!container) return;
+
+    container.innerHTML = '<p>Loading active orders...</p>';
+
+    // Load tables for dropdown if not loaded
+    if (cachedTables.length === 0) {
+        const tRes = await apiRequest('table', 'get_all');
+        if (tRes.success) cachedTables = tRes.data;
+    }
+
+    const res = await apiRequest('order', 'get_running');
+    if (res.success) {
+        const orders = res.orders || [];
+        if (orders.length === 0) {
+            container.innerHTML = '<p>No running orders.</p>';
+            return;
+        }
+
+        container.innerHTML = orders.map(o => renderOrderCard(o)).join('');
+    } else {
+        container.innerHTML = `<p style="color:red">Error: ${res.error}</p>`;
+    }
+}
+
+function renderOrderCard(order) {
+    const itemsHtml = order.items.map(i => `<li>${i.quantity}x ${i.name}</li>`).join('');
+
+    const statusColors = {
+        'pending': '#f1c40f',
+        'preparing': '#e67e22',
+        'ready': '#2ecc71'
+    };
+    const statusColor = statusColors[order.status] || '#95a5a6';
+
+    const tableOptions = cachedTables.map(t =>
+        `<option value="${t.ID}" ${parseInt(order.table_id) === parseInt(t.ID) ? 'selected' : ''}>Table ${t.ID} (${t.Status})</option>`
+    ).join('');
+
+    return `
+    <div class="order-card" style="border: 1px solid #ddd; background: #fff; padding: 15px; border-radius: 8px; width: 300px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:10px; border-left: 5px solid ${statusColor};">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+                <h4 style="margin:0;">Order #${order.id}</h4>
+                <small style="color:#666;">${order.username}</small>
+            </div>
+            <span style="background:${statusColor}; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.8rem;">${order.status.toUpperCase()}</span>
+        </div>
+        
+        <div style="max-height: 150px; overflow-y:auto; background:#f9f9f9; padding:5px; border-radius:4px;">
+            <ul style="margin:0; padding-left:20px; font-size:0.9rem;">${itemsHtml}</ul>
+        </div>
+
+        <div style="font-size: 0.85rem; color: #555;">
+             Time: ${new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </div>
+
+        <div style="display:flex; gap:5px; margin-top:5px;">
+            <button class="btn btn-sm" style="flex:1; background:#f1c40f; color:#fff;" onclick="updateOrderStatus(${order.id}, 'pending')">Pending</button>
+            <button class="btn btn-sm" style="flex:1; background:#e67e22; color:#fff;" onclick="updateOrderStatus(${order.id}, 'preparing')">Prep</button>
+            <button class="btn btn-sm" style="flex:1; background:#2ecc71; color:#fff;" onclick="updateOrderStatus(${order.id}, 'ready')">Ready</button>
+        </div>
+
+        <div>
+            <label style="font-size:0.8rem; font-weight:bold;">Example: Table / Pickup</label>
+            <select class="form-control" onchange="assignOrderTable(${order.id}, this.value)" style="width:100%; font-size:0.9rem; padding:5px;">
+                <option value="pickup" ${!order.table_id ? 'selected' : ''}>Pick-up / Takeaway</option>
+                ${tableOptions}
+            </select>
+        </div>
+
+        <button class="btn btn-success" style="width:100%; margin-top:5px;" onclick="completeOrder(${order.id})">
+            <i class="fas fa-check"></i> Complete & Clear
+        </button>
+    </div>
+    `;
+}
+
+async function updateOrderStatus(id, status) {
+    const res = await apiRequest('order', 'update_status', { order_id: id, status: status });
+    if (res.success) loadRunningOrders();
+}
+
+async function assignOrderTable(orderId, val) {
+    // If val is 'pickup', table_id is null.
+    // If val is number, table_id is number.
+    const res = await apiRequest('order', 'assign_table', { order_id: orderId, table_id: val });
+    if (res.success) {
+        // Also refresh tables because status might have changed to 'Ocupata'
+        loadTables();
+        loadRunningOrders();
+    } else {
+        alert(res.error);
+    }
+}
+
+async function completeOrder(id) {
+    if (!confirm("Mark order as COMPLETED? This might free the table.")) return;
+    const res = await apiRequest('order', 'update_status', { order_id: id, status: 'completed' });
+    if (res.success) {
+        loadRunningOrders();
+        loadTables(); // Status might change to 'Libera'
+    } else {
+        alert(res.error);
+    }
 }
 
 // ==========================================

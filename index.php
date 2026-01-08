@@ -88,6 +88,6 @@ if ($currentUser && isset($conn)) {
 
     <script type="module" src="assets/js/main.js"></script>
 
-    <script type="module" src="assets/js/main.js"></script>
+
 </body>
 </html>

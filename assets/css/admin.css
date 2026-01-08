@@ -588,21 +588,197 @@ body {
 
 .resize-handle {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 15px;
-    height: 15px;
-    background-color: #3498db;
-    cursor: se-resize;
-    border-top-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    /* Matches table corner if applicable */
+    width: 12px;
+    height: 12px;
+    background-color: transparent;
     z-index: 20;
-    /* Above table content */
+    /* Invisible but clickable area */
 }
 
 .resize-handle:hover {
-    background-color: #2980b9;
+    /* No visual change on hover, just cursor */
+}
+
+.resize-n {
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: n-resize;
+}
+
+.resize-s {
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: s-resize;
+}
+
+.resize-e {
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: e-resize;
+}
+
+.resize-w {
+    left: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: w-resize;
+}
+
+.resize-ne {
+    top: -5px;
+    right: -5px;
+    cursor: ne-resize;
+}
+
+.resize-nw {
+    top: -5px;
+    left: -5px;
+    cursor: nw-resize;
+}
+
+.resize-se {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+.resize-sw {
+    bottom: -5px;
+    left: -5px;
+    cursor: sw-resize;
+}
+
+/* Circular Table Resize Adjustments */
+.shape-circle .resize-ne {
+    top: 13%;
+    right: 13%;
+    transform: translate(50%, -50%);
+}
+
+.shape-circle .resize-nw {
+    top: 13%;
+    left: 13%;
+    transform: translate(-50%, -50%);
+}
+
+.shape-circle .resize-se {
+    bottom: 13%;
+    right: 13%;
+    transform: translate(50%, 50%);
+}
+
+.shape-circle .resize-sw {
+    bottom: 13%;
+    left: 13%;
+    transform: translate(-50%, 50%);
+}
+
+/* Floor Plan */
+#floor-plan-container {
+    width: 100%;
+    height: 600px;
+    border: 2px dashed #bdc3c7;
+    position: relative;
+    overflow: hidden;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #f9f9f9;
+    background-image: url('../../img/floor-plan-placeholder.png');
+    /* Default */
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+/* Crop Modal Specific */
+#crop-modal {
+    align-items: center;
+    justify-content: center;
+}
+
+#crop-modal .modal-content {
+    margin: 0;
+    max-width: 95vw;
+    max-height: 95vh;
+}
+
+#crop-zoom-slider {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    transition: .2s;
+    border-radius: 5px;
+}
+
+#crop-zoom-slider:hover {
+    opacity: 1;
+}
+
+#crop-zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #3498db;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.crop-guides {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Let clicks pass through */
+    z-index: 10;
+}
+
+.crop-guides::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 0;
+    height: 100%;
+    border-left: 1px dashed rgba(52, 152, 219, 0.5);
+    transform: translateX(-50%);
+}
+
+.crop-guides::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 0;
+    border-top: 1px dashed rgba(52, 152, 219, 0.5);
+    transform: translateY(-50%);
+}
+
+.zoom-btn {
+    cursor: pointer;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.zoom-btn:hover {
+    background: #e0e0e0;
 }
 
 /* --- Dashboard Specific Styles --- */

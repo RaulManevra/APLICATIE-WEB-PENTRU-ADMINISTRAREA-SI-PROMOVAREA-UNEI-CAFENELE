@@ -8,6 +8,23 @@ import { initProfilePopup, closeProfilePopup } from './modules/profile.js';
 import { showModal } from './modules/utils.js';
 import { updateHeaderUI } from './modules/ui.js';
 // ====================================
+// ======== GLOBAL TOKEN CHECK ========
+// ====================================
+(function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    if (token) {
+        console.log("Token detected and saved:", token);
+        sessionStorage.setItem('orderToken', token);
+        // Clean URL to hide token, keeping other params
+        urlParams.delete('token');
+        const newQuery = urlParams.toString();
+        const newUrl = window.location.pathname + (newQuery ? '?' + newQuery : '');
+        window.history.replaceState({}, document.title, newUrl);
+    }
+})();
+
+// ====================================
 // ======== EVENT LISTENERS ===========
 // ====================================
 
