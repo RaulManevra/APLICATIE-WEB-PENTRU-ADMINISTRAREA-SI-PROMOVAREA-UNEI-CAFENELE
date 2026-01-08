@@ -7,10 +7,11 @@ import { refreshCurrentUser } from './modules/auth.js';
 import { initProfilePopup, closeProfilePopup } from './modules/profile.js';
 import { showModal } from './modules/utils.js';
 import { updateHeaderUI } from './modules/ui.js';
+// ====================================
+// ======== EVENT LISTENERS ===========
+// ====================================
 
-// ===== EVENT LISTENERS =====
-
-// 1. Form Submission (Login/Register)
+// Form Submission (Add to Cart)
 document.addEventListener("click", async e => {
     const btn = e.target.closest('.add-to-cart-btn');
     if (btn) {
@@ -54,7 +55,8 @@ document.addEventListener("click", async e => {
         }
     }
 });
-
+// ====================================
+// Form Submission (Login/Register)
 document.addEventListener("submit", async e => {
     const form = e.target;
     if (form.matches("form[action*='controllers/register_handler.php'], form[action*='controllers/login_handler.php'], form[action*='controllers/profile_handler.php']")) {
@@ -92,8 +94,8 @@ document.addEventListener("submit", async e => {
         }
     }
 });
-
-// 2. Navigation Click Handler (delegation for .nav-link and .popup-action)
+// ====================================
+// Navigation Click Handler (delegation for .nav-link and .popup-action)
 document.addEventListener("click", async e => {
     const target = e.target.closest('.nav-link, .popup-action');
     if (!target) return;
@@ -130,19 +132,15 @@ document.addEventListener("click", async e => {
         }
     }
 });
-
-// 3. History State Manager
+// ====================================
+// History State Manager
 window.addEventListener("popstate", e => {
     if (e.state && e.state.page) {
         loadPage(e.state.page, false);
     }
 });
 
-// ... imports at top ...
-
-// ... other imports
-
-// 4. Initial Load
+// Initial Load
 const urlParams = new URLSearchParams(window.location.search);
 loadPage(urlParams.get("page") || "home", false);
 

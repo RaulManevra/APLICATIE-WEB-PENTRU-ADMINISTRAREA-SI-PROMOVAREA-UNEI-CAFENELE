@@ -610,3 +610,18 @@
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Thu 01/08/2026 15:23:56.35 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Thu 01/08/2026 15:24:01.87 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 

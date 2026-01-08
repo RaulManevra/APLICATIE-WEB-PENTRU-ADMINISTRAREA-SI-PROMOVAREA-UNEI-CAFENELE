@@ -109,7 +109,7 @@ require_admin();
                         <h4 style="margin:0;">Top Selling Products (Last 7 Days)</h4>
                         <button class="btn btn-sm btn-primary" onclick="exportData('sales')"><i class="fas fa-download"></i> Export Sales CSV</button>
                     </div>
-                    <canvas id="reservationsChart"></canvas>
+                    <canvas id="TopSellingChart"></canvas>
                 </div>
 
                 <!-- Notes Board -->

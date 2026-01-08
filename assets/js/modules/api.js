@@ -21,11 +21,11 @@ export async function safeFetch(url, options = {}) {
         if (!res.ok) {
             if (res.status === 401) {
                 // 401 Unauthorized: specific handling if needed
-                throw new Error("Unauthorized");
+                throw new Error("Error 401: Unauthorized");
             }
             if (res.status === 403) {
                 showModal("Access Denied: You do not have permission.");
-                throw new Error("Forbidden");
+                throw new Error("Error 403: Forbidden");
             }
             throw new Error(`HTTP error! status: ${res.status}`);
         }
@@ -33,7 +33,7 @@ export async function safeFetch(url, options = {}) {
     } catch (err) {
         console.error("Fetch error:", err);
         // Avoid generic modal for handled auth errors
-        if (err.message !== "Unauthorized" && err.message !== "Forbidden") {
+        if (err.message !== "Error 401: Unauthorized" && err.message !== "Error 403: Forbidden") {
             showModal("Connection error. Please check your internet connection and try again.");
         }
         throw err;

@@ -33,7 +33,7 @@ $result = $conn->query($sql);
 
 <section class="menu-section">
     <div class="menu-container">
-        <h2 class="section-title">Our Coffee Selection</h2>
+        <h2 class="section-title">Selectia noastră</h2>
 
         <div class="menu-search">
             <div class="search-input-wrapper">
@@ -41,13 +41,13 @@ $result = $conn->query($sql);
                 <input
                     type="text"
                     id="menuSearchInput"
-                    placeholder="Search here" />
-                <span class="search-pill">Search</span>
+                    placeholder="Caută aici" />
+                <span class="search-pill">Caută</span>
             </div>
         </div>
 
         <div class="no-results" style="display: none;">
-            <span class="not-found-pill">Sorry, no products found!</span>
+            <span class="not-found-pill">Ne pare rău, nu am gasit niciun produs!</span>
         </div>
 
         <?php if ($result && $result->num_rows > 0): ?>

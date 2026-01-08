@@ -27,13 +27,17 @@ function initAdminPanel() {
         console.error("Sidebar nav NOT found!");
     }
 
-    // 1. DASHBOARD INIT
+    // ==========================================
+    // ====== DASHBOARD AND SCHEDULE INIT ======
+    // ==========================================
     loadDashboard();
     setupSearch();
     setupScheduleForm();
     setupQuickActions();
 
-    // Notes auto-save
+    // ==========================================
+    // ============ NOTES AUTO-SAVE =============
+    // ==========================================
     const notesArea = document.getElementById('admin-notes');
     if (notesArea) {
         let timeout = null;
@@ -44,7 +48,9 @@ function initAdminPanel() {
         });
     }
 
-    // Modal Close Logic
+    // ==========================================
+    // ======== MODAL CLOSE LOGIC ================
+    // ==========================================
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', () => {
             document.getElementById(btn.dataset.target).style.display = 'none';
@@ -57,7 +63,10 @@ function initAdminPanel() {
         }
     }
 
-    // --- PRODUCT MODULE SETUP ---
+    // ==========================================
+    // ======== PRODUCT MODULE SETUP ============
+    // ==========================================
+    
     const addProdBtn = document.getElementById('add-product-btn');
     if (addProdBtn) {
         addProdBtn.addEventListener('click', () => {
@@ -75,7 +84,9 @@ function initAdminPanel() {
         prodForm.addEventListener('submit', handleProductSubmit);
     }
 
-    // --- SLIDER MODULE SETUP ---
+    // ==========================================
+    // ======== SLIDER MODULE SETUP =============
+    // ==========================================
     const addSlideBtn = document.getElementById('add-slide-btn');
     if (addSlideBtn) {
         addSlideBtn.addEventListener('click', () => {
@@ -88,7 +99,9 @@ function initAdminPanel() {
         sliderForm.addEventListener('submit', handleSliderSubmit);
     }
 
-    // --- TABLE MODULE SETUP ---
+    // ==========================================
+    // ======== TABLE MODULE SETUP =============
+    // ==========================================
     const addTableBtn = document.getElementById('add-table-btn');
     if (addTableBtn) addTableBtn.addEventListener('click', () => updateTableCount(1));
 
@@ -113,7 +126,9 @@ function initAdminPanel() {
         tablePropsForm.addEventListener('submit', handleTablePropsSubmit);
     }
 
-    // --- ORDERS SETUP ---
+    // ==========================================
+    // ======== ORDERS SETUP ===================
+    // ==========================================
     const refreshOrdersBtn = document.getElementById('refresh-orders-btn');
     if (refreshOrdersBtn) refreshOrdersBtn.addEventListener('click', loadOrders);
 }
@@ -125,7 +140,11 @@ if (document.readyState === 'loading') {
     initAdminPanel();
 }
 
-// --- GENERAL UTILS ---
+// ==========================================
+// ======== GENERAL UTILS ===================
+// ==========================================
+
+
 function showSection(sectionId) {
     document.querySelectorAll('.admin-section').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
@@ -181,8 +200,9 @@ async function apiRequest(entity, action, body = null) {
 }
 
 // ==========================================
-// 1. DASHBOARD & SETTINGS & USERS (Preserved)
+// ============== DASHBOARD =================
 // ==========================================
+
 async function loadDashboard() {
     try {
         console.log("Fetching dashboard stats...");
@@ -201,6 +221,7 @@ async function loadDashboard() {
         console.error("Dashboard load failed exception", e);
     }
 }
+
 function renderDashboard(data) {
     console.log("Rendering dashboard with:", data);
     if (!data) return;
@@ -230,9 +251,10 @@ function renderDashboard(data) {
     }
     if (data.chart) renderChart(data.chart);
 }
+
 var resChartInstance = null;
 function renderChart(chartData) {
-    const cvs = document.getElementById('reservationsChart');
+    const cvs = document.getElementById('TopSellingChart');
     if (!cvs) return;
     if (resChartInstance) resChartInstance.destroy();
     resChartInstance = new Chart(cvs.getContext('2d'), {
@@ -279,13 +301,16 @@ function renderChart(chartData) {
         }
     });
 }
+
 async function saveNotes() {
     await apiRequest('dashboard', 'save_note', { content: document.getElementById('admin-notes').value });
     const s = document.getElementById('notes-status');
     s.style.display = 'block'; setTimeout(() => s.style.display = 'none', 2000);
 }
+
 async function updateCafeStatus(val) { await apiRequest('dashboard', 'toggle_cafe_status', { status: val }); }
 function exportData(type) { window.location.href = `controllers/admin_handler.php?entity=dashboard&action=export_data&type=${type}`; }
+
 async function sendNewsletter() {
     const sub = document.getElementById('news-subject').value;
     const body = document.getElementById('news-body').value;
@@ -293,8 +318,10 @@ async function sendNewsletter() {
     const res = await apiRequest('dashboard', 'send_newsletter', { subject: sub, body: body });
     alert(res.success ? res.data.message : res.error);
 }
+// ==========================================
+// =============== USERS ====================
+// ==========================================
 
-// USERS
 function setupSearch() {
     const inp = document.getElementById('user-search');
     if (!inp) return;
@@ -392,8 +419,9 @@ async function handleBlacklistToggle(id, currentStatus) {
         alert(res.error);
     }
 }
-
-// SETTINGS
+// ==========================================
+// =============== SETTINGS =================
+// ==========================================
 async function loadSettings() {
     const res = await apiRequest('settings', 'get_schedule');
     const tb = document.getElementById('schedule-list');
@@ -418,7 +446,7 @@ function setupScheduleForm() {
 }
 
 // ==========================================
-// 2. PRODUCTS MODULE (Restored)
+// =============== PRODUCTS =================
 // ==========================================
 async function loadProducts() {
     const res = await apiRequest('product', 'get_all');
@@ -479,7 +507,7 @@ async function deleteProduct(id) {
 }
 
 // ==========================================
-// 3. SLIDER MODULE (Restored)
+// =============== SLIDER ===================
 // ==========================================
 async function loadSlides() {
     const res = await apiRequest('slider', 'get_all');
@@ -526,7 +554,7 @@ async function deleteSlide(id) {
 }
 
 // ==========================================
-// 4. TABLE MODULE (Restored)
+// =============== TABLE ====================
 // ==========================================
 async function loadTables() {
     const res = await apiRequest('table', 'get_all');
@@ -684,7 +712,7 @@ async function handleTablePropsSubmit(e) {
 }
 
 // ==========================================
-// 5. RESERVATIONS MODULE (Restored)
+// =============== RESERVATIONS =============
 // ==========================================
 async function loadReservations() {
     const res = await apiRequest('reservation', 'get_all');
@@ -725,7 +753,7 @@ async function deleteReservation(id) {
 }
 
 // ==========================================
-// 6. ORDERS MODULE (Basic Implementation)
+// =============== ORDERS ===================
 // ==========================================
 async function loadOrders() {
     // Placeholder for now
@@ -734,7 +762,7 @@ async function loadOrders() {
 }
 
 // ==========================================
-// 7. QUICK ACTION MODULE
+// ============ QUICK ACTIONS ==============
 // ==========================================
 function openQuickReserve() {
     document.getElementById('quick-reserve-form').reset();

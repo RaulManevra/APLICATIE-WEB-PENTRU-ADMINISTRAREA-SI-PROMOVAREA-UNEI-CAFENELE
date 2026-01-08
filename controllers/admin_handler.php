@@ -7,12 +7,13 @@ require_once __DIR__ . '/../core/auth.php';
 require_once __DIR__ . '/../core/output.php';
 require_once __DIR__ . '/ProductController.php';
 
-// 1. Ensure strictly JSON response
+// Ensure strictly JSON response
 header('Content-Type: application/json; charset=utf-8');
 ini_set('display_errors', '0'); // Suppress HTML errors
 error_reporting(E_ALL); // Log errors instead
 
-// 2. CSRF Check (Assuming verify_csrf is available from security.php or csrf.php)
+// ====================================
+// CSRF Check (Assuming verify_csrf is available from security.php or csrf.php)
 require_once __DIR__ . '/../core/csrf.php';
 if (!verify_csrf()) {
    // For GET requests sometimes we might skip, but for admin actions strictly enforce
@@ -27,7 +28,8 @@ if (!verify_csrf()) {
    }
 }
 
-// 3. Auth Check
+// ====================================
+// Auth Check
 // require_admin() usually checks Auth and redirects or exits.
 // Since this is an AJAX handler, we want JSON error, not HTML redirect.
 if (!SessionManager::isLoggedIn()) {
@@ -42,7 +44,8 @@ if (!in_array('admin', $roles)) {
     sendError("Forbidden. Admin access required.");
 }
 
-// 4. Route to Controller
+// ====================================
+// Route to Controller
 $entity = $_POST['entity'] ?? $_GET['entity'] ?? 'product';
 
 if ($entity === 'slider') {

@@ -46,7 +46,7 @@ export function loadPage(page, pushState = true) {
         if (page === "admin") {
             const roles = window.APP_CONFIG?.currentUserRoles || [];
             if (!roles.includes("admin")) {
-                showModal("You are not authorized to access the admin dashboard.");
+                showModal("Nu esti autorizat să accesezi pagina de administrare.");
                 setActiveLink("home");
                 // Don't recurse infinitely if home is broken, but here it's fine
                 return loadPage("home");

@@ -9,8 +9,8 @@ const hero = document.getElementById("hero");
 export function updateHero(page) {
   if (page === "home") {
     const userText = window.CURRENT_USER
-      ? `Welcome back, ${escapeHtml(window.CURRENT_USER)}!`
-      : "Welcome to Mazi Coffee";
+      ? `Bine ai revenit, ${escapeHtml(window.CURRENT_USER)}!`
+      : "Bine ai venit la Mazi Coffee";
     hero.innerHTML = `
             <div class="content-wrapper">
                 <div class="bgimg">
@@ -97,7 +97,7 @@ export function updateHeaderUI() {
         if (picTrigger) {
           picTrigger.addEventListener("click", (e) => {
             e.preventDefault();
-            if (confirm("Do you want to change your profile picture?")) {
+            if (confirm("Vrei să îți schimbi poza de profil?")) {
               import("./profile.js").then((p) => p.closeProfilePopup());
 
               // Fetch and show modal
