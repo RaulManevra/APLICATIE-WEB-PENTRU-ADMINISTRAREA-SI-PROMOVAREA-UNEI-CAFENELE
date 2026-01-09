@@ -144,15 +144,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.5s;
     color: #fff;
     font-size: 1.2rem;
 }
 
-.qty-btn:hover {
-    color: #E0B574;
+.qty-btn.minus:hover {
+    color: #ff4d4d;
 }
-
+.qty-btn.plus:hover {
+    color: #4caf50;
+}
 .qty-val {
     min-width: 30px;
     text-align: center;
@@ -246,4 +248,13 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(224, 181, 116, 0.5);
     background: linear-gradient(135deg, #eacaa0 0%, #daa560 100%);
+}
+.empty-cart .empty {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ccc;
+}
+.tr{
+    background-color: rgba(36, 35, 35, 0.578);
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
 }

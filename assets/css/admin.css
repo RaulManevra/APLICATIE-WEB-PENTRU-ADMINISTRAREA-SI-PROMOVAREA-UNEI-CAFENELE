@@ -858,3 +858,59 @@ body {
     color: #e74c3c;
     font-weight: bold;
 }
+.stat-icon.calendar {
+    background: #e8f5e9;
+    color: #2e7d32;
+    transition: 0.8s ease;
+}
+.stat-icon.tables {
+    background: #fff3e0;
+    color: #ef6c00;
+    transition: 0.8s ease;
+}
+.stat-icon.info {
+    background: #e3f2fd;
+    color: #1565c0;
+    transition: 0.8s ease;
+}
+.stat-card:hover .stat-icon.calendar {
+    background: #2e7d32;
+    color: #e8f5e9;
+}
+.stat-card:hover .stat-icon.tables {
+    background: #ef6c00;
+    color: #fff3e0;
+}
+.stat-card:hover .stat-icon.info {
+    background: #1565c0;
+    color: #e3f2fd;
+}
+#news-subject {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background-color: #f9fafb;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+#news-body {
+    width: 100%;
+    min-height: 160px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    background-color: #f9fafb;
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: vertical;
+    transition: all 0.2s ease;
+}
+#news-subject:focus,
+#news-body:focus {
+    outline: none;
+    background-color: #fff;
+    border-color: #2e7d32;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}

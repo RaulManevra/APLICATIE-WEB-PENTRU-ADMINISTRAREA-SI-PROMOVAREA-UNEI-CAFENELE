@@ -72,7 +72,7 @@ require_admin();
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: #e8f5e9; color: #2e7d32;"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-icon calendar"><i class="fas fa-calendar-check"></i></div>
                     <div class="stat-info">
                         <span class="stat-label">Reservations (Today)</span>
                         <h3 id="stat-res-today">-</h3>
@@ -80,14 +80,14 @@ require_admin();
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: #fff3e0; color: #ef6c00;"><i class="fas fa-chair"></i></div>
+                    <div class="stat-icon tables"><i class="fas fa-chair"></i></div>
                     <div class="stat-info">
                         <span class="stat-label">Active Tables</span>
                         <h3 id="stat-active-tables">-</h3>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: #e3f2fd; color: #1565c0;"><i class="fas fa-coffee"></i></div>
+                    <div class="stat-icon info"><i class="fas fa-coffee"></i></div>
                     <div class="stat-info">
                         <span class="stat-label">Menu Items</span>
                         <h3 id="stat-menu-items">-</h3>
@@ -107,7 +107,7 @@ require_admin();
                 <div class="chart-container" style="flex: 2; min-width: 300px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; height: 400px; position: relative;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <h4 style="margin:0;">Top Selling Products (Last 7 Days)</h4>
-                        <button class="btn btn-sm btn-primary" onclick="exportData('sales')"><i class="fas fa-download"></i> Export Sales CSV</button>
+                        <button class="btn btn-sm btn-secondary" onclick="exportData('sales')"><i class="fas fa-download"></i> Export Sales CSV</button>
                     </div>
                     <canvas id="TopSellingChart"></canvas>
                 </div>
@@ -127,7 +127,7 @@ require_admin();
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h3>Recent Reservations</h3>
                     <div>
-                        <button class="btn btn-sm btn-primary" onclick="exportData('reservations')"><i class="fas fa-file-csv"></i> Export Reservations</button>
+                        <button class="btn btn-sm btn-secondary" onclick="exportData('reservations')"><i class="fas fa-file-csv"></i> Export Reservations</button>
                         <button class="btn btn-sm btn-secondary" onclick="exportData('users')"><i class="fas fa-file-csv"></i> Export Users</button>
                     </div>
                 </div>
@@ -148,9 +148,9 @@ require_admin();
             </div>
             
             <!-- Newsletter Widget -->
-             <div class="newsletter-widget" style="margin-top: 30px; background: #f0f4c3; padding: 20px; border-radius: 12px;">
+             <div class="newsletter-widget" style="margin-top: 30px; background: #c3d6f4ff; padding: 20px; border-radius: 12px;">
                 <details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #827717;">Send Newsletter / Announcement</summary>
+                    <summary style="font-weight: bold; cursor: pointer; color: #173e82ff;">Send Newsletter / Announcement</summary>
                     <div style="margin-top: 15px;">
                         <input type="text" id="news-subject" class="form-control" placeholder="Subject" style="margin-bottom: 10px;">
                         <textarea id="news-body" class="form-control" placeholder="Message to all users..." style="margin-bottom: 10px;"></textarea>
@@ -259,7 +259,7 @@ require_admin();
                                 <input type="number" id="prop-height" name="height" class="form-control" min="1" max="100" step="0.1">
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Update Table</button>
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Update Table</button>
                     </form>
                 </div>
             </div>
@@ -573,7 +573,7 @@ require_admin();
                 <input type="email" name="email" placeholder="For confirmation">
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Create Reservation</button>
+            <button type="submit" class="btn btn-secondary" style="width: 100%;">Create Reservation</button>
         </form>
     </div>
 </div>

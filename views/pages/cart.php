@@ -69,7 +69,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                 cartContent.innerHTML = `
                     <div class="empty-cart">
                         <i class="fa-solid fa-cart-arrow-down"></i>
-                        <p>Your cart is empty.</p>
+                        <p class="empty">Your cart is empty.</p>
                         <a href="?page=menu" class="nav-link btn-secondary" data-page="menu">Browse Menu</a>
                     </div>
                 `;
@@ -80,7 +80,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                 <div class="cart-table-wrapper">
                     <table class="cart-table">
                         <thead>
-                            <tr>
+                            <tr class="tr">
                                 <th>Product</th>
                                 <th>Price</th>
                                 <th>Quantity</th>
@@ -438,8 +438,6 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
     border-radius: 12px;
     position: relative;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    top: 50%;
-    transform: translateY(-50%);
 }
 
 .close-modal {
@@ -449,11 +447,12 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
     font-weight: bold;
     cursor: pointer;
     line-height: 1;
+    transition: 0.6s ease;
 }
 
 .close-modal:hover,
 .close-modal:focus {
-    color: black;
+    color: red;
     text-decoration: none;
     cursor: pointer;
 }

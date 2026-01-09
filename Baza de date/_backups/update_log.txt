@@ -651,3 +651,24 @@
 [2026-01-09 04:30:28] [INFO] Exporting database to SQL file...
 [2026-01-09 04:30:29] [INFO] Database exported successfully!
 [2026-01-09 04:30:33] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Fri 01/09/2026 18:13:02.46 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 01/09/2026 18:13:08.24 
+====================================== 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 01/09/2026 18:13:10.44 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
