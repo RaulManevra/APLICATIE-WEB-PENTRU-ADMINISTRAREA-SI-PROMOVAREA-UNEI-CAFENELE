@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.44, for macos10.15 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
 -- Host: localhost    Database: mazi_coffee
 -- ------------------------------------------------------
--- Server version	8.0.44
+-- Server version	8.0.31
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `admin_notes`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `admin_notes` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `content` text COLLATE utf8mb4_general_ci,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -48,8 +48,8 @@ DROP TABLE IF EXISTS `global_settings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `global_settings` (
-  `key_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `key_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `value` text COLLATE utf8mb4_general_ci,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`key_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -106,7 +106,7 @@ CREATE TABLE `orders` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `pickup_time` datetime NOT NULL,
-  `status` enum('pending','preparing','ready','completed','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `status` enum('pending','preparing','ready','completed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
   `total_price` decimal(10,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `table_id` int DEFAULT NULL,
@@ -166,11 +166,11 @@ DROP TABLE IF EXISTS `reservations`;
 CREATE TABLE `reservations` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
-  `reservation_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `reservation_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `table_id` int NOT NULL,
   `reservation_time` datetime NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `status` enum('active','deleted') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'active',
+  `status` enum('active','deleted') COLLATE utf8mb4_general_ci DEFAULT 'active',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `table_id` (`table_id`),
@@ -198,7 +198,7 @@ DROP TABLE IF EXISTS `schedule`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `schedule` (
   `day_of_week` int NOT NULL,
-  `day_name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `day_name` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `open_time` time DEFAULT NULL,
   `close_time` time DEFAULT NULL,
   `is_closed` tinyint(1) DEFAULT '0',
@@ -320,4 +320,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-09  4:30:29
+-- Dump completed on 2026-01-08 19:53:23
