@@ -64,7 +64,7 @@
                     </div>
 
                     <!-- Guest Actions (Shown by default, hidden by JS if logged in) -->
-                    <div id="popup-guest-actions" style="width: 100%;">
+                    <div id="popup-guest-actions" class="auth">
                          <a href="?page=login" class="popup-action" style="text-decoration:none; display:block; margin-bottom:10px;">Login</a>
                          <a href="?page=register" class="popup-action" style="text-decoration:none; display:block;">Sign up</a>
                     </div>

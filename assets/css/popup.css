@@ -104,6 +104,10 @@ span.psw {
     padding: 19px;
     font-weight: 600;
     z-index: 30;
+
+}
+.auth{
+    margin-top:75%;
 }
 
 .profile-popup .profile-close {
@@ -149,9 +153,9 @@ span.psw {
 }
 
 .popup-action:hover {
-    background: #5f3b1a;
+    background: #edd7c3;
     border-color: #281b0e;
-    color: #eed0a9;
+    color: #2a1a05;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
     transform: none;
 }
@@ -332,4 +336,9 @@ span.psw {
     background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.03));
     border-radius: inherit;
     pointer-events: none;
+}
+.popup-guest-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }

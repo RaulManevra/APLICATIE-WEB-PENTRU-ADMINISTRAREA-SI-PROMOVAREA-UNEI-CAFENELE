@@ -148,9 +148,9 @@ require_admin();
             </div>
             
             <!-- Newsletter Widget -->
-             <div class="newsletter-widget" style="margin-top: 30px; background: #c3d6f4ff; padding: 20px; border-radius: 12px;">
+             <div class="newsletter-widget" style="margin-top: 30px; background: rgb(203, 204, 207); padding: 20px; border-radius: 12px;">
                 <details>
-                    <summary style="font-weight: bold; cursor: pointer; color: #173e82ff;">Send Newsletter / Announcement</summary>
+                    <summary style="font-weight: bold; cursor: pointer; color: rgb(40, 43, 47);">Send Newsletter / Announcement</summary>
                     <div style="margin-top: 15px;">
                         <input type="text" id="news-subject" class="form-control" placeholder="Subject" style="margin-bottom: 10px;">
                         <textarea id="news-body" class="form-control" placeholder="Message to all users..." style="margin-bottom: 10px;"></textarea>

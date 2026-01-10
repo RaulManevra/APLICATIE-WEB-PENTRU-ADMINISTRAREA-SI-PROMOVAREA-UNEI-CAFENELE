@@ -22,7 +22,7 @@
     font-family: 'Poppins', sans-serif;
     position: relative;
     padding-bottom: 1rem;
-    margin-top: 1rem;
+    margin-top: 2rem;
     font-weight: 600;
 }
 
@@ -40,7 +40,7 @@
 /* --- Layout --- */
 .menu-layout {
     display: flex;
-    gap: 3rem;
+    gap: 1.5rem;
     align-items: flex-start;
 }
 
@@ -126,7 +126,7 @@
 .menu-search {
     margin-bottom: 2.5rem;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
 }
 
 .search-input-wrapper {
@@ -145,6 +145,7 @@
     font-size: 1rem;
     outline: none;
     transition: all 0.3s ease;
+
 }
 
 .search-input-wrapper input:focus {
