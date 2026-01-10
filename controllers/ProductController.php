@@ -28,7 +28,7 @@ class ProductController {
                 $this->delete();
                 break;
             default:
-                sendError("Invalid action.");
+                sendError("Invalid action for product: " . $action);
         }
     }
 
@@ -44,28 +44,28 @@ class ProductController {
 
     private function add() {
         $name = trim($_POST['name'] ?? '');
-        $desc = trim($_POST['description'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $ingredients = trim($_POST['ingredients'] ?? ''); // New field
         $price = floatval($_POST['price'] ?? 0);
-        $category = $_POST['category'] ?? 'coffee';
+        $category = trim($_POST['category'] ?? 'coffee');
 
-        if ($name === '' || $price <= 0) {
-            sendError("Name and valid price are required.");
+        if (empty($name) || $price < 0) {
+            sendError("Name and valid Price are required.");
         }
 
         $imagePath = $this->handleUpload();
-        if (!$imagePath) {
-             // Use a default or require image? Let's require it for now or use a placeholder
-             // For this app, let's require it or set null if allowed, but schema allows null.
-             // We'll proceed with NULL if no image, but usually menu items need images.
-             // Let's assume default for now to be safe or just NULL.
-             $imagePath = 'assets/menu/images/default_coffee.jpg'; 
-        }
-
-        $stmt = $this->conn->prepare("INSERT INTO products (name, description, price, image_path, category) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssdss", $name, $desc, $price, $imagePath, $category);
+        // If image upload failed but was required? For now optional or default used? 
+        // SQL dump shows some have images.
         
+        $sql = "INSERT INTO products (name, description, ingredients, price, category, image_path) VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+             sendError("Prepare failed (Add): " . $this->conn->error);
+        }
+        $stmt->bind_param("sssdss", $name, $description, $ingredients, $price, $category, $imagePath);
+
         if ($stmt->execute()) {
-            sendSuccess(['id' => $stmt->insert_id, 'message' => 'Product added successfully.']);
+            sendSuccess(['message' => 'Product added successfully.']);
         } else {
             sendError("Failed to add product: " . $stmt->error);
         }
@@ -76,29 +76,38 @@ class ProductController {
         if ($id <= 0) sendError("Invalid Product ID");
 
         $name = trim($_POST['name'] ?? '');
-        $desc = trim($_POST['description'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $ingredients = trim($_POST['ingredients'] ?? ''); // New field
         $price = floatval($_POST['price'] ?? 0);
-        $category = $_POST['category'] ?? 'coffee';
+        $category = trim($_POST['category'] ?? 'coffee');
 
-        if ($name === '' || $price <= 0) {
-            sendError("Name and valid price are required.");
+        if (empty($name) || $price < 0) {
+            sendError("Name and valid Price are required.");
         }
 
-        // Check if new image uploaded
+        // Check if image is uploaded
         $imagePath = $this->handleUpload();
         
         if ($imagePath) {
-            $stmt = $this->conn->prepare("UPDATE products SET name=?, description=?, price=?, image_path=?, category=? WHERE id=?");
-            $stmt->bind_param("ssdssi", $name, $desc, $price, $imagePath, $category, $id);
+             $sql = "UPDATE products SET name=?, description=?, ingredients=?, price=?, category=?, image_path=? WHERE id=?";
+             $stmt = $this->conn->prepare($sql);
+             if (!$stmt) {
+                sendError("Prepare failed (Update Img): " . $this->conn->error);
+             }
+             $stmt->bind_param("sssdssi", $name, $description, $ingredients, $price, $category, $imagePath, $id);
         } else {
-            $stmt = $this->conn->prepare("UPDATE products SET name=?, description=?, price=?, category=? WHERE id=?");
-            $stmt->bind_param("ssdsi", $name, $desc, $price, $category, $id);
+             $sql = "UPDATE products SET name=?, description=?, ingredients=?, price=?, category=? WHERE id=?";
+             $stmt = $this->conn->prepare($sql);
+             if (!$stmt) {
+                sendError("Prepare failed (Update NoImg): " . $this->conn->error);
+             }
+             $stmt->bind_param("sssdsi", $name, $description, $ingredients, $price, $category, $id);
         }
 
         if ($stmt->execute()) {
             sendSuccess(['message' => 'Product updated successfully.']);
         } else {
-            sendError("Failed to update product.");
+            sendError("Failed to update product: " . $stmt->error);
         }
     }
 
@@ -106,18 +115,9 @@ class ProductController {
         $id = intval($_POST['id'] ?? 0);
         if ($id <= 0) sendError("Invalid Product ID");
 
-        // Optional: Delete image file from server too.
-        // First get the image path
-        $stmt = $this->conn->prepare("SELECT image_path FROM products WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if ($row = $res->fetch_assoc()) {
-            $file = __DIR__ . '/../' . $row['image_path'];
-            if (file_exists($file) && !str_contains($file, 'default')) {
-                // @unlink($file); // Commented out for safety unless requested, but usually desired.
-            }
-        }
+        // Optional: Delete image file if exists
+        // $stmt = $this->conn->prepare("SELECT image_path FROM products WHERE id=?");
+        // ... (Similar to SliderController logic)
 
         $stmt = $this->conn->prepare("DELETE FROM products WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -142,7 +142,7 @@ class ProductController {
             sendError("Invalid file type. Only JPG, PNG, WEBP allowed.");
         }
 
-        // Ensure directory exists
+        // Directory: assets/menu/images/
         $uploadDir = __DIR__ . '/../assets/menu/images/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);

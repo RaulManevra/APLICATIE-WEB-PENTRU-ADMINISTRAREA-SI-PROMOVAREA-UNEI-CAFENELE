@@ -64,8 +64,11 @@ class OrderController {
             $sqlItems = "SELECT oi.quantity, oi.price_at_time, p.name 
                          FROM order_items oi
                          JOIN products p ON oi.product_id = p.id
-                         WHERE oi.order_id = $orderId";
-            $resItems = $this->conn->query($sqlItems);
+                         WHERE oi.order_id = ?";
+            $stmtItems = $this->conn->prepare($sqlItems);
+            $stmtItems->bind_param("i", $orderId);
+            $stmtItems->execute();
+            $resItems = $stmtItems->get_result();
             
             $items = [];
             if ($resItems) {
@@ -119,7 +122,9 @@ class OrderController {
                      // Auto-free table (unless reserved? User said 'set to libera')
                      // Let's check current status to be safe? User rule: "set table as libera exept... another order".
                      // So we just set it to Libera.
-                     $this->conn->query("UPDATE tables SET Status='Libera' WHERE ID=$tableId");
+                     $updTable = $this->conn->prepare("UPDATE tables SET Status='Libera' WHERE ID=?");
+                     $updTable->bind_param("i", $tableId);
+                     $updTable->execute();
                  }
              }
 
@@ -147,7 +152,9 @@ class OrderController {
         if ($stmt->execute()) {
             // Update Table Status if assigned
             if ($tableId) {
-                $this->conn->query("UPDATE tables SET Status='Ocupata' WHERE ID=$tableId");
+                $updT = $this->conn->prepare("UPDATE tables SET Status='Ocupata' WHERE ID=?");
+                $updT->bind_param("i", $tableId);
+                $updT->execute();
             }
             sendSuccess(['message' => 'Table assigned']);
         } else {

@@ -1,4 +1,9 @@
 // Main Initialization Wrapper
+window.onerror = function (msg, url, line, col, error) {
+  console.error("Admin JS Error: " + msg + "\nLine: " + line);
+  return false;
+};
+
 function initAdminPanel() {
   console.log("Admin Panel Initializing...", new Date().toISOString());
   // Visual confirmation for debug
@@ -30,10 +35,10 @@ function initAdminPanel() {
   // ==========================================
   // ====== DASHBOARD AND SCHEDULE INIT ======
   // ==========================================
-  loadDashboard();
-  setupSearch();
-  setupScheduleForm();
-  loadDashboard();
+  // ==========================================
+  // ====== DASHBOARD AND SCHEDULE INIT ======
+  // ==========================================
+  // loadDashboard() is called by showSection('dashboard') below.
   setupSearch();
   setupScheduleForm();
   setupEmailSettingsForm();
@@ -61,15 +66,17 @@ function initAdminPanel() {
     });
   });
 
-  window.onclick = function (event) {
+  // Delegated modal close on click outside
+  window.addEventListener("click", (event) => {
     if (event.target.classList.contains("modal")) {
       event.target.style.display = "none";
     }
-  };
+  });
 
   // ==========================================
   // ======== PRODUCT MODULE SETUP ============
   // ==========================================
+  setupProductEvents();
 
   const addProdBtn = document.getElementById("add-product-btn");
   if (addProdBtn) {
@@ -141,8 +148,36 @@ function initAdminPanel() {
   const refreshOrdersBtn = document.getElementById("refresh-orders-btn");
   if (refreshOrdersBtn) refreshOrdersBtn.addEventListener("click", loadOrders);
 
+  // Ensure dashboard loads even if coming from history
+  if (showSection.lastSection === 'dashboard' || !showSection.lastSection) {
+    setTimeout(loadDashboard, 500); // Retry after short delay
+  }
+
   // Initialize Cropper (safely)
-  setupCropper();
+  // Initialize Cropper (safely)
+  if (typeof setupCropper === 'function') {
+    setupCropper();
+  }
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.getElementById("toast-notification");
+  if (!toast) {
+    console.error("Toast element not found!");
+    alert(message); // Fallback
+    return;
+  }
+
+  console.log("Showing toast:", message, type);
+  toast.innerText = message;
+  // Ensure z-index is max and visible
+  toast.style.zIndex = "2147483647";
+  toast.className = "toast show " + type;
+
+  // Hide after 3 seconds
+  setTimeout(function () {
+    toast.className = toast.className.replace("show", "");
+  }, 3000);
 }
 
 // Auto-run if already loaded (for SPA)
@@ -172,7 +207,10 @@ function showSection(sectionId) {
     );
     if (nav) nav.classList.add("active");
 
-    if (sectionId === "dashboard") loadDashboard();
+    if (sectionId === "dashboard") {
+      showSection.lastSection = 'dashboard';
+      loadDashboard();
+    }
     if (sectionId === "users") loadUsers();
     if (sectionId === "settings") loadSettings();
     if (sectionId === "menu") loadProducts();
@@ -228,19 +266,32 @@ async function apiRequest(entity, action, body = null) {
 async function loadDashboard() {
   try {
     console.log("Fetching dashboard stats...");
+    // Show loading state
+    ['stat-res-today', 'stat-res-total', 'stat-active-tables', 'stat-menu-items'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = "...";
+    });
+
     const res = await apiRequest("dashboard", "get_dashboard_stats");
     console.log("Dashboard fetch result:", res);
 
     if (res.success) {
       renderDashboard(res.data);
+      // Also update cafe status if provided
+      if (res.data.cafe_status) {
+        const statusEl = document.getElementById("global-cafe-status");
+        if (statusEl) statusEl.value = res.data.cafe_status;
+      }
     } else {
       console.warn("Dashboard fetch failed logic:", res.error);
-      // Optional: alert(res.error || "Failed to load dashboard data");
-      // For now, let's render empty state or partial?
+      const errMsg = res.message || res.error || "Failed to load dashboard data";
+      showToast(errMsg, 'error');
       document.getElementById("stat-res-today").innerText = "Err";
     }
   } catch (e) {
     console.error("Dashboard load failed exception", e);
+    showToast("Error loading dashboard: " + e.message, 'error');
+    document.getElementById("stat-res-today").innerText = "Err";
   }
 }
 
@@ -280,7 +331,8 @@ function renderDashboard(data) {
 }
 
 // Modern color palette (rotates automatically)
-const MODERN_CHART_COLORS = [
+// Modern color palette (rotates automatically)
+var MODERN_CHART_COLORS = [
   "#4CAF50",
   "#2196F3",
   "#FF9800",
@@ -660,17 +712,24 @@ async function loadProducts() {
       .map(
         (p) => `
             <tr>
-                <td><img src="${p.image_path || "assets/menu/images/coffee.jpg"
-          }" onerror="this.src='assets/img/Logo Modificat.png'"></td>
+                <td><img src="${p.image_path || "assets/menu/images/coffee.jpg"}" onerror="this.src='assets/img/Logo Modificat.png'"></td>
                 <td>${p.name}</td>
                 <td>${p.category}</td>
                 <td>${p.price} RON</td>
                 <td>
-                    <button class="btn btn-sm btn-edit" onclick="editProduct(${p.id
-          }, '${p.name}', '${p.description}', ${p.price}, '${p.category
-          }', '${p.image_path}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id
-          })"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-edit btn-edit-product" 
+                        data-id="${p.id}"
+                        data-name="${(p.name || '').replace(/"/g, '&quot;')}"
+                        data-desc="${(p.description || '').replace(/"/g, '&quot;')}"
+                        data-ingredients="${(p.ingredients || '').replace(/"/g, '&quot;')}"
+                        data-price="${p.price}"
+                        data-category="${p.category}"
+                        data-img="${p.image_path || ''}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-delete-product" data-id="${p.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
         `
@@ -679,13 +738,14 @@ async function loadProducts() {
   }
 }
 
-function editProduct(id, name, desc, price, cat, img) {
+function editProduct(id, name, desc, ingredients, price, cat, img) {
   document.getElementById("product-form").reset();
   document.getElementById("prod-id").value = id;
   document.getElementById("form-action").value = "update";
   document.getElementById("modal-title").innerText = "Edit Product";
   document.getElementById("prod-name").value = name;
   document.getElementById("prod-desc").value = desc;
+  document.getElementById("prod-ingredients").value = ingredients;
   document.getElementById("prod-price").value = price;
   document.getElementById("prod-category").value = cat;
   if (img) {
@@ -699,15 +759,24 @@ function editProduct(id, name, desc, price, cat, img) {
 
 async function handleProductSubmit(e) {
   e.preventDefault();
-  const fd = new FormData(e.target);
-  const action = document.getElementById("form-action").value;
-  const res = await apiRequest("product", action, fd);
-  if (res.success) {
-    alert(res.data.message);
-    document.getElementById("product-modal").style.display = "none";
-    loadProducts();
-  } else {
-    alert(res.error);
+  try {
+    const fd = new FormData(e.target);
+    const action = document.getElementById("form-action").value;
+    const res = await apiRequest("product", action, fd);
+    if (res.success) {
+      document.getElementById("product-modal").style.display = "none";
+      loadProducts();
+      // PHP output sends message at top level or inside data
+      const msg = res.message || (res.data && res.data.message) || 'Operation successful';
+      showToast(msg, 'success');
+    } else {
+      // PHP sends 'message' on error, apiRequest catch sends 'error'
+      const errMsg = res.message || res.error || "Operation failed";
+      showToast(errMsg, 'error');
+    }
+  } catch (err) {
+    console.error("Product submit error:", err);
+    showToast("Error: " + (err.message || err), 'error');
   }
 }
 
@@ -1492,6 +1561,26 @@ function setupQuickActions() {
         }
       } else {
         alert(res.error);
+      }
+    });
+  }
+}
+
+function setupProductEvents() {
+  const table = document.getElementById('products-table');
+  if (table) {
+    table.addEventListener('click', e => {
+      const editBtn = e.target.closest('.btn-edit-product');
+      const deleteBtn = e.target.closest('.btn-delete-product');
+
+      if (editBtn) {
+        const { id, name, desc, ingredients, price, category, img } = editBtn.dataset;
+        editProduct(id, name, desc, ingredients, price, category, img);
+      }
+
+      if (deleteBtn) {
+        const { id } = deleteBtn.dataset;
+        deleteProduct(id);
       }
     });
   }

@@ -477,6 +477,11 @@ require_admin();
             </div>
 
             <div class="form-group">
+                <label for="prod-ingredients">Ingredients</label>
+                <textarea id="prod-ingredients" name="ingredients" rows="2" placeholder="e.g. Espresso, Milk, Sugar"></textarea>
+            </div>
+
+            <div class="form-group">
                 <label for="prod-image">Image</label>
                 <input type="file" id="prod-image" name="image" accept="image/*">
                 <div id="current-image-preview" style="margin-top: 10px; display: none;">
@@ -593,5 +598,8 @@ require_admin();
         </form>
     </div>
 </div>
+
+<!-- Toast Notification -->
+<div id="toast-notification" class="toast"></div>
 
 <script src="assets/js/admin.js?v=<?= time(); ?>"></script>

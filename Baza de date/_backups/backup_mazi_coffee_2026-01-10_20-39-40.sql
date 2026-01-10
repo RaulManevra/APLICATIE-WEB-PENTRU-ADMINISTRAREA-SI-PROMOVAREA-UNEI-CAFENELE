@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.44, for macos10.15 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.39, for Win64 (x86_64)
 --
 -- Host: localhost    Database: mazi_coffee
 -- ------------------------------------------------------
--- Server version	8.0.44
+-- Server version	8.0.39
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -36,7 +36,7 @@ CREATE TABLE `admin_notes` (
 
 LOCK TABLES `admin_notes` WRITE;
 /*!40000 ALTER TABLE `admin_notes` DISABLE KEYS */;
-INSERT INTO `admin_notes` VALUES (1,'\r\nba vedeti ca arde cafeneaua are cineva un AAAAAAAAAA MA ARDE MOR AICI hjvbasuybwrayiuvbewgiBVUIERSWBOL\r\n','2026-01-10 18:38:51');
+INSERT INTO `admin_notes` VALUES (1,'Salut\r\n','2026-01-08 14:44:02');
 /*!40000 ALTER TABLE `admin_notes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -63,30 +63,6 @@ LOCK TABLES `global_settings` WRITE;
 /*!40000 ALTER TABLE `global_settings` DISABLE KEYS */;
 INSERT INTO `global_settings` VALUES ('newsletter_email','zarnescuraul@gmail.com','2026-01-10 10:58:30'),('support_email','','2026-01-10 10:58:30');
 /*!40000 ALTER TABLE `global_settings` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `ingredients`
---
-
-DROP TABLE IF EXISTS `ingredients`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ingredients` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ingredients`
---
-
-LOCK TABLES `ingredients` WRITE;
-/*!40000 ALTER TABLE `ingredients` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ingredients` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -189,8 +165,8 @@ DROP TABLE IF EXISTS `password_resets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `password_resets` (
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -206,32 +182,6 @@ LOCK TABLES `password_resets` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `product_ingredients`
---
-
-DROP TABLE IF EXISTS `product_ingredients`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `product_ingredients` (
-  `product_id` int NOT NULL,
-  `ingredient_id` int NOT NULL,
-  PRIMARY KEY (`product_id`,`ingredient_id`),
-  KEY `ingredient_id` (`ingredient_id`),
-  CONSTRAINT `product_ingredients_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `product_ingredients_ibfk_2` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `product_ingredients`
---
-
-LOCK TABLES `product_ingredients` WRITE;
-/*!40000 ALTER TABLE `product_ingredients` DISABLE KEYS */;
-/*!40000 ALTER TABLE `product_ingredients` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `products`
 --
 
@@ -242,7 +192,6 @@ CREATE TABLE `products` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `ingredients` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `price` decimal(10,2) NOT NULL,
   `image_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category` enum('coffee','other') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'coffee',
@@ -257,7 +206,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'Caramel Macchiato','Delicious Caramel Macchiato',NULL,13.00,'assets/menu/images/Caramel Macchiato.jpeg','coffee','2025-12-07 19:52:52'),(2,'Caramel Mocha','Rich Caramel Mocha','CACAT',15.00,'assets/menu/images/Caramel Mocha.jpg','coffee','2025-12-07 19:52:52'),(3,'Espresso','Strong and pure Espresso','sabrina carpenter',10.00,'assets/menu/images/Espresso.webp','coffee','2025-12-07 19:52:52'),(4,'Iced Americano','Refreshing Iced Americano',NULL,12.00,'assets/menu/images/Iced Americano.jpg','coffee','2025-12-07 19:52:52'),(5,'Latte','Smooth and creamy Latte','Lapte',14.00,'assets/menu/images/Latte.webp','coffee','2025-12-07 19:52:52'),(6,'Dorian Cafelutza','HATZ MAESTRE',NULL,6700.00,'assets/menu/images/prod_694d66784164b.jpeg','coffee','2025-12-25 16:29:44'),(7,'Capuccino','Un echilibru perfect între espresso intens, lapte fierbinte catifelat și spumă fină de lapte. O cafea cremoasă, aromată, ideală pentru orice moment al zilei.',NULL,5.00,'assets/menu/images/prod_694ffeafc7eda.jpg','coffee','2025-12-27 15:43:43'),(9,'Cortado','Espresso intens, echilibrat cu o cantitate egală de lapte cald, pentru o băutură fină, cremoasă și fără să fie prea dulce.',NULL,15.00,'assets/menu/images/prod_69500f45814e3.jpeg','coffee','2025-12-27 15:47:30'),(10,'Mocha','Combinația perfectă de espresso intens, ciocolată fină și lapte catifelat, decorată cu spumă delicată pentru o experiență dulce și aromată.',NULL,15.00,'assets/menu/images/prod_69500f8bf17c6.jpeg','coffee','2025-12-27 15:48:27'),(11,'Iced latte','Espresso rece, lapte proaspăt și cuburi de gheață, pentru o băutură răcoritoare, fină și revigorantă.',NULL,7.00,'assets/menu/images/prod_6950001b8e7e2.jfif','coffee','2025-12-27 15:49:47'),(12,'Ice-caramell-latte','Espresso rece, lapte proaspăt și gheață, cu un strop de caramel dulce, pentru o băutură cremoasă și răcoritoare.','Lapte, Caramel, Cafea',7.00,'assets/menu/images/prod_69500064bfede.jpg','coffee','2025-12-27 15:51:00'),(13,'Iced-mocha','Espresso rece, ciocolată fină, lapte proaspăt și gheață, pentru o băutură cremoasă și răcoritoare, cu gust bogat de ciocolată.',NULL,7.00,'assets/menu/images/prod_695000a881661.jpg','coffee','2025-12-27 15:52:08'),(14,'Ice-spanish-latte','Espresso de specialitate, lapte fin și gheață, îndulcit subtil cu zahăr caramelizat, pentru o experiență rafinată și revigorantă.',NULL,7.00,'assets/menu/images/prod_6950010c326ac.jpg','coffee','2025-12-27 15:53:48'),(15,'Cicolată caldă','O îmbrățișare într-o ceașcă! Ciocolată dulce, lapte cremos și spumă pufoasă, perfectă pentru momentele de relaxare.','Ciocolata, lapte cald',7.00,'assets/menu/images/prod_6950014e93c55.jpg','coffee','2025-12-27 15:54:54');
+INSERT INTO `products` VALUES (1,'Caramel Macchiato','Delicious Caramel Macchiato',13.00,'assets/menu/images/Caramel Macchiato.jpeg','coffee','2025-12-07 19:52:52'),(2,'Caramel Mocha','Rich Caramel Mocha',15.00,'assets/menu/images/Caramel Mocha.jpg','coffee','2025-12-07 19:52:52'),(3,'Espresso','Strong and pure Espresso',10.00,'assets/menu/images/Espresso.webp','coffee','2025-12-07 19:52:52'),(4,'Iced Americano','Refreshing Iced Americano',12.00,'assets/menu/images/Iced Americano.jpg','coffee','2025-12-07 19:52:52'),(5,'Latte','Smooth and creamy Latte',14.00,'assets/menu/images/Latte.webp','coffee','2025-12-07 19:52:52'),(6,'Dorian Cafelutza','HATZ MAESTRE',6700.00,'assets/menu/images/prod_694d66784164b.jpeg','coffee','2025-12-25 16:29:44'),(7,'Capuccino','Un echilibru perfect între espresso intens, lapte fierbinte catifelat și spumă fină de lapte. O cafea cremoasă, aromată, ideală pentru orice moment al zilei.',5.00,'assets/menu/images/prod_694ffeafc7eda.jpg','coffee','2025-12-27 15:43:43'),(9,'Cortado','Espresso intens, echilibrat cu o cantitate egală de lapte cald, pentru o băutură fină, cremoasă și fără să fie prea dulce.',15.00,'assets/menu/images/prod_69500f45814e3.jpeg','coffee','2025-12-27 15:47:30'),(10,'Mocha','Combinația perfectă de espresso intens, ciocolată fină și lapte catifelat, decorată cu spumă delicată pentru o experiență dulce și aromată.',15.00,'assets/menu/images/prod_69500f8bf17c6.jpeg','coffee','2025-12-27 15:48:27'),(11,'Iced latte','Espresso rece, lapte proaspăt și cuburi de gheață, pentru o băutură răcoritoare, fină și revigorantă.',7.00,'assets/menu/images/prod_6950001b8e7e2.jfif','coffee','2025-12-27 15:49:47'),(12,'Ice-caramell-latte','Espresso rece, lapte proaspăt și gheață, cu un strop de caramel dulce, pentru o băutură cremoasă și răcoritoare.',7.00,'assets/menu/images/prod_69500064bfede.jpg','coffee','2025-12-27 15:51:00'),(13,'Iced-mocha','Espresso rece, ciocolată fină, lapte proaspăt și gheață, pentru o băutură cremoasă și răcoritoare, cu gust bogat de ciocolată.',7.00,'assets/menu/images/prod_695000a881661.jpg','coffee','2025-12-27 15:52:08'),(14,'Ice-spanish-latte','Espresso de specialitate, lapte fin și gheață, îndulcit subtil cu zahăr caramelizat, pentru o experiență rafinată și revigorantă.',7.00,'assets/menu/images/prod_6950010c326ac.jpg','coffee','2025-12-27 15:53:48'),(15,'Cicolată caldă','O îmbrățișare într-o ceașcă! Ciocolată dulce, lapte cremos și spumă pufoasă, perfectă pentru momentele de relaxare.',7.00,'assets/menu/images/prod_6950014e93c55.jpg','coffee','2025-12-27 15:54:54');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -390,8 +339,8 @@ DROP TABLE IF EXISTS `user_tokens`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user_tokens` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `selector` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `validator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `selector` varchar(32) COLLATE utf8mb4_general_ci NOT NULL,
+  `validator` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
   `user_id` int NOT NULL,
   `expires_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
@@ -440,7 +389,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'zarnescuraul@gmail.com','Raul','$2y$12$j09C55tliX7bS9ZCNMLFJuerVS.0DZ0pG/pgqVzLaFcFtYosnA8Iq','admin','2025-11-24 10:19:31',34,'assets/uploads/profile_pictures/PP_userid_1.jpg','google','105941628733277196959',0,NULL),(2,'davidrares56@yahoo.com','raress_tc','$2y$12$ud4pLmRn0Vx6Vm0NpNqXY.nnTbNMkNqKmvsru14zHnrYoXpm/.JHi','admin','2025-12-08 17:24:04',10000,'assets/uploads/profile_pictures/PP_userid_2.gif',NULL,NULL,0,NULL),(3,'erwin.georgescu@student.unitbv.ro','erwin','$2y$12$K6Bet6UcpmUmXdC9I4FlYOhtazj9eQf.UeIxyKgoiQ7FuQxmSTmDW','admin','2025-12-27 15:34:58',0,'assets/public/default.png',NULL,NULL,0,NULL),(4,'guest@mazicoffee.com','Guest','$2y$10$ya7vmoIY9nQQDqeBygttKOiTfRSHLBNvxc02utkPBrEUmLzQZIEtK','user','2026-01-08 17:27:05',NULL,'assets/public/default.png',NULL,NULL,0,NULL),(5,'sisea.ianis@gmail.com','ianis','$2y$12$w1.oeOUzogdPxmvjKgbZqO/gT9Lxnyaj1a7NJW.QE3QmwqXmph6/W','user','2026-01-10 13:15:52',0,'assets/public/default.png',NULL,NULL,0,NULL);
+INSERT INTO `users` VALUES (1,'zarnescuraul@gmail.com','Raul','$2y$12$j09C55tliX7bS9ZCNMLFJuerVS.0DZ0pG/pgqVzLaFcFtYosnA8Iq','admin','2025-11-24 10:19:31',34,'assets/uploads/profile_pictures/PP_userid_1.jpg','google','105941628733277196959',0,NULL),(2,'davidrares56@yahoo.com','raress_tc','$2y$12$ud4pLmRn0Vx6Vm0NpNqXY.nnTbNMkNqKmvsru14zHnrYoXpm/.JHi','admin','2025-12-08 17:24:04',10000,'assets/public/default.png',NULL,NULL,0,NULL),(3,'erwin.georgescu@student.unitbv.ro','erwin','$2y$12$K6Bet6UcpmUmXdC9I4FlYOhtazj9eQf.UeIxyKgoiQ7FuQxmSTmDW','admin','2025-12-27 15:34:58',0,'assets/public/default.png',NULL,NULL,0,NULL),(4,'guest@mazicoffee.com','Guest','$2y$10$ya7vmoIY9nQQDqeBygttKOiTfRSHLBNvxc02utkPBrEUmLzQZIEtK','user','2026-01-08 17:27:05',NULL,'assets/public/default.png',NULL,NULL,0,NULL),(5,'sisea.ianis@gmail.com','ianis','$2y$12$w1.oeOUzogdPxmvjKgbZqO/gT9Lxnyaj1a7NJW.QE3QmwqXmph6/W','user','2026-01-10 13:15:52',0,'assets/public/default.png',NULL,NULL,0,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -453,4 +402,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-10 20:39:41
+-- Dump completed on 2026-01-10 16:43:17
