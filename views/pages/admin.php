@@ -422,6 +422,22 @@ require_admin();
                     <button type="submit" class="btn btn-success" style="margin-top: 20px;">Save Schedule</button>
                 </form>
             </div>
+
+            <div class="settings-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-top: 20px;">
+                <h3>Email Configuration</h3>
+                <p>Configure sender emails for system notifications.</p>
+                <form id="email-settings-form">
+                    <div class="form-group">
+                        <label>Newsletter Sender Email</label>
+                        <input type="email" name="newsletter_email" id="newsletter-email" class="form-control" placeholder="newsletter@mazicoffee.com" style="max-width:300px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Support / Password Reset Email</label>
+                        <input type="email" name="support_email" id="support-email" class="form-control" placeholder="support@mazicoffee.com" style="max-width:300px;">
+                    </div>
+                    <button type="submit" class="btn btn-success" style="margin-top: 10px;">Save Emails</button>
+                </form>
+            </div>
         </section>
 
     </main>

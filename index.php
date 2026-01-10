@@ -19,6 +19,19 @@ if (isset($_GET['action']) || isset($_POST['action'])) {
         $controller->handleRequest();
         exit;
     }
+    if ($page === 'forgot_password_handler') {
+        require_once __DIR__ . '/controllers/ForgotPasswordController.php';
+        $controller = new ForgotPasswordController($conn);
+        $controller->handleRequest();
+        exit;
+    }
+    if ($page === 'reservation') {
+        // ReservationController is already required at top, but ensure it handles request
+        // $conn is available from config/db.php
+        $controller = new ReservationController($conn);
+        $controller->handleRequest();
+        exit;
+    }
 }
 
 $userData = SessionManager::getCurrentUserData();
@@ -79,6 +92,9 @@ if ($currentUser && isset($conn)) {
                 'profile_picture_upload' => 'views/forms/profile_picture_upload.php',
                 'cart' => 'views/pages/cart.php',
                 'cart_handler' => 'controllers/CartController.php',
+                'forgot_password' => 'views/auth/forgot_password.php',
+                'reset_password' => 'views/auth/reset_password.php',
+                'forgot_password_handler' => 'index.php?page=forgot_password_handler'
             ], JSON_UNESCAPED_UNICODE); ?>
         };
         // Backwards compatibility if needed, or just use APP_CONFIG.currentUser

@@ -1,6 +1,7 @@
 /**
  * Profile Popup Logic
  */
+import { safeFetch } from './api.js';
 
 let scrollCompApplied = false;
 let previousBodyPaddingRight = '';
@@ -64,11 +65,48 @@ export function initProfilePopup() {
         document.body.style.overflow = 'hidden';
     }
 
+    async function updateReservationDisplay() {
+        try {
+            const container = document.getElementById('upcoming-res-container');
+            if (!container) return;
+
+            const res = await safeFetch('?page=reservation&action=get_upcoming');
+            const data = await res.json();
+
+            if (data.success && data.data) {
+                const r = data.data;
+
+                const nameEl = document.getElementById('upcoming-res-name');
+                const tableEl = document.getElementById('upcoming-res-table');
+                const timeEl = document.getElementById('upcoming-res-time');
+
+                if (nameEl) nameEl.textContent = r.reservation_name || 'Guest';
+                if (tableEl) tableEl.textContent = r.table_name || r.table_id;
+
+                if (timeEl && r.reservation_time) {
+                    const d = new Date(r.reservation_time);
+                    // Format: "10 Jan, 15:30"
+                    const day = d.getDate();
+                    const month = d.toLocaleString('en-US', { month: 'short' });
+                    const time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    timeEl.textContent = `${day} ${month}, ${time}`;
+                }
+
+                container.hidden = false;
+            } else {
+                container.hidden = true;
+            }
+        } catch (e) {
+            console.error('Failed to update reservation display', e);
+        }
+    }
+
     function openPopup() {
         popup.removeAttribute('hidden');
         backdrop.classList.add('active');
         btn.setAttribute('aria-expanded', 'true');
         applyScrollComp();
+        updateReservationDisplay();
     }
 
     // Toggle wrapper

@@ -30,6 +30,9 @@ class ReservationController {
             case 'check_status':
                  // Optional: check status for a specific table/time
                  break;
+            case 'get_upcoming':
+                $this->getUpcoming();
+                break;
             default:
                 sendError("Invalid action.");
         }
@@ -397,6 +400,15 @@ class ReservationController {
         if (!$user || !in_array('admin', $user['roles'])) {
             sendError("Unauthorized.");
         }
+    }
+
+    private function getUpcoming() {
+        if (!SessionManager::isLoggedIn()) {
+            sendSuccess(['data' => null]);
+        }
+        $user = SessionManager::getCurrentUserData();
+        $res = self::getUpcomingForUser($this->conn, $user['id']);
+        sendSuccess(['data' => $res]);
     }
 
     /**

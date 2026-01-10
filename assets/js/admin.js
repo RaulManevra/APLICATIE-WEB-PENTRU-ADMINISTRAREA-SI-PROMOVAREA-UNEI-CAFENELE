@@ -33,6 +33,10 @@ function initAdminPanel() {
   loadDashboard();
   setupSearch();
   setupScheduleForm();
+  loadDashboard();
+  setupSearch();
+  setupScheduleForm();
+  setupEmailSettingsForm();
   setupQuickActions();
 
   // ==========================================
@@ -302,114 +306,128 @@ function hexToRgba(hex, alpha = 1) {
 var resChartInstance = null;
 
 function renderChart(chartData) {
-    const cvs = document.getElementById('TopSellingChart');
-    if (!cvs) return;
+  const cvs = document.getElementById('TopSellingChart');
+  if (!cvs) return;
 
-    // Destroy previous chart if exists
-    if (resChartInstance) resChartInstance.destroy();
+  // Destroy previous chart if exists
+  if (resChartInstance) resChartInstance.destroy();
 
-    // Diverse colors for bars
-    const colors = [
-        'rgba(255, 99, 132, 0.7)',
-        'rgba(54, 162, 235, 0.7)',
-        'rgba(255, 206, 86, 0.7)',
-        'rgba(75, 192, 192, 0.7)',
-        'rgba(153, 102, 255, 0.7)',
-        'rgba(255, 159, 64, 0.7)',
-        'rgba(199, 199, 199, 0.7)',
-        'rgba(83, 102, 255, 0.7)',
-        'rgba(255, 99, 255, 0.7)',
-        'rgba(99, 255, 132, 0.7)'
-    ];
+  // Diverse colors for bars
+  const colors = [
+    'rgba(255, 99, 132, 0.7)',
+    'rgba(54, 162, 235, 0.7)',
+    'rgba(255, 206, 86, 0.7)',
+    'rgba(75, 192, 192, 0.7)',
+    'rgba(153, 102, 255, 0.7)',
+    'rgba(255, 159, 64, 0.7)',
+    'rgba(199, 199, 199, 0.7)',
+    'rgba(83, 102, 255, 0.7)',
+    'rgba(255, 99, 255, 0.7)',
+    'rgba(99, 255, 132, 0.7)'
+  ];
 
-    const borderColors = colors.map(c => c.replace('0.7', '1'));
+  const borderColors = colors.map(c => c.replace('0.7', '1'));
 
-    resChartInstance = new Chart(cvs.getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: chartData.labels,
-            datasets: [
-                {
-                    label: 'Units Sold',
-                    data: chartData.data,
-                    backgroundColor: colors,
-                    borderColor: borderColors,
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    yAxisID: 'yUnits'
-                },
-                {
-                    label: 'Revenue (RON)',
-                    data: chartData.revenue, // Array of revenue per product
-                    backgroundColor: colors.map(c => c.replace('0.7', '0.3')), // lighter shade
-                    borderColor: borderColors,
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    yAxisID: 'yRevenue'
-                }
-            ]
+  resChartInstance = new Chart(cvs.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: chartData.labels,
+      datasets: [
+        {
+          label: 'Units Sold',
+          data: chartData.data,
+          backgroundColor: colors,
+          borderColor: borderColors,
+          borderWidth: 1,
+          borderRadius: 10,
+          yAxisID: 'yUnits'
+        }/*,
+        {
+          label: 'Revenue (RON)',
+          data: chartData.revenue, // Array of revenue per product
+          backgroundColor: colors.map(c => c.replace('0.7', '0.3')), // lighter shade
+          borderColor: borderColors,
+          borderWidth: 1,
+          borderRadius: 10,
+          yAxisID: 'yRevenue'
+        }*/
+      ]
+    },
+    options: {
+      indexAxis: 'y', // Horizontal bars
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 900,
+        easing: 'easeOutQuart'
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0,0,0,0.05)',
+            borderDash: [6, 6]
+          },
+          ticks: {
+            precision: 0,
+            color: '#6b7280'
+          }
         },
-        options: {
-            indexAxis: 'y', // Horizontal bars
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: {
-                duration: 900,
-                easing: 'easeOutQuart'
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0,0,0,0.05)',
-                        borderDash: [6, 6]
-                    },
-                    ticks: {
-                        precision: 0,
-                        color: '#6b7280'
-                    }
-                },
-                yUnits: {
-                    position: 'left',
-                    grid: { display: false },
-                    ticks: {
-                        color: '#111827',
-                        font: {
-                            size: 14,
-                            weight: '600'
-                        }
-                    }
-                },
-                yRevenue: {
-                    position: 'right',
-                    grid: { drawOnChartArea: false },
-                    ticks: {
-                        callback: value => value + ' RON',
-                        color: '#2563eb'
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        font: { size: 13, weight: '500' }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: '#111827',
-                    callbacks: {
-                        label: function(context) {
-                            const datasetLabel = context.dataset.label || '';
-                            const value = context.parsed.x;
-                            return `${datasetLabel}: ${value}` + (datasetLabel === 'Revenue (RON)' ? ' RON' : ' units');
-                        }
-                    }
-                }
+        yUnits: {
+          position: 'left',
+          grid: { display: false },
+          ticks: {
+            color: '#111827',
+            font: {
+              size: 14,
+              weight: '600'
             }
+          }
+        },
+        yRevenue: {
+          position: 'right',
+          grid: { drawOnChartArea: false, drawTicks: false, drawBorder: false },
+          title: {
+            display: true,
+            text: `Total Revenue: ${chartData.revenue ? chartData.revenue.reduce((a, b) => a + b, 0) : 0} RON`,
+            color: '#167137ff', // Green
+            opacity: 0.6,
+            font: { size: 14, weight: 'bold' },
+            padding: { right: 10 }
+          },
+          ticks: {
+            display: false, // Hide the 0 RON, 1 RON... ticks
+            callback: value => value + ' RON',
+            color: '#167137ff',
+            opacity: 0.6,
+          }
         }
-    });
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            font: { size: 13, weight: '500' }
+          }
+        },
+        tooltip: {
+          backgroundColor: '#111827',
+          callbacks: {
+            label: function (context) {
+              const datasetLabel = context.dataset.label || '';
+              const value = context.parsed.x;
+              let label = `${datasetLabel}: ${value}`;
+              if (chartData.revenue && chartData.revenue[context.dataIndex] !== undefined) {
+                label += ` (${chartData.revenue[context.dataIndex]} RON)`;
+              }
+              return label;
+            }
+          }
+        }
+      }
+    }
+  });
 }
 
 
@@ -437,7 +455,11 @@ async function sendNewsletter() {
     subject: sub,
     body: body,
   });
-  alert(res.success ? res.data.message : res.error);
+  alert(res.success ? res.message : res.message || res.error);
+  if (res.success) {
+    document.getElementById("news-subject").value = "";
+    document.getElementById("news-body").value = "";
+  }
 }
 // ==========================================
 // =============== USERS ====================
@@ -460,22 +482,17 @@ async function loadUsers(search = "") {
       .map(
         (u) => `
             <tr>
-                <td><div style="display:flex;align-items:center;gap:10px;"><img src="${
-                  u.PPicture || "assets/img/default-user.png"
-                }" style="width:30px;height:30px;border-radius:50%;"><span>${
-          u.username
-        }</span></div></td>
-                <td>${u.email}</td><td>${u.role}</td><td>${
-          u.PuncteFidelitate
-        }</td>
-                <td>${
-                  u.is_blacklisted == 1
-                    ? '<span style="color:red">Blacklisted</span>'
-                    : '<span style="color:green">Active</span>'
-                }</td>
-                <td><button class="btn btn-sm btn-edit" onclick="viewUser(${
-                  u.id
-                })">Details</button></td>
+                <td><div style="display:flex;align-items:center;gap:10px;"><img src="${u.PPicture || "assets/img/default-user.png"
+          }" style="width:30px;height:30px;border-radius:50%;"><span>${u.username
+          }</span></div></td>
+                <td>${u.email}</td><td>${u.role}</td><td>${u.PuncteFidelitate
+          }</td>
+                <td>${u.is_blacklisted == 1
+            ? '<span style="color:red">Blacklisted</span>'
+            : '<span style="color:green">Active</span>'
+          }</td>
+                <td><button class="btn btn-sm btn-edit" onclick="viewUser(${u.id
+          })">Details</button></td>
             </tr>`
       )
       .join("");
@@ -494,19 +511,14 @@ async function viewUser(id) {
     }
 
     document.getElementById("user-details-content").innerHTML = `
-            <div style="text-align:center;"><img src="${
-              u.PPicture || "assets/img/default-user.png"
-            }" style="width:80px;height:80px;border-radius:50%;"><h3>${
-      u.username
-    }</h3><p>${u.email}</p></div>
+            <div style="text-align:center;"><img src="${u.PPicture || "assets/img/default-user.png"
+      }" style="width:80px;height:80px;border-radius:50%;"><h3>${u.username
+      }</h3><p>${u.email}</p></div>
             ${statusHtml}
-            <p><strong>Reservations:</strong> ${
-              u.total_reservations
-            } | <strong>Deleted Res:</strong> ${
-      u.deleted_reservations || 0
-    } | <strong>Orders:</strong> ${u.total_orders} | <strong>Points:</strong> ${
-      u.PuncteFidelitate
-    }</p>
+            <p><strong>Reservations:</strong> ${u.total_reservations
+      } | <strong>Deleted Res:</strong> ${u.deleted_reservations || 0
+      } | <strong>Orders:</strong> ${u.total_orders} | <strong>Points:</strong> ${u.PuncteFidelitate
+      }</p>
         `;
 
     // Configure Blacklist Button
@@ -588,24 +600,28 @@ async function loadSettings() {
       .map(
         (d, i) => `
             <tr>
-                <td>${
-                  d.day_name
-                }<input type="hidden" name="schedule[${i}][day_of_week]" value="${
-          d.day_of_week
-        }"></td>
-                <td><input type="time" name="schedule[${i}][open_time]" value="${
-          d.open_time
-        }"></td>
-                <td><input type="time" name="schedule[${i}][close_time]" value="${
-          d.close_time
-        }"></td>
-                <td><input type="checkbox" name="schedule[${i}][is_closed]" value="1" ${
-          d.is_closed == 1 ? "checked" : ""
-        } onchange="this.value=this.checked?1:0"></td>
+                <td>${d.day_name
+          }<input type="hidden" name="schedule[${i}][day_of_week]" value="${d.day_of_week
+          }"></td>
+                <td><input type="time" name="schedule[${i}][open_time]" value="${d.open_time
+          }"></td>
+                <td><input type="time" name="schedule[${i}][close_time]" value="${d.close_time
+          }"></td>
+                <td><input type="checkbox" name="schedule[${i}][is_closed]" value="1" ${d.is_closed == 1 ? "checked" : ""
+          } onchange="this.value=this.checked?1:0"></td>
             </tr>
         `
       )
       .join("");
+  }
+
+  // Load Email Settings
+  const res2 = await apiRequest("settings", "get_emails");
+  if (res2.success) {
+    if (document.getElementById("newsletter-email"))
+      document.getElementById("newsletter-email").value = res2.data.newsletter_email || "";
+    if (document.getElementById("support-email"))
+      document.getElementById("support-email").value = res2.data.support_email || "";
   }
 }
 function setupScheduleForm() {
@@ -618,8 +634,19 @@ function setupScheduleForm() {
         "update_schedule",
         new FormData(f)
       );
-      alert(res.success ? res.data.message : res.error);
+      alert(res.success ? res.message : res.message || res.error);
     });
+}
+
+function setupEmailSettingsForm() {
+  const f = document.getElementById("email-settings-form");
+  if (f) {
+    f.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const res = await apiRequest("settings", "update_emails", new FormData(f));
+      alert(res.success ? res.message : res.message || res.error);
+    });
+  }
 }
 
 // ==========================================
@@ -633,21 +660,17 @@ async function loadProducts() {
       .map(
         (p) => `
             <tr>
-                <td><img src="${
-                  p.image_path || "assets/menu/images/coffee.jpg"
-                }" onerror="this.src='assets/img/Logo Modificat.png'"></td>
+                <td><img src="${p.image_path || "assets/menu/images/coffee.jpg"
+          }" onerror="this.src='assets/img/Logo Modificat.png'"></td>
                 <td>${p.name}</td>
                 <td>${p.category}</td>
                 <td>${p.price} RON</td>
                 <td>
-                    <button class="btn btn-sm btn-edit" onclick="editProduct(${
-                      p.id
-                    }, '${p.name}', '${p.description}', ${p.price}, '${
-          p.category
-        }', '${p.image_path}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(${
-                      p.id
-                    })"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-edit" onclick="editProduct(${p.id
+          }, '${p.name}', '${p.description}', ${p.price}, '${p.category
+          }', '${p.image_path}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id
+          })"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `
@@ -709,21 +732,20 @@ async function loadSlides() {
     container.innerHTML = `
             <div class="slider-grid">
                 ${res.data
-                  .map(
-                    (s) => `
+        .map(
+          (s) => `
                     <div class="slide-card">
                         <img src="${s.image_path}">
                         <div class="slide-info">
                             <strong>${s.title || "No Title"}</strong>
                             <p>${s.subtitle || ""}</p>
-                            <button class="btn btn-sm btn-danger" onclick="deleteSlide(${
-                              s.id
-                            })">Delete</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteSlide(${s.id
+            })">Delete</button>
                         </div>
                     </div>
                 `
-                  )
-                  .join("")}
+        )
+        .join("")}
             </div>
         `;
   }
@@ -767,32 +789,25 @@ function renderTableList(tables) {
     .map(
       (t) => `
         <div class="table-card status-${t.Status.toLowerCase().replace(
-          " ",
-          "-"
-        )}">
+        " ",
+        "-"
+      )}">
             <div class="table-id">Table ${t.ID}</div>
-            <select class="table-status-select" onchange="updateTableStatus(${
-              t.ID
-            }, this.value)">
-                <option value="Libera" ${
-                  t.Status == "Libera" ? "selected" : ""
-                }>Libera</option>
-                <option value="Ocupata" ${
-                  t.Status == "Ocupata" ? "selected" : ""
-                }>Ocupata</option>
-                <option value="Rezervata" ${
-                  t.Status == "Rezervata" ? "selected" : ""
-                }>Rezervata</option>
-                <option value="Inactiva" ${
-                  t.Status == "Inactiva" ? "selected" : ""
-                }>Inactiva</option>
+            <select class="table-status-select" onchange="updateTableStatus(${t.ID
+        }, this.value)">
+                <option value="Libera" ${t.Status == "Libera" ? "selected" : ""
+        }>Libera</option>
+                <option value="Ocupata" ${t.Status == "Ocupata" ? "selected" : ""
+        }>Ocupata</option>
+                <option value="Rezervata" ${t.Status == "Rezervata" ? "selected" : ""
+        }>Rezervata</option>
+                <option value="Inactiva" ${t.Status == "Inactiva" ? "selected" : ""
+        }>Inactiva</option>
             </select>
             <div style="margin-top:10px;">
-                 <button class="btn btn-sm btn-edit" onclick="openTableProps(${
-                   t.ID
-                 }, '${t.shape}', ${t.width}, ${
-        t.height
-      })"><i class="fas fa-cog"></i></button>
+                 <button class="btn btn-sm btn-edit" onclick="openTableProps(${t.ID
+        }, '${t.shape}', ${t.width}, ${t.height
+        })"><i class="fas fa-cog"></i></button>
             </div>
         </div>
     `
@@ -823,9 +838,8 @@ function renderFloorPlan(tables, bg) {
 
   tables.forEach((t) => {
     const el = document.createElement("div");
-    el.className = `draggable-table status-${t.Status.toLowerCase()} shape-${
-      t.shape
-    }`;
+    el.className = `draggable-table status-${t.Status.toLowerCase()} shape-${t.shape
+      }`;
     el.style.left = t.x_pos + "%";
     el.style.top = t.y_pos + "%";
     // Now using percentages for width/height too
@@ -1272,19 +1286,17 @@ function renderResTable(elId, data, isDeleted = false) {
             <td>Table ${r.table_id}</td>
             <td>${r.reservation_name}</td>
             <td>${r.username || "-"}</td>
-            ${
-              isDeleted
-                ? `<td><span style="color:red">Deleted</span></td>`
-                : `<td>${r.email || "-"}</td>`
-            }
-            ${
-              !isDeleted
-                ? `
+            ${isDeleted
+          ? `<td><span style="color:red">Deleted</span></td>`
+          : `<td>${r.email || "-"}</td>`
+        }
+            ${!isDeleted
+          ? `
             <td>
                 <button class="btn btn-sm btn-danger" onclick="deleteReservation(${r.id})">Delete</button>
             </td>`
-                : ""
-            }
+          : ""
+        }
         </tr>
     `
     )
@@ -1344,8 +1356,7 @@ function renderOrderCard(order) {
   const tableOptions = cachedTables
     .map(
       (t) =>
-        `<option value="${t.ID}" ${
-          parseInt(order.table_id) === parseInt(t.ID) ? "selected" : ""
+        `<option value="${t.ID}" ${parseInt(order.table_id) === parseInt(t.ID) ? "selected" : ""
         }>Table ${t.ID} (${t.Status})</option>`
     )
     .join("");
@@ -1366,38 +1377,32 @@ function renderOrderCard(order) {
 
         <div style="font-size: 0.85rem; color: #555;">
              Time: ${new Date(order.created_at).toLocaleTimeString([], {
-               hour: "2-digit",
-               minute: "2-digit",
-             })}
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
         </div>
 
         <div style="display:flex; gap:5px; margin-top:5px;">
-            <button class="btn btn-sm" style="flex:1; background:#f1c40f; color:#fff;" onclick="updateOrderStatus(${
-              order.id
-            }, 'pending')">Pending</button>
-            <button class="btn btn-sm" style="flex:1; background:#e67e22; color:#fff;" onclick="updateOrderStatus(${
-              order.id
-            }, 'preparing')">Prep</button>
-            <button class="btn btn-sm" style="flex:1; background:#2ecc71; color:#fff;" onclick="updateOrderStatus(${
-              order.id
-            }, 'ready')">Ready</button>
+            <button class="btn btn-sm" style="flex:1; background:#f1c40f; color:#fff;" onclick="updateOrderStatus(${order.id
+    }, 'pending')">Pending</button>
+            <button class="btn btn-sm" style="flex:1; background:#e67e22; color:#fff;" onclick="updateOrderStatus(${order.id
+    }, 'preparing')">Prep</button>
+            <button class="btn btn-sm" style="flex:1; background:#2ecc71; color:#fff;" onclick="updateOrderStatus(${order.id
+    }, 'ready')">Ready</button>
         </div>
 
         <div>
             <label style="font-size:0.8rem; font-weight:bold;">Example: Table / Pickup</label>
-            <select class="form-control" onchange="assignOrderTable(${
-              order.id
-            }, this.value)" style="width:100%; font-size:0.9rem; padding:5px;border-radius:4px; border:1px solid #ccc;">
-                <option value="pickup" ${
-                  !order.table_id ? "selected" : ""
-                }>Pick-up / Takeaway</option>
+            <select class="form-control" onchange="assignOrderTable(${order.id
+    }, this.value)" style="width:100%; font-size:0.9rem; padding:5px;border-radius:4px; border:1px solid #ccc;">
+                <option value="pickup" ${!order.table_id ? "selected" : ""
+    }>Pick-up / Takeaway</option>
                 ${tableOptions}
             </select>
         </div>
 
-        <button class="btn btn-success" style="width:100%; margin-top:5px;" onclick="completeOrder(${
-          order.id
-        })">
+        <button class="btn btn-success" style="width:100%; margin-top:5px;" onclick="completeOrder(${order.id
+    })">
             <i class="fas fa-check"></i> Complete & Clear
         </button>
     </div>

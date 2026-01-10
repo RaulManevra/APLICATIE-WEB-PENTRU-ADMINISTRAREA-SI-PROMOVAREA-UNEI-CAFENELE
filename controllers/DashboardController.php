@@ -13,7 +13,6 @@ class DashboardController {
     }
 
     public function handleRequest() {
-        // Admin check is usually done in admin_handler, but let's double check
         if (!SessionManager::isLoggedIn()) {
             sendError("Unauthorized.");
         }
@@ -30,6 +29,12 @@ class DashboardController {
             case 'toggle_cafe_status':
                 $this->toggleCafeStatus();
                 break;
+            case 'get_emails':
+                $this->getEmailSettings();
+                break;
+            case 'update_emails':
+                $this->updateEmailSettings();
+                break;
             case 'send_newsletter':
                 $this->sendNewsletter();
                 break;
@@ -39,13 +44,50 @@ class DashboardController {
             case 'quick_reserve':
                 $this->quickReserve();
                 break;
+            case 'get_schedule':
+                $this->getSchedule();
+                break;
+            case 'update_schedule':
+                $this->updateSchedule();
+                break;
             default:
                 sendError("Invalid dashboard action.");
         }
     }
 
+    private function getEmailSettings() {
+        $settings = ['newsletter_email' => '', 'support_email' => ''];
+        $res = $this->conn->query("SELECT key_name, value FROM global_settings WHERE key_name IN ('newsletter_email', 'support_email')");
+        if ($res) {
+            while ($row = $res->fetch_assoc()) {
+                $settings[$row['key_name']] = $row['value'];
+            }
+        }
+        sendSuccess(['data' => $settings]);
+    }
+
+    private function updateEmailSettings() {
+        $newsletter = $_POST['newsletter_email'] ?? '';
+        $support = $_POST['support_email'] ?? '';
+
+        $stmt = $this->conn->prepare("INSERT INTO global_settings (key_name, value) VALUES ('newsletter_email', ?), ('support_email', ?) ON DUPLICATE KEY UPDATE value = VALUES(value)");
+        
+        // This simple INSERT ... ON DUPLICATE update logic for multiple rows might depend on syntax support or separate queries.
+        // Let's safe-guard with separate queries to be robust.
+        $this->saveSetting('newsletter_email', $newsletter);
+        $this->saveSetting('support_email', $support);
+
+        sendSuccess(['message' => 'Email settings updated']);
+    }
+
+    private function saveSetting($key, $val) {
+        $stmt = $this->conn->prepare("INSERT INTO global_settings (key_name, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = ?");
+        $stmt->bind_param("sss", $key, $val, $val);
+        $stmt->execute();
+    }
+
     private function getStats() {
-        // 1. Counts
+        // Counts
         $stats = [
             'reservations_total' => 0,
             'reservations_today' => 0,
@@ -71,10 +113,10 @@ class DashboardController {
         $res = $this->conn->query("SELECT COUNT(*) as c FROM tables WHERE Status = 'Ocupata' AND Status != 'Inactiva'");
         if ($row = $res->fetch_assoc()) $stats['active_tables'] = $row['c'];
 
-        // 2. Chart Data: Top 5 Selling Products (Last 7 Days)
+        // Chart Data: Top 5 Selling Products (Last 7 Days)
         $sevenDaysAgo = date('Y-m-d H:i:s', strtotime('-7 days'));
         $chartSql = "
-            SELECT p.name, SUM(oi.quantity) as total_qty
+            SELECT p.name, SUM(oi.quantity) as total_qty, SUM(oi.quantity * oi.price_at_time) as total_revenue
             FROM order_items oi
             JOIN orders o ON oi.order_id = o.id
             JOIN products p ON oi.product_id = p.id
@@ -87,20 +129,23 @@ class DashboardController {
         
         $labels = [];
         $chartData = [];
+        $revenueData = [];
         
         if ($chartRes) {
             while($row = $chartRes->fetch_assoc()) {
                 $labels[] = $row['name'];
                 $chartData[] = (int)$row['total_qty'];
+                $revenueData[] = (float)$row['total_revenue'];
             }
         }
         
         if (empty($labels)) {
             $labels = ['No Sales'];
             $chartData = [0];
+            $revenueData = [0];
         }
 
-        // 3. Recent Activity (Last 5 Reservations)
+        // Recent Activity (Last 5 Reservations)
         $recent = [];
         $res = $this->conn->query("SELECT r.*, u.username FROM reservations r LEFT JOIN users u ON r.user_id = u.id ORDER BY r.created_at DESC LIMIT 5");
         if ($res) {
@@ -115,19 +160,19 @@ class DashboardController {
             }
         }
 
-        // 4. Notes
+        // Notes
         $notes = "";
         $res = $this->conn->query("SELECT content FROM admin_notes WHERE id = 1");
         if ($row = $res->fetch_assoc()) $notes = $row['content'];
 
-        // 5. Cafe Status
+        // Cafe Status
         $cafeStatus = 'open';
         $res = $this->conn->query("SELECT value FROM global_settings WHERE key_name = 'cafe_status'");
         if ($row = $res->fetch_assoc()) $cafeStatus = $row['value'];
 
         sendSuccess(['data' => [
             'stats' => $stats,
-            'chart' => ['labels' => $labels, 'data' => $chartData],
+            'chart' => ['labels' => $labels, 'data' => $chartData, 'revenue' => $revenueData],
             'recent' => $recent,
             'notes' => $notes,
             'cafe_status' => $cafeStatus
@@ -136,9 +181,7 @@ class DashboardController {
 
     private function saveNote() {
         $content = $_POST['content'] ?? '';
-        // Sanitize? Maybe simple text.
         $content = strip_tags($content); 
-        // Allow basic formatting? Let's just strip for now.
         
         $stmt = $this->conn->prepare("UPDATE admin_notes SET content = ? WHERE id = 1");
         $stmt->bind_param("s", $content);
@@ -162,20 +205,122 @@ class DashboardController {
         }
     }
 
+    private function getSchedule() {
+        // Build schedule array based on schedule table
+        // We need 7 days. If table has data use it, else default.
+        // Assuming 'schedule' table: id, day_of_week(0-6), open_time, close_time, is_closed
+        
+        $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        $schedule = [];
+        
+        for ($i=0; $i<7; $i++) {
+            $schedule[$i] = [
+                'day_of_week' => $i,
+                'day_name' => $days[$i],
+                'open_time' => '10:00',
+                'close_time' => '22:00',
+                'is_closed' => 0
+            ];
+        }
+
+        $res = $this->conn->query("SELECT * FROM schedule ORDER BY day_of_week ASC");
+        if ($res) {
+            while($row = $res->fetch_assoc()) {
+                $idx = (int)$row['day_of_week'];
+                if (isset($schedule[$idx])) {
+                    $schedule[$idx]['open_time'] = substr($row['open_time'], 0, 5);
+                    $schedule[$idx]['close_time'] = substr($row['close_time'], 0, 5);
+                    $schedule[$idx]['is_closed'] = (int)$row['is_closed'];
+                }
+            }
+        }
+        
+        sendSuccess(['data' => array_values($schedule)]);
+    }
+
+    private function updateSchedule() {
+        $data = $_POST['schedule'] ?? [];
+        if (!is_array($data)) sendError("Invalid data");
+
+        foreach ($data as $item) {
+            $day = (int)$item['day_of_week'];
+            if ($day < 0 || $day > 6) continue;
+
+            $open = $item['open_time'] ?? '10:00';
+            $close = $item['close_time'] ?? '22:00';
+            $closed = (int)($item['is_closed'] ?? 0);
+
+            // Upsert
+            $stmt = $this->conn->prepare("INSERT INTO schedule (day_of_week, open_time, close_time, is_closed) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE open_time = VALUES(open_time), close_time = VALUES(close_time), is_closed = VALUES(is_closed)");
+            
+            // Format time? database usually takes HH:MM:SS or HH:MM. Input is likely HH:MM.
+            $stmt->bind_param("issi", $day, $open, $close, $closed);
+            $stmt->execute();
+        }
+
+        sendSuccess(['message' => 'Schedule updated']);
+    }
+
+    // Newsletter
     private function sendNewsletter() {
-        // Placeholder implementation
         $subject = $_POST['subject'] ?? '';
         $body = $_POST['body'] ?? '';
         
         if (empty($subject) || empty($body)) sendError("Subject and Body required");
 
-        // Actually fetching users and mailing would go here.
-        // For risk reasons, we won't mass mail in this demo, but we simulate it.
-        // sleep(1); // Simulate work
+        // 1. Get Sender Email
+        $sender = 'noreply@mazicoffee.com'; // Default
+        $res = $this->conn->query("SELECT value FROM global_settings WHERE key_name = 'newsletter_email'");
+        if ($row = $res->fetch_assoc()) {
+            if (!empty($row['value'])) $sender = $row['value'];
+        }
+
+        // 2. Fetch Users
+        $emails = [];
+        $res = $this->conn->query("SELECT email FROM users WHERE email IS NOT NULL AND email != ''");
+        if ($res) {
+            while ($row = $res->fetch_assoc()) {
+                $emails[] = $row['email'];
+            }
+        }
+
+        if (empty($emails)) sendError("No users to send to.");
+
+        // 3. Send Emails (Simulation/Real)
+        // Note: PHP mail() might block or fail on local Ampps without config.
+        // We will loop and attempt to send, but handle errors gracefully.
         
-        sendSuccess(['message' => 'Newsletter queued for sending (Simulation)']);
+        $headers = "From: " . $sender . "\r\n";
+        $headers .= "Reply-To: " . $sender . "\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+
+        $count = 0;
+        $failures = 0;
+
+        foreach ($emails as $to) {
+             if (@mail($to, $subject, $body, $headers)) {
+                 $count++;
+             } else {
+                 $failures++;
+             }
+        }
+        
+        // Save to History
+        $sentBy = SessionManager::getCurrentUserData()['id'] ?? null;
+        $stmt = $this->conn->prepare("INSERT INTO newsletters_history (subject, body, recipients_count, failures_count, sent_by) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssiii", $subject, $body, $count, $failures, $sentBy);
+        $stmt->execute();
+
+        if ($count == 0 && $failures > 0) {
+             sendError("Failed to send emails. SMTP server might not be configured or detected (Error 500/Mail Failure).");
+        } elseif ($count > 0 && $failures > 0) {
+             sendSuccess(['message' => "Newsletter sent to $count users. ($failures failed)"]);
+        } else {
+             sendSuccess(['message' => "Newsletter sent to $count users."]);
+        }
     }
 
+    // Export Data
     private function exportData() {
         $type = $_GET['type'] ?? 'reservations';
         

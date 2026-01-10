@@ -57,12 +57,9 @@ if ($entity === 'slider') {
 } elseif ($entity === 'reservation') {
     require_once __DIR__ . '/ReservationController.php';
     $controller = new ReservationController($conn);
-} elseif ($entity === 'dashboard') {
+} elseif ($entity === 'dashboard' || $entity === 'settings') {
     require_once __DIR__ . '/DashboardController.php';
     $controller = new DashboardController($conn);
-} elseif ($entity === 'settings') {
-    require_once __DIR__ . '/SettingsController.php';
-    $controller = new SettingsController($conn);
 } elseif ($entity === 'user') {
     require_once __DIR__ . '/UserController.php';
     $controller = new UserController($conn);

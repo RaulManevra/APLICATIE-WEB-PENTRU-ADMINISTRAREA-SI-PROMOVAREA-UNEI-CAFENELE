@@ -76,7 +76,7 @@ document.addEventListener("click", async e => {
 // Form Submission (Login/Register)
 document.addEventListener("submit", async e => {
     const form = e.target;
-    if (form.matches("form[action*='controllers/register_handler.php'], form[action*='controllers/login_handler.php'], form[action*='controllers/profile_handler.php']")) {
+    if (form.matches("form[action*='controllers/register_handler.php'], form[action*='controllers/login_handler.php'], form[action*='controllers/profile_handler.php'], form[action*='forgot_password_handler']")) {
         e.preventDefault();
         const formData = new FormData(form);
         const action = form.getAttribute("action");
