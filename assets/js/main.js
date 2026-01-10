@@ -86,10 +86,16 @@ document.addEventListener("submit", async e => {
             const data = await res.json();
 
             if (data.success) {
-                await refreshCurrentUser();
+                // Determine next steps
+                const promises = [refreshCurrentUser()];
 
-                // Special handling for profile picture upload
+                if (data.redirect) {
+                    promises.push(loadPage(data.redirect));
+                }
+
                 if (action.includes('profile_handler.php')) {
+                    await Promise.all(promises);
+                    // Special handling for profile picture upload
                     // Close modal
                     const modal = document.getElementById("modal");
                     if (modal) modal.style.display = "none";
@@ -100,8 +106,8 @@ document.addEventListener("submit", async e => {
                         const src = img.getAttribute('src').split('?')[0];
                         img.setAttribute('src', `${src}?t=${timestamp}`);
                     });
-                } else if (data.redirect) {
-                    await loadPage(data.redirect);
+                } else {
+                    await Promise.all(promises);
                 }
             } else {
                 showModal(data.message);
@@ -127,8 +133,10 @@ document.addEventListener("click", async e => {
             const res = await safeFetch('controllers/logout.php', { method: 'GET' });
             const data = await res.json();
             if (data.success) {
-                await refreshCurrentUser();
-                await loadPage(data.redirect);
+                await Promise.all([
+                    refreshCurrentUser(),
+                    loadPage(data.redirect)
+                ]);
                 closeProfilePopup();
             } else {
                 showModal("Logout failed.");
