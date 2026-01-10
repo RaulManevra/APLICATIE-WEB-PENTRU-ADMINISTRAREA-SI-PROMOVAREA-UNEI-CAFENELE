@@ -46,18 +46,39 @@ export function updateHeaderUI() {
     adminLinkLi.style.display = isAdmin ? "" : "none";
   }
 
-  // 2. Toggle Popup Content (Login/Register vs Logout)
-  const authButtons = document.getElementById("auth-buttons");
-  const profileButtons = document.getElementById("profile-buttons");
+  // 2. Toggle Popup Content / Profile Logic
+  // unified: profile-buttons is always visible, but we inject extra info if logged in
+
+  // Update Profile Button Text/Icon dynamically
+  const profileBtn = document.getElementById("profile-btn");
+  if (profileBtn) {
+    if (isLoggedIn) {
+      const avatarUrl = userData.profile_picture || "assets/public/default.png";
+      const displayUser = userData.username || window.CURRENT_USER || "User";
+      profileBtn.innerHTML = `
+        ${escapeHtml(displayUser)}
+        <img src="${escapeHtml(
+        avatarUrl
+      )}" alt="Profile" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;">
+      `;
+    } else {
+      profileBtn.innerHTML = `
+        Cont
+        <i class="fa-regular fa-circle-user"></i>
+      `;
+    }
+  }
 
   // Profile Info Container (inside profile popup)
   let profileInfo = document.getElementById("profile-info");
   const popupContent = document.querySelector(".profile-popup-content");
+  const userActions = document.getElementById("popup-user-actions");
+  const guestActions = document.getElementById("popup-guest-actions");
 
   if (isLoggedIn) {
-    // Logged IN: Show Profile Icon, Hide Login/Register
-    if (authButtons) authButtons.style.display = "none";
-    if (profileButtons) profileButtons.style.display = "";
+    // Show User Actions, Hide Guest Actions
+    if (userActions) userActions.style.display = "flex";
+    if (guestActions) guestActions.style.display = "none";
 
     if (popupContent) {
       // Create Profile Info if missing
@@ -91,45 +112,14 @@ export function updateHeaderUI() {
         `;
 
 
-      // Add click listener for profile picture
-      setTimeout(() => {
-        const picTrigger = document.getElementById("profile-pic-trigger");
-        if (picTrigger) {
-          picTrigger.addEventListener("click", (e) => {
-            e.preventDefault();
-            if (confirm("Vrei să îți schimbi poza de profil?")) {
-              import("./profile.js").then((p) => p.closeProfilePopup());
 
-              // Fetch and show modal
-              import("./api.js").then(({ safeFetch }) => {
-                const routes = window.APP_CONFIG?.routes || {};
-                const url = routes["profile_picture_upload"];
-                if (url) {
-                  safeFetch(url)
-                    .then((res) => res.text())
-                    .then((html) => {
-                      import("./utils.js").then(({ showContentModal }) => {
-                        showContentModal(html);
-                      });
-                    })
-                    .catch((err) =>
-                      console.error("Failed to load upload form", err)
-                    );
-                } else {
-                  console.error("Route for profile_picture_upload not found");
-                }
-              });
-            }
-          });
-        }
-      }, 0);
     }
   } else {
-    // Logged OUT: Hide Profile Icon, Show Login/Register
-    if (authButtons) authButtons.style.display = "";
-    if (profileButtons) profileButtons.style.display = "none";
+    // Logged OUT: Show Guest Actions, Hide User Actions
+    if (userActions) userActions.style.display = "none";
+    if (guestActions) guestActions.style.display = "block";
 
-    // Remove profile info from popup if it exists (cleanup)
+    // cleanup profile info if it exists
     if (profileInfo) profileInfo.remove();
   }
 }
@@ -189,3 +179,72 @@ export function initRippleEffect() {
     }
   });
 }
+
+// ===== DELEGATED EVENT LISTENERS =====
+// Handle Profile Picture Click (delegated)
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "profile-pic-trigger") {
+    e.preventDefault();
+    if (confirm("Vrei să îți schimbi poza de profil?")) {
+      import("./profile.js").then((p) => p.closeProfilePopup());
+
+      // Fetch and show modal
+      import("./api.js").then(({ safeFetch }) => {
+        const routes = window.APP_CONFIG?.routes || {};
+        const url = routes["profile_picture_upload"];
+        if (url) {
+          safeFetch(url)
+            .then((res) => res.text())
+            .then((html) => {
+              import("./utils.js").then(({ showContentModal }) => {
+                showContentModal(html);
+
+                // Attach submit listener to the form that was just injected
+                // We can use delegation here too optionally, but for now this is fine as it's infrequent
+                setTimeout(() => {
+                  const form = document.querySelector(
+                    ".profile-picture-upload-box"
+                  );
+                  if (form) {
+                    form.addEventListener("submit", function (e) {
+                      e.preventDefault();
+                      const formData = new FormData(this);
+                      const submitBtn = this.querySelector(
+                        'button[type="submit"]'
+                      );
+                      if (submitBtn) submitBtn.disabled = true;
+
+                      safeFetch(this.action, {
+                        method: "POST",
+                        body: formData,
+                      })
+                        .then((res) => res.json())
+                        .then((data) => {
+                          if (data.success) {
+                            // Reload to show new picture
+                            window.location.reload();
+                          } else {
+                            alert(data.message || "Upload failed");
+                            if (submitBtn) submitBtn.disabled = false;
+                          }
+                        })
+                        .catch((err) => {
+                          console.error("Upload error:", err);
+                          alert("An error occurred during upload.");
+                          if (submitBtn) submitBtn.disabled = false;
+                        });
+                    });
+                  }
+                }, 50);
+              });
+            })
+            .catch((err) =>
+              console.error("Failed to load upload form", err)
+            );
+        } else {
+          console.error("Route for profile_picture_upload not found");
+        }
+      });
+    }
+  }
+});

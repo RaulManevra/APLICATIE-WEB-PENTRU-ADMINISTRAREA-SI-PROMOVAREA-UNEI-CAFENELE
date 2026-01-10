@@ -161,3 +161,82 @@ export function showModal(message) {
     });
 }
 
+/**
+ * Displays a modal with custom HTML content.
+ * @param {string} htmlContent
+ */
+export function showContentModal(htmlContent) {
+    let modal = document.getElementById("content-modal");
+
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "content-modal";
+
+        // Create base structure
+        modal.innerHTML = `
+            <div class="modal-card" style="position: relative;">
+                <button class="close-btn" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: #555;">&times;</button>
+                <div id="modal-content-body"></div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Overlay styles
+        Object.assign(modal.style, {
+            position: "fixed",
+            inset: 0,
+            display: "none",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10000,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backdropFilter: "blur(4px)"
+        });
+
+        // Card styles
+        const card = modal.querySelector(".modal-card");
+        Object.assign(card.style, {
+            background: "#fff",
+            borderRadius: "16px",
+            padding: "20px",
+            width: "500px",
+            maxWidth: "95%",
+            maxHeight: "90vh",
+            overflowY: "auto",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            opacity: "0",
+            transform: "scale(0.95)",
+            transition: "all 0.3s ease-out"
+        });
+
+        // Close behaviors
+        const closeBtn = modal.querySelector(".close-btn");
+        const closeModal = () => {
+            card.style.opacity = "0";
+            card.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                modal.style.display = "none";
+                modal.remove(); // Remove to ensure fresh state next time or keep if resizing is better
+            }, 300);
+        };
+
+        closeBtn.addEventListener("click", closeModal);
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
+        });
+    }
+
+    // Inject content
+    const body = modal.querySelector("#modal-content-body");
+    body.innerHTML = htmlContent;
+
+    // Show
+    modal.style.display = "flex";
+    const card = modal.querySelector(".modal-card");
+    requestAnimationFrame(() => {
+        card.style.opacity = "1";
+        card.style.transform = "scale(1)";
+    });
+}
+
