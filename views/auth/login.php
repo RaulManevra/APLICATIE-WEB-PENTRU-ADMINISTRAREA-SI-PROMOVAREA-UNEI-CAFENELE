@@ -22,7 +22,7 @@ require_once __DIR__ . '/../../core/output.php';
     </div>
 
     <div class="remember">
-        <label><input type="checkbox">Remember me</label>
+        <label><input type="checkbox" name="remember_me">Remember me</label>
         <a href="?page=forgot_password">Forgot password</a>
     </div>
 

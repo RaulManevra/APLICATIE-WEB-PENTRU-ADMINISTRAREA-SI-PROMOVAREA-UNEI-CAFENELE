@@ -41,6 +41,29 @@ if (!password_verify($psw, $user['password'])) {
 // Successful login
 SessionManager::login($user);
 
+// Handle Remember Me
+if (isset($_POST['remember_me'])) {
+    $selector = bin2hex(random_bytes(16)); // Public ID
+    $validator = bin2hex(random_bytes(32)); // Secret to hash
+    $hashedValidator = hash('sha256', $validator);
+    $expiry = date('Y-m-d H:i:s', time() + (30 * 24 * 60 * 60)); // 30 days
+
+    $insert = $conn->prepare("INSERT INTO user_tokens (selector, validator, user_id, expires_at) VALUES (?, ?, ?, ?)");
+    $insert->bind_param("ssis", $selector, $hashedValidator, $user['id'], $expiry);
+    $insert->execute();
+
+    // Set cookie: selector:validator
+    // Note: We are setting it for 30 days. Secure flag depends on HTTPS.
+    $cookieValue = "$selector:$validator";
+    setcookie('remember_me', $cookieValue, [
+        'expires' => time() + (30 * 24 * 60 * 60),
+        'path' => '/',
+        'httponly' => true,
+        'samesite' => 'Lax', // or Strict
+        // 'secure' => ... (handled by environment usually, but good to be explicit if on HTTPS)
+    ]);
+}
+
 sendSuccess(['redirect' => 'home']);
 $conn->close();
 exit;

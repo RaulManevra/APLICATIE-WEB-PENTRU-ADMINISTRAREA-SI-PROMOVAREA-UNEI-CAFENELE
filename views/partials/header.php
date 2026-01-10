@@ -41,27 +41,25 @@
                     
                     <!-- User Actions (Hidden by default, shown by JS if logged in) -->
                     <div id="popup-user-actions" style="display: none; width: 100%; display:flex; flex-direction:column; align-items:center;">
-                        <?php if (isset($upcomingReservation) && $upcomingReservation): ?>
-                            <div class="reservation-reminder-modern">
-                                <h4>
-                                    <i class="fa-solid fa-calendar-check"></i> Upcoming Reservation
-                                </h4>
-                                <div class="reservation-details">
-                                    <div class="reservation-row">
-                                        <span>Name:</span>
-                                        <strong><?= htmlspecialchars($upcomingReservation['reservation_name'] ?? $currentUser['username'] ?? 'Guest') ?></strong>
-                                    </div>
-                                    <div class="reservation-row">
-                                        <span>Table:</span>
-                                        <strong><?= htmlspecialchars($upcomingReservation['table_id']) ?></strong>
-                                    </div>
-                                    <div class="reservation-row">
-                                        <span>Time:</span>
-                                        <strong><?= date('d M, H:i', strtotime($upcomingReservation['reservation_time'])) ?></strong>
-                                    </div>
+                        <div id="upcoming-res-container" class="reservation-reminder-modern" <?= (isset($upcomingReservation) && $upcomingReservation) ? '' : 'hidden' ?>>
+                            <h4>
+                                <i class="fa-solid fa-calendar-check"></i> Upcoming Reservation
+                            </h4>
+                            <div class="reservation-details">
+                                <div class="reservation-row">
+                                    <span>Name:</span>
+                                    <strong id="upcoming-res-name"><?= htmlspecialchars($upcomingReservation['reservation_name'] ?? $currentUser['username'] ?? 'Guest') ?></strong>
+                                </div>
+                                <div class="reservation-row">
+                                    <span>Table:</span>
+                                    <strong id="upcoming-res-table"><?= htmlspecialchars($upcomingReservation['table_id'] ?? '') ?></strong>
+                                </div>
+                                <div class="reservation-row">
+                                    <span>Time:</span>
+                                    <strong id="upcoming-res-time"><?= isset($upcomingReservation['reservation_time']) ? date('d M, H:i', strtotime($upcomingReservation['reservation_time'])) : '' ?></strong>
                                 </div>
                             </div>
-                        <?php endif; ?>
+                        </div>
                         <button id="popup-logout" class="popup-action" data-page="logout">Logout</button>
                     </div>
 

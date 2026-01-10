@@ -35,6 +35,13 @@ if (isset($_GET['action']) || isset($_POST['action'])) {
 }
 
 $userData = SessionManager::getCurrentUserData();
+
+// Remember Me Check
+if (!SessionManager::isLoggedIn() && isset($_COOKIE['remember_me'])) {
+    SessionManager::checkRememberMe($conn);
+    $userData = SessionManager::getCurrentUserData(); // Refresh
+}
+
 $currentUser = $userData['username'] ?? null;
 $currentUserRoles = $userData['roles'] ?? [];
 $upcomingReservation = null;

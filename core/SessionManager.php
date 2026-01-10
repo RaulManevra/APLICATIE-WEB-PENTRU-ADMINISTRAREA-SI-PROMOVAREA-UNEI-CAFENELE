@@ -112,4 +112,27 @@ class SessionManager {
         }
         session_destroy();
     }
+    public static function checkRememberMe($conn): void {
+        if (isset($_COOKIE['remember_me'])) {
+            list($selector, $validator) = explode(':', $_COOKIE['remember_me']);
+            
+            $stmt = $conn->prepare("SELECT * FROM user_tokens WHERE selector = ? AND expires_at > NOW()");
+            $stmt->bind_param("s", $selector);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $token = $result->fetch_assoc();
+            
+            if ($token && hash_equals($token['validator'], hash('sha256', $validator))) {
+                // Initial Auth Success - Get User
+                $uStmt = $conn->prepare("SELECT id, email, username, password, role, PuncteFidelitate, PPicture FROM users WHERE id = ?");
+                $uStmt->bind_param("i", $token['user_id']);
+                $uStmt->execute();
+                $user = $uStmt->get_result()->fetch_assoc();
+                
+                if ($user) {
+                    self::login($user);
+                }
+            }
+        }
+    }
 }

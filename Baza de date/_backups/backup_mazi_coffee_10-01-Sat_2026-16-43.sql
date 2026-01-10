@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.39, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.44, for macos10.15 (x86_64)
 --
 -- Host: localhost    Database: mazi_coffee
 -- ------------------------------------------------------
--- Server version	8.0.39
+-- Server version	8.0.44
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -61,37 +61,7 @@ CREATE TABLE `global_settings` (
 
 LOCK TABLES `global_settings` WRITE;
 /*!40000 ALTER TABLE `global_settings` DISABLE KEYS */;
-INSERT INTO `global_settings` VALUES ('newsletter_email','zarnescuraul@gmail.com','2026-01-10 10:58:30'),('support_email','','2026-01-10 10:58:30');
 /*!40000 ALTER TABLE `global_settings` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `newsletters_history`
---
-
-DROP TABLE IF EXISTS `newsletters_history`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `newsletters_history` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `subject` varchar(255) NOT NULL,
-  `body` text NOT NULL,
-  `sent_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `recipients_count` int DEFAULT '0',
-  `failures_count` int DEFAULT '0',
-  `sent_by` int DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `newsletters_history`
---
-
-LOCK TABLES `newsletters_history` WRITE;
-/*!40000 ALTER TABLE `newsletters_history` DISABLE KEYS */;
-INSERT INTO `newsletters_history` VALUES (1,'Test 3','Acesta este al 3-lea test de tip Newsletter. Va rog sa imi spuneti daca l-ati primit','2026-01-10 13:22:04',0,4,1),(2,'Test 4','Acesta este al 4-lea test de tip Newsletter. Va rog sa imi spuneti daca l-ati primit','2026-01-10 13:27:48',4,0,1),(3,'Test 5','Acesta este al 5-lea test de tip Newsletter. Va rog sa imi spuneti daca l-ati primit','2026-01-10 15:36:51',5,0,1),(4,'Test 6','Acesta este al 6-lea test de tip Newsletter. Va rog sa imi spuneti daca l-ati primit','2026-01-10 15:41:12',5,0,1),(5,'Test 7','Acesta este al 7-lea test de tip Newsletter. Va rog sa imi spuneti daca l-ati primit','2026-01-10 15:42:44',5,0,1);
-/*!40000 ALTER TABLE `newsletters_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -112,7 +82,7 @@ CREATE TABLE `order_items` (
   KEY `product_id` (`product_id`),
   CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -121,7 +91,7 @@ CREATE TABLE `order_items` (
 
 LOCK TABLES `order_items` WRITE;
 /*!40000 ALTER TABLE `order_items` DISABLE KEYS */;
-INSERT INTO `order_items` VALUES (1,1,1,1,13.00),(2,1,2,1,15.00),(3,2,15,4,7.00),(4,2,7,3,5.00),(5,3,2,1,15.00),(6,3,10,3,15.00),(7,3,7,2,5.00),(8,4,11,2,7.00),(9,4,11,1,7.00),(10,5,5,1,14.00),(11,6,2,2,15.00),(12,7,1,2,13.00),(13,7,6,2,6700.00),(14,7,13,2,7.00),(15,8,9,5,15.00),(16,9,1,1,13.00),(17,10,4,5,12.00),(18,10,1,2,13.00),(19,11,11,3,7.00),(20,11,11,1,7.00),(21,11,7,4,5.00),(22,12,11,1,7.00),(23,12,15,4,7.00),(24,13,12,4,7.00),(25,13,6,5,6700.00),(26,14,15,1,7.00),(27,15,14,1,7.00),(28,16,7,2,5.00),(29,16,9,4,15.00),(30,17,6,2,6700.00),(31,18,12,5,7.00),(32,18,6,2,6700.00),(33,18,10,2,15.00),(34,19,14,1,7.00),(35,19,11,5,7.00),(36,19,9,5,15.00),(37,20,7,3,5.00),(38,20,7,5,5.00),(39,21,10,4,15.00),(40,21,14,5,7.00),(41,21,13,3,7.00),(42,22,7,4,5.00),(43,22,9,5,15.00),(44,22,4,1,12.00),(45,23,2,4,15.00),(46,23,3,3,10.00),(47,24,13,2,7.00),(48,25,14,2,7.00),(49,26,11,1,7.00),(50,26,14,5,7.00),(51,27,5,5,14.00),(52,28,9,2,15.00),(53,28,12,4,7.00),(54,28,5,2,14.00),(55,29,7,5,5.00),(56,30,9,5,15.00),(57,30,2,2,15.00),(58,30,1,3,13.00),(59,31,12,1,7.00),(60,32,7,1,5.00),(61,33,7,1,5.00),(62,34,7,1,5.00),(63,35,3,1,10.00),(64,36,1,1,13.00),(65,37,2,1,15.00),(66,37,6,1,6700.00),(67,37,12,1,7.00);
+INSERT INTO `order_items` VALUES (1,1,1,1,13.00),(2,1,2,1,15.00),(3,2,15,4,7.00),(4,2,7,3,5.00),(5,3,2,1,15.00),(6,3,10,3,15.00),(7,3,7,2,5.00),(8,4,11,2,7.00),(9,4,11,1,7.00),(10,5,5,1,14.00),(11,6,2,2,15.00),(12,7,1,2,13.00),(13,7,6,2,6700.00),(14,7,13,2,7.00),(15,8,9,5,15.00),(16,9,1,1,13.00),(17,10,4,5,12.00),(18,10,1,2,13.00),(19,11,11,3,7.00),(20,11,11,1,7.00),(21,11,7,4,5.00),(22,12,11,1,7.00),(23,12,15,4,7.00),(24,13,12,4,7.00),(25,13,6,5,6700.00),(26,14,15,1,7.00),(27,15,14,1,7.00),(28,16,7,2,5.00),(29,16,9,4,15.00),(30,17,6,2,6700.00),(31,18,12,5,7.00),(32,18,6,2,6700.00),(33,18,10,2,15.00),(34,19,14,1,7.00),(35,19,11,5,7.00),(36,19,9,5,15.00),(37,20,7,3,5.00),(38,20,7,5,5.00),(39,21,10,4,15.00),(40,21,14,5,7.00),(41,21,13,3,7.00),(42,22,7,4,5.00),(43,22,9,5,15.00),(44,22,4,1,12.00),(45,23,2,4,15.00),(46,23,3,3,10.00),(47,24,13,2,7.00),(48,25,14,2,7.00),(49,26,11,1,7.00),(50,26,14,5,7.00),(51,27,5,5,14.00),(52,28,9,2,15.00),(53,28,12,4,7.00),(54,28,5,2,14.00),(55,29,7,5,5.00),(56,30,9,5,15.00),(57,30,2,2,15.00),(58,30,1,3,13.00),(59,31,12,1,7.00),(60,32,7,1,5.00),(61,33,7,1,5.00),(62,34,7,1,5.00),(63,35,3,1,10.00),(64,36,1,1,13.00);
 /*!40000 ALTER TABLE `order_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -144,7 +114,7 @@ CREATE TABLE `orders` (
   KEY `user_id` (`user_id`),
   KEY `table_id` (`table_id`),
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -153,32 +123,8 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` VALUES (1,1,'2026-01-09 10:32:00','completed',28.00,'2026-01-08 08:35:15',1),(2,2,'2026-01-08 13:30:11','completed',43.00,'2026-01-08 11:30:11',NULL),(3,2,'2026-01-08 13:30:11','completed',70.00,'2026-01-08 11:30:11',NULL),(4,2,'2026-01-08 13:30:11','completed',21.00,'2026-01-08 11:30:11',NULL),(5,2,'2026-01-08 13:30:11','completed',14.00,'2026-01-08 11:30:11',NULL),(6,2,'2026-01-08 13:30:11','completed',30.00,'2026-01-08 11:30:11',NULL),(7,2,'2026-01-07 13:30:11','completed',13440.00,'2026-01-07 11:30:11',NULL),(8,2,'2026-01-07 13:30:11','completed',75.00,'2026-01-07 11:30:11',NULL),(9,2,'2026-01-07 13:30:11','completed',13.00,'2026-01-07 11:30:11',NULL),(10,2,'2026-01-06 13:30:11','completed',86.00,'2026-01-06 11:30:11',NULL),(11,2,'2026-01-06 13:30:11','completed',48.00,'2026-01-06 11:30:11',NULL),(12,2,'2026-01-06 13:30:11','completed',35.00,'2026-01-06 11:30:11',NULL),(13,2,'2026-01-06 13:30:11','completed',33528.00,'2026-01-06 11:30:11',NULL),(14,2,'2026-01-06 13:30:11','completed',7.00,'2026-01-06 11:30:11',NULL),(15,2,'2026-01-05 13:30:11','completed',7.00,'2026-01-05 11:30:11',NULL),(16,2,'2026-01-05 13:30:11','completed',70.00,'2026-01-05 11:30:11',NULL),(17,2,'2026-01-05 13:30:11','completed',13400.00,'2026-01-05 11:30:11',NULL),(18,2,'2026-01-04 13:30:11','completed',13465.00,'2026-01-04 11:30:11',NULL),(19,2,'2026-01-04 13:30:11','completed',117.00,'2026-01-04 11:30:11',NULL),(20,2,'2026-01-04 13:30:11','completed',40.00,'2026-01-04 11:30:11',NULL),(21,2,'2026-01-04 13:30:11','completed',116.00,'2026-01-04 11:30:11',NULL),(22,2,'2026-01-04 13:30:11','completed',107.00,'2026-01-04 11:30:11',NULL),(23,2,'2026-01-03 13:30:11','completed',90.00,'2026-01-03 11:30:11',NULL),(24,2,'2026-01-03 13:30:11','completed',14.00,'2026-01-03 11:30:11',NULL),(25,2,'2026-01-03 13:30:11','completed',14.00,'2026-01-03 11:30:11',NULL),(26,2,'2026-01-03 13:30:11','completed',42.00,'2026-01-03 11:30:11',NULL),(27,2,'2026-01-03 13:30:11','completed',70.00,'2026-01-03 11:30:11',NULL),(28,2,'2026-01-02 13:30:11','completed',86.00,'2026-01-02 11:30:11',NULL),(29,2,'2026-01-02 13:30:11','completed',25.00,'2026-01-02 11:30:11',NULL),(30,2,'2026-01-02 13:30:11','completed',144.00,'2026-01-02 11:30:11',NULL),(31,1,'2026-01-09 10:56:00','completed',7.00,'2026-01-08 16:57:21',NULL),(32,1,'2026-01-09 10:29:00','completed',5.00,'2026-01-08 17:13:36',NULL),(33,1,'2026-01-08 19:16:37','completed',5.00,'2026-01-08 17:16:37',1),(34,4,'2026-01-08 19:27:04','completed',5.00,'2026-01-08 17:27:05',1),(35,4,'2026-01-08 19:28:11','completed',10.00,'2026-01-08 17:28:11',1),(36,4,'2026-01-08 19:33:19','completed',13.00,'2026-01-08 17:33:19',1),(37,1,'2026-01-10 10:30:00','pending',6722.00,'2026-01-09 18:30:55',NULL);
+INSERT INTO `orders` VALUES (1,1,'2026-01-09 10:32:00','completed',28.00,'2026-01-08 08:35:15',1),(2,2,'2026-01-08 13:30:11','completed',43.00,'2026-01-08 11:30:11',NULL),(3,2,'2026-01-08 13:30:11','completed',70.00,'2026-01-08 11:30:11',NULL),(4,2,'2026-01-08 13:30:11','completed',21.00,'2026-01-08 11:30:11',NULL),(5,2,'2026-01-08 13:30:11','completed',14.00,'2026-01-08 11:30:11',NULL),(6,2,'2026-01-08 13:30:11','completed',30.00,'2026-01-08 11:30:11',NULL),(7,2,'2026-01-07 13:30:11','completed',13440.00,'2026-01-07 11:30:11',NULL),(8,2,'2026-01-07 13:30:11','completed',75.00,'2026-01-07 11:30:11',NULL),(9,2,'2026-01-07 13:30:11','completed',13.00,'2026-01-07 11:30:11',NULL),(10,2,'2026-01-06 13:30:11','completed',86.00,'2026-01-06 11:30:11',NULL),(11,2,'2026-01-06 13:30:11','completed',48.00,'2026-01-06 11:30:11',NULL),(12,2,'2026-01-06 13:30:11','completed',35.00,'2026-01-06 11:30:11',NULL),(13,2,'2026-01-06 13:30:11','completed',33528.00,'2026-01-06 11:30:11',NULL),(14,2,'2026-01-06 13:30:11','completed',7.00,'2026-01-06 11:30:11',NULL),(15,2,'2026-01-05 13:30:11','completed',7.00,'2026-01-05 11:30:11',NULL),(16,2,'2026-01-05 13:30:11','completed',70.00,'2026-01-05 11:30:11',NULL),(17,2,'2026-01-05 13:30:11','completed',13400.00,'2026-01-05 11:30:11',NULL),(18,2,'2026-01-04 13:30:11','completed',13465.00,'2026-01-04 11:30:11',NULL),(19,2,'2026-01-04 13:30:11','completed',117.00,'2026-01-04 11:30:11',NULL),(20,2,'2026-01-04 13:30:11','completed',40.00,'2026-01-04 11:30:11',NULL),(21,2,'2026-01-04 13:30:11','completed',116.00,'2026-01-04 11:30:11',NULL),(22,2,'2026-01-04 13:30:11','completed',107.00,'2026-01-04 11:30:11',NULL),(23,2,'2026-01-03 13:30:11','completed',90.00,'2026-01-03 11:30:11',NULL),(24,2,'2026-01-03 13:30:11','completed',14.00,'2026-01-03 11:30:11',NULL),(25,2,'2026-01-03 13:30:11','completed',14.00,'2026-01-03 11:30:11',NULL),(26,2,'2026-01-03 13:30:11','completed',42.00,'2026-01-03 11:30:11',NULL),(27,2,'2026-01-03 13:30:11','completed',70.00,'2026-01-03 11:30:11',NULL),(28,2,'2026-01-02 13:30:11','completed',86.00,'2026-01-02 11:30:11',NULL),(29,2,'2026-01-02 13:30:11','completed',25.00,'2026-01-02 11:30:11',NULL),(30,2,'2026-01-02 13:30:11','completed',144.00,'2026-01-02 11:30:11',NULL),(31,1,'2026-01-09 10:56:00','completed',7.00,'2026-01-08 16:57:21',NULL),(32,1,'2026-01-09 10:29:00','completed',5.00,'2026-01-08 17:13:36',NULL),(33,1,'2026-01-08 19:16:37','completed',5.00,'2026-01-08 17:16:37',1),(34,4,'2026-01-08 19:27:04','completed',5.00,'2026-01-08 17:27:05',1),(35,4,'2026-01-08 19:28:11','completed',10.00,'2026-01-08 17:28:11',1),(36,4,'2026-01-08 19:33:19','completed',13.00,'2026-01-08 17:33:19',1);
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `password_resets`
---
-
-DROP TABLE IF EXISTS `password_resets`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `password_resets` (
-  `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `token` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `password_resets`
---
-
-LOCK TABLES `password_resets` WRITE;
-/*!40000 ALTER TABLE `password_resets` DISABLE KEYS */;
-/*!40000 ALTER TABLE `password_resets` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -331,34 +277,6 @@ INSERT INTO `tables` VALUES (1,'Libera',27.7638,10.0671,'circle',9.375,12.3296),
 UNLOCK TABLES;
 
 --
--- Table structure for table `user_tokens`
---
-
-DROP TABLE IF EXISTS `user_tokens`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_tokens` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `selector` varchar(32) COLLATE utf8mb4_general_ci NOT NULL,
-  `validator` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
-  `user_id` int NOT NULL,
-  `expires_at` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_user_tokens_user_id` (`user_id`),
-  CONSTRAINT `fk_user_tokens_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_tokens`
---
-
-LOCK TABLES `user_tokens` WRITE;
-/*!40000 ALTER TABLE `user_tokens` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_tokens` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `users`
 --
 
@@ -380,7 +298,7 @@ CREATE TABLE `users` (
   `blacklist_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -389,7 +307,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'zarnescuraul@gmail.com','Raul','$2y$12$j09C55tliX7bS9ZCNMLFJuerVS.0DZ0pG/pgqVzLaFcFtYosnA8Iq','admin','2025-11-24 10:19:31',34,'assets/uploads/profile_pictures/PP_userid_1.jpg','google','105941628733277196959',0,NULL),(2,'davidrares56@yahoo.com','raress_tc','$2y$12$ud4pLmRn0Vx6Vm0NpNqXY.nnTbNMkNqKmvsru14zHnrYoXpm/.JHi','admin','2025-12-08 17:24:04',10000,'assets/public/default.png',NULL,NULL,0,NULL),(3,'erwin.georgescu@student.unitbv.ro','erwin','$2y$12$K6Bet6UcpmUmXdC9I4FlYOhtazj9eQf.UeIxyKgoiQ7FuQxmSTmDW','admin','2025-12-27 15:34:58',0,'assets/public/default.png',NULL,NULL,0,NULL),(4,'guest@mazicoffee.com','Guest','$2y$10$ya7vmoIY9nQQDqeBygttKOiTfRSHLBNvxc02utkPBrEUmLzQZIEtK','user','2026-01-08 17:27:05',NULL,'assets/public/default.png',NULL,NULL,0,NULL),(5,'sisea.ianis@gmail.com','ianis','$2y$12$w1.oeOUzogdPxmvjKgbZqO/gT9Lxnyaj1a7NJW.QE3QmwqXmph6/W','user','2026-01-10 13:15:52',0,'assets/public/default.png',NULL,NULL,0,NULL);
+INSERT INTO `users` VALUES (1,'zarnescuraul@gmail.com','Raul','$2y$12$j09C55tliX7bS9ZCNMLFJuerVS.0DZ0pG/pgqVzLaFcFtYosnA8Iq','admin','2025-11-24 10:19:31',34,'assets/uploads/profile_pictures/PP_userid_1.jpg','google','105941628733277196959',0,NULL),(2,'davidrares56@yahoo.com','raress_tc','$2y$12$ud4pLmRn0Vx6Vm0NpNqXY.nnTbNMkNqKmvsru14zHnrYoXpm/.JHi','admin','2025-12-08 17:24:04',10000,'assets/public/default.png',NULL,NULL,0,NULL),(3,'erwin.georgescu@student.unitbv.ro','erwin','$2y$12$K6Bet6UcpmUmXdC9I4FlYOhtazj9eQf.UeIxyKgoiQ7FuQxmSTmDW','admin','2025-12-27 15:34:58',0,'assets/public/default.png',NULL,NULL,0,NULL),(4,'guest@mazicoffee.com','Guest','$2y$10$ya7vmoIY9nQQDqeBygttKOiTfRSHLBNvxc02utkPBrEUmLzQZIEtK','user','2026-01-08 17:27:05',NULL,'assets/public/default.png',NULL,NULL,0,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -402,4 +320,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-10 16:43:17
+-- Dump completed on 2026-01-09  4:30:29
