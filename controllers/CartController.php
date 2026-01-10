@@ -249,7 +249,9 @@ class CartController {
             // In Admin "Running Orders" we implemented logic to set 'Ocupata' when assigning.
             // Should we do it here? Yes, consistent.
             if ($tableId) {
-                $this->conn->query("UPDATE tables SET Status='Ocupata' WHERE ID=$tableId");
+                $updT = $this->conn->prepare("UPDATE tables SET Status='Ocupata' WHERE ID=?");
+                $updT->bind_param("i", $tableId);
+                $updT->execute();
             }
 
             // Insert Items

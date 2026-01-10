@@ -799,6 +799,40 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
+/* Toast Notification */
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 17px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+}
+
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+}
+
+.toast.success {
+    background-color: #4CAF50;
+}
+
+.toast.error {
+    background-color: #f44336;
+}
+
 .cafe-status-toggle select {
     padding: 5px;
     border-radius: 5px;
@@ -858,33 +892,40 @@ body {
     color: #e74c3c;
     font-weight: bold;
 }
+
 .stat-icon.calendar {
     background: #e8f5e9;
     color: #2e7d32;
     transition: 0.8s ease;
 }
+
 .stat-icon.tables {
     background: #fff3e0;
     color: #ef6c00;
     transition: 0.8s ease;
 }
+
 .stat-icon.info {
     background: #e3f2fd;
     color: #1565c0;
     transition: 0.8s ease;
 }
+
 .stat-card:hover .stat-icon.calendar {
     background: #2e7d32;
     color: #e8f5e9;
 }
+
 .stat-card:hover .stat-icon.tables {
     background: #ef6c00;
     color: #fff3e0;
 }
+
 .stat-card:hover .stat-icon.info {
     background: #1565c0;
     color: #e3f2fd;
 }
+
 #news-subject {
     width: 100%;
     padding: 12px 14px;
@@ -895,6 +936,7 @@ body {
     margin-bottom: 10px;
     transition: all 0.2s ease;
 }
+
 #news-body {
     width: 100%;
     min-height: 160px;
@@ -907,6 +949,7 @@ body {
     resize: vertical;
     transition: all 0.2s ease;
 }
+
 #news-subject:focus,
 #news-body:focus {
     outline: none;

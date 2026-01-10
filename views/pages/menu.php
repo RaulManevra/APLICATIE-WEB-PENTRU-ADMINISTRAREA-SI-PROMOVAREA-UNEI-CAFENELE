@@ -124,7 +124,12 @@ while ($c = $catResult->fetch_assoc()) {
                 <?php if ($result && $result->num_rows > 0): ?>
                     <div class="menu-grid" id="menu-grid">
                         <?php while ($row = $result->fetch_assoc()): ?>
-                            <div class="product-card animate-on-scroll">
+                            <div class="product-card animate-on-scroll" 
+                                 data-name="<?= htmlspecialchars($row['name']) ?>"
+                                 data-desc="<?= htmlspecialchars($row['description']) ?>"
+                                 data-price="<?= number_format($row['price'], 2) ?>"
+                                 data-img="<?= htmlspecialchars($row['image_path']) ?>"
+                                 data-ingredients="<?= htmlspecialchars($row['ingredients'] ?? '') ?>">
                                 <div class="product-image">
                                     <img src="<?= htmlspecialchars($row['image_path']) ?>" alt="<?= htmlspecialchars($row['name']) ?>" loading="lazy" onerror="this.src='assets/menu/images/default_coffee.jpg'">
                                 </div>
@@ -132,10 +137,10 @@ while ($c = $catResult->fetch_assoc()) {
                                     <div class="product-header">
                                         <h3 class="product-name"><?= htmlspecialchars($row['name']) ?></h3>
                                         <div class="product-price">
-                                            <button class="add-to-cart-btn" data-id="<?= $row['id'] ?>" title="Add to Cart">
+                                            <button class="add-to-cart-btn-full" data-id="<?= $row['id'] ?>">
                                                 <i class="fa-solid fa-cart-shopping"></i>
+                                                <span><?= number_format($row['price'], 2) ?> RON</span>
                                             </button>
-                                            <?= number_format($row['price'], 2) ?> RON
                                         </div>
                                     </div>
                                     <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
@@ -152,6 +157,29 @@ while ($c = $catResult->fetch_assoc()) {
         </div>
     </div>
 </section>
+
+<!-- Product Details Modal -->
+<div id="product-details-modal" class="modal">
+    <div class="modal-content product-modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-body-flex">
+            <div class="modal-img-wrapper">
+                <img id="modal-prod-img" src="" alt="Product">
+            </div>
+            <div class="modal-info-wrapper">
+                <h3 id="modal-prod-name"></h3>
+                <p id="modal-prod-desc" class="modal-desc"></p>
+                <div class="ingredients-section" id="modal-ingredients-section">
+                    <h4>Ingrediente:</h4>
+                    <p id="modal-prod-ingredients"></p>
+                </div>
+                <div class="modal-price-action">
+                    <span id="modal-prod-price" class="modal-price"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     (function() {

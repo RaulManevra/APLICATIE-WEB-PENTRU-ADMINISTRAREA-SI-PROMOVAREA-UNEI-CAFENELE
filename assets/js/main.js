@@ -30,7 +30,7 @@ import { updateHeaderUI } from './modules/ui.js';
 
 // Form Submission (Add to Cart)
 document.addEventListener("click", async e => {
-    const btn = e.target.closest('.add-to-cart-btn');
+    const btn = e.target.closest('.add-to-cart-btn, .add-to-cart-btn-full');
     if (btn) {
         e.preventDefault();
         e.stopPropagation();
@@ -55,8 +55,24 @@ document.addEventListener("click", async e => {
             if (data.success) {
                 // Success feedback
                 icon.className = "fa-solid fa-check";
+                btn.classList.add('success'); // Add success class for CSS animation
+
+                // Add simple toast notification
+                const toast = document.createElement('div');
+                toast.className = 'cart-toast';
+                toast.innerHTML = '<i class="fa-solid fa-check-circle"></i> Added to cart!';
+                document.body.appendChild(toast);
+
+                // Trigger reflow
+                toast.offsetHeight;
+                toast.classList.add('show');
+
                 setTimeout(() => {
                     icon.className = originalClass;
+                    btn.classList.remove('success');
+
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
                 }, 1500);
 
                 // Optional: Update badge if we had one
@@ -190,6 +206,63 @@ document.addEventListener('click', (e) => {
     if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
     // for normal navigation or SPA routers, ensure page is at top
     setTimeout(() => window.scrollTo(0, 0), 50);
+});
+
+// ====================================
+// Menu Details Modal Logic
+// ====================================
+function openProductDetailsModal(name, desc, price, img, ingredients) {
+    const modal = document.getElementById('product-details-modal');
+    if (!modal) return;
+
+    document.getElementById('modal-prod-name').innerText = name || '';
+    document.getElementById('modal-prod-desc').innerText = desc || '';
+    document.getElementById('modal-prod-price').innerText = (price || '0') + ' RON';
+    const imgEl = document.getElementById('modal-prod-img');
+    if (imgEl) imgEl.src = img || 'assets/menu/images/default_coffee.jpg';
+
+    const ingEl = document.getElementById('modal-prod-ingredients');
+    const ingSec = document.getElementById('modal-ingredients-section');
+
+    if (ingEl && ingSec) {
+        if (ingredients && ingredients.trim() !== '') {
+            ingEl.innerText = ingredients;
+            ingSec.style.display = 'block';
+        } else {
+            ingSec.style.display = 'none';
+        }
+    }
+
+    modal.style.display = 'block';
+}
+
+function closeProductDetailsModal() {
+    const modal = document.getElementById('product-details-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Global Click Delegation for Menu
+document.addEventListener('click', e => {
+    // 1. Product Card Click (Open Modal)
+    const card = e.target.closest('.product-card');
+    if (card) {
+        // Prevent opening if clicking add-to-cart
+        if (e.target.closest('.add-to-cart-btn-full')) return;
+
+        const { name, desc, price, img, ingredients } = card.dataset;
+        openProductDetailsModal(name, desc, price, img, ingredients);
+    }
+
+    // 2. Close Modal (Button)
+    if (e.target.closest('.close-modal')) {
+        closeProductDetailsModal();
+    }
+
+    // 3. Close Modal (Click Outside)
+    const modal = document.getElementById('product-details-modal');
+    if (modal && e.target === modal) {
+        closeProductDetailsModal();
+    }
 });
 
 
