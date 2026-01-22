@@ -4,6 +4,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
     exit('Direct access denied.');
 }
 ?>
+<link rel="stylesheet" href="assets/css/about.css">
 <section class="about-section">
     <div class="about-card">
         <p style="font-style: italic; font-weight: 600; color: #E0B574; margin-bottom: 20px;">

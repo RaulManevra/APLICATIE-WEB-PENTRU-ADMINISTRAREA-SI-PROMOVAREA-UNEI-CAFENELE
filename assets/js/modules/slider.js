@@ -26,16 +26,33 @@ export async function initSlider() {
 
             if (data.success && data.data && data.data.length > 0) {
                 sliderData = data.data; // Store for later text updates
-                // Render slides
-                data.data.forEach((s, i) => {
-                    const img = document.createElement('img');
-                    img.className = 'slide' + (i === 0 ? ' active' : '');
-                    // Prioritize uploaded slider images, fall back if needed
-                    img.src = s.image_path;
-                    img.alt = s.title || 'Slide';
-                    slider.appendChild(img);
-                });
-                slides = Array.from(slider.querySelectorAll('.slide'));
+
+                // Render FIRST slide immediately (Critical Path)
+                const s0 = data.data[0];
+                const img0 = document.createElement('img');
+                img0.className = 'slide active';
+                img0.src = s0.image_path;
+                img0.alt = s0.title || 'Slide';
+                slider.appendChild(img0);
+
+                slides = [img0]; // Init with first
+
+                // Lazy load the rest after page settles
+                setTimeout(() => {
+                    data.data.slice(1).forEach((s, i) => {
+                        const img = document.createElement('img');
+                        img.className = 'slide';
+                        img.src = s.image_path;
+                        img.alt = s.title || 'Slide';
+                        slider.appendChild(img);
+                        slides.push(img);
+                    });
+
+                    // Re-query to ensure order (optional, but safe)
+                    // slides = Array.from(slider.querySelectorAll('.slide')); 
+
+                }, 3000); // 3-second delay for background loading
+
             } else {
                 console.warn("No slides found in DB.");
                 return false;

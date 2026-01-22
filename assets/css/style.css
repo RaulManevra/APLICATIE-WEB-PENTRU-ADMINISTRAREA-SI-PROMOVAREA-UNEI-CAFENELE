@@ -39,8 +39,8 @@ body::before {
     height: 100%;
     z-index: -1;
     background-image:
-        url("../img/Coffee Pattern - BLURRED.png"),
-        url("../img/GRADIENT.png");
+        url("../img/Coffee Pattern - BLURRED.webp"),
+        url("../img/GRADIENT.webp");
     background-size: cover;
     background-position: center;
     pointer-events: none;

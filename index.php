@@ -61,10 +61,7 @@ if ($currentUser && isset($conn)) {
     <link rel="stylesheet" href="assets/icons/css/brands.min.css">
     <link rel="stylesheet" href="assets/icons/css2/fontawesome.min.css">
     <link rel="stylesheet" href="assets/icons/css2/solid.min.css">
-    <link rel="stylesheet" href="assets/css/login.css">
-    <link rel="stylesheet" href="assets/css/register.css">
-    <link rel="stylesheet" href="assets/css/about.css">
-    <link rel="stylesheet" href="assets/css/menu.css">
+    <!-- Page-specific CSS moved to respective views -->
     <link rel="stylesheet" href="assets/css/modal.css">
     <link rel="stylesheet" href="assets/css/navbar.css">
     <link rel="stylesheet" href="assets/css/popup.css">

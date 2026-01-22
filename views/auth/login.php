@@ -6,6 +6,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
 require_once __DIR__ . '/../../core/csrf.php';
 require_once __DIR__ . '/../../core/output.php';
 ?>
+<link rel="stylesheet" href="assets/css/login.css">
 <div class="login-wrapper">
 <form class="login-box" action="controllers/login_handler.php" method="post" autocomplete="on">
     <input type="hidden" name="csrf_token" value="<?php echo e(csrf_token()); ?>">

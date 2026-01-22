@@ -8,6 +8,9 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
 if (!isset($conn)) {
     require_once __DIR__ . '/../../config/db.php';
 }
+?>
+<link rel="stylesheet" href="assets/css/menu.css">
+<?php
 
 // --- FILTERING LOGIC ---
 $where = [];
