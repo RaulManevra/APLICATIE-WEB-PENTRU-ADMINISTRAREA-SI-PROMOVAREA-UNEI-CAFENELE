@@ -71,6 +71,40 @@ export function getSkeleton(page) {
         `;
     }
 
+    if (page === 'about') {
+        return `
+            <div class="skeleton-about-page">
+                <div class="skeleton-about-container">
+                    <!-- Quote -->
+                    <div class="skeleton-text skeleton" style="width: 50%; height: 1.2rem; margin: 0 auto 3rem auto;"></div>
+                    
+                    <!-- Title & Icon Row -->
+                    <div class="skeleton-about-hero">
+                         <div class="skeleton-text title skeleton" style="width: 40%; height: 5rem;"></div>
+                         <div class="skeleton-circle skeleton"></div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="skeleton-about-desc">
+                        <div class="skeleton-text skeleton" style="width: 80%; margin: 0 auto;"></div>
+                        <div class="skeleton-text skeleton" style="width: 90%; margin: 0 auto;"></div>
+                        <div class="skeleton-text skeleton" style="width: 70%; margin: 0 auto 2rem auto;"></div>
+                        
+                        <div class="skeleton-text skeleton" style="width: 85%; margin: 0 auto;"></div>
+                        <div class="skeleton-text skeleton" style="width: 75%; margin: 0 auto;"></div>
+                    </div>
+
+                    <!-- Social Buttons -->
+                    <div class="skeleton-social-row">
+                         <div class="skeleton-btn skeleton-small skeleton"></div>
+                         <div class="skeleton-btn skeleton-small skeleton"></div>
+                         <div class="skeleton-btn skeleton-small skeleton"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     // Default Skeleton
     return `
         <div style="padding: 120px 20px; max-width: 900px; margin: 0 auto;">

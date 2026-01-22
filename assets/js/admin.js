@@ -1447,10 +1447,13 @@ function renderOrderCard(order) {
         </div>
 
         <div style="font-size: 0.85rem; color: #555;">
-             Time: ${new Date(order.created_at).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}
+             <div style="display:flex; justify-content:space-between;">
+                 <span>Created: ${new Date(order.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                 ${!order.table_id ?
+      `<span>Pickup: ${new Date(order.pickup_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`
+      : '<span>Table Order</span>'
+    }
+             </div>
         </div>
 
         <div style="display:flex; gap:5px; margin-top:5px;">
@@ -1463,7 +1466,7 @@ function renderOrderCard(order) {
         </div>
 
         <div>
-            <label style="font-size:0.8rem; font-weight:bold;">Example: Table / Pickup</label>
+            <label style="font-size:0.8rem; font-weight:bold;">Serving for:</label>
             <select class="form-control" onchange="assignOrderTable(${order.id
     }, this.value)" style="width:100%; font-size:0.9rem; padding:5px;border-radius:4px; border:1px solid #ccc;">
                 <option value="pickup" ${!order.table_id ? "selected" : ""

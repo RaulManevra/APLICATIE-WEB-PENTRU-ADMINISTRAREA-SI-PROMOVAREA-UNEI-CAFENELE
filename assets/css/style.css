@@ -245,12 +245,25 @@ p {
 /* =========================
    SLIDER CONTROLS
 ========================= */
+/* Ensure hero-mid/left is relative to anchor controls */
+.hero-left {
+    position: relative;
+    /* Other existing styles for hero-left usually in main layout, ensuring relative here */
+}
+
 .slider-controls {
-    margin-top: 22px;
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    z-index: 20;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 16px;
+    /* Remove old margin-top */
+    margin-top: 0;
 }
 
 .arrow {

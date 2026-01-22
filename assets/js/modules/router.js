@@ -134,6 +134,13 @@ export async function loadPage(page, pushState = true) {
     updateHero(page);
     setActiveLink(page);
 
+    // CLEANUP: Remove admin.css if we are NOT on the admin page
+    // This prevents styles from leaking into the public site (navbar issues)
+    if (page !== 'admin') {
+        const adminLinks = document.querySelectorAll('link[href*="admin.css"]');
+        adminLinks.forEach(link => link.remove());
+    }
+
     if (pushState) {
         history.pushState({ page }, "", `?page=${page}`);
     }

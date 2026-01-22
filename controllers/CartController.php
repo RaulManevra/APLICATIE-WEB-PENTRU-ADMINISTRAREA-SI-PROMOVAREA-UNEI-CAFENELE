@@ -117,6 +117,11 @@ class CartController {
         $formattedTime = null;
         $userId = $_SESSION['user_id'] ?? null;
 
+        // 0. CHECK CART (First Priority)
+        if (empty($_SESSION['cart'])) {
+            sendError("Cart is empty.");
+        }
+
         // --- TOKEN HANDLING (Moved Up) ---
         $isTableOrder = false;
 
@@ -157,7 +162,16 @@ class CartController {
             // Validate Pickup Time
             try {
                 $pickupTime = new DateTime($pickupTimeStr);
+            } catch (Exception $e) {
+                sendError("Invalid date format.");
+            }
+
+            try {
                 $now = new DateTime();
+
+                if ($pickupTime < $now) {
+                    sendError("Orders cannot be placed in the past.");
+                }
                 
                 // Allow only future times + buffer (e.g. 15 mins)
                 $buffer = clone $now;
@@ -198,13 +212,11 @@ class CartController {
                 
                 $formattedTime = $pickupTime->format('Y-m-d H:i:s');
                 
-            } catch (Exception $e) {
-                sendError("Invalid date format or schedule check failed.");
+            } catch (Throwable $e) {
+                // DB or Logic error during schedule check
+                // error_log("Checkout Schedule Error: " . $e->getMessage());
+                sendError("Schedule check failed. Please try again or contact us.");
             }
-        }
-
-        if (empty($_SESSION['cart'])) {
-            sendError("Cart is empty.");
         }
 
         // Calculate total and prepare items
@@ -274,7 +286,7 @@ class CartController {
             
             sendSuccess(['message' => $msg, 'order_id' => $orderId]);
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->conn->rollback();
             sendError($e->getMessage());
         }

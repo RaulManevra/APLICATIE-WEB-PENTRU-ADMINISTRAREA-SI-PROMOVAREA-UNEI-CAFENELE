@@ -15,6 +15,11 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
         <div class="hero-slider" id="homeSlider">
             <!-- Slides will be injected dynamically -->
         </div>
+        <div class="slider-controls">
+            <button class="arrow prev">&#10094;</button>
+            <div class="dots"></div>
+            <button class="arrow next">&#10095;</button>
+        </div>
     </div>
 
     <div class="hero-right">
@@ -26,12 +31,6 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                 Ofertă valabilă doar săptămâna aceasta – vino să te bucuri de gustul perfect al caramelului împreună cu un prieten!
             </p>
             <a href="?page=menu" class="hero-offer-btn nav-link" id="hero-btn" data-page="menu">Vezi Meniul</a>
-        </div>
-
-        <div class="slider-controls">
-            <button class="arrow prev">&#10094;</button>
-            <div class="dots"></div>
-            <button class="arrow next">&#10095;</button>
         </div>
     </div>
 

@@ -35,7 +35,7 @@ class OrderController {
     }
 
     private function getAllOrders() {
-        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.created_at, u.username, u.email 
+        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.created_at, o.completed_at, u.username, u.email 
                 FROM orders o 
                 JOIN users u ON o.user_id = u.id 
                 ORDER BY o.pickup_time ASC"; 
@@ -43,7 +43,7 @@ class OrderController {
     }
 
     private function getRunningOrders() {
-        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.created_at, u.username, u.email 
+        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.created_at, o.completed_at, u.username, u.email 
                 FROM orders o 
                 JOIN users u ON o.user_id = u.id 
                 WHERE o.status NOT IN ('completed', 'cancelled')
@@ -106,8 +106,17 @@ class OrderController {
         $currentOrder = $resInfo->fetch_assoc();
         $tableId = $currentOrder['table_id'] ?? null;
 
-        $stmt = $this->conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
-        $stmt->bind_param("si", $status, $id);
+        $completedAt = null;
+        if ($status === 'completed') {
+            $completedAt = date('Y-m-d H:i:s');
+            // If completed, update both status and completed_at
+            $stmt = $this->conn->prepare("UPDATE orders SET status = ?, completed_at = ? WHERE id = ?");
+            $stmt->bind_param("ssi", $status, $completedAt, $id);
+        } else {
+            // Just status
+            $stmt = $this->conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
+            $stmt->bind_param("si", $status, $id);
+        }
 
         if ($stmt->execute()) {
              // Logic: If Completed, check if table should be freed

@@ -36,9 +36,12 @@ export async function initSlider() {
                 slider.appendChild(img0);
 
                 slides = [img0]; // Init with first
+                let loadedRemaining = false;
 
-                // Lazy load the rest after page settles
-                setTimeout(() => {
+                const loadRemainingSlides = () => {
+                    if (loadedRemaining) return;
+                    loadedRemaining = true;
+
                     data.data.slice(1).forEach((s, i) => {
                         const img = document.createElement('img');
                         img.className = 'slide';
@@ -47,11 +50,13 @@ export async function initSlider() {
                         slider.appendChild(img);
                         slides.push(img);
                     });
+                };
 
-                    // Re-query to ensure order (optional, but safe)
-                    // slides = Array.from(slider.querySelectorAll('.slide')); 
+                // Lazy load the rest after page settles
+                setTimeout(loadRemainingSlides, 3000);
 
-                }, 3000); // 3-second delay for background loading
+                // Expose loader to module scope so controls can trigger it
+                slider.loadRemaining = loadRemainingSlides;
 
             } else {
                 console.warn("No slides found in DB.");
@@ -74,19 +79,34 @@ export async function initSlider() {
     stopSlider();
 
     let index = 0;
-    const intervalTime = 5000; // slightly longer for better UX
+    const intervalTime = 5000;
 
     // Initialize dots
-    if (dotsContainer) {
+    if (dotsContainer && sliderData.length > 0) {
         dotsContainer.innerHTML = '';
-        slides.forEach((_, i) => {
+        sliderData.forEach((_, i) => {
             const dot = document.createElement('span');
             if (i === 0) dot.classList.add('active');
             dot.addEventListener('click', () => {
+                // Determine if we need to force load
+                if (slider.loadRemaining) slider.loadRemaining();
                 manualSlide(i);
             });
             dotsContainer.appendChild(dot);
         });
+    } else if (dotsContainer) {
+        // Fallback if no data (shouldn't happen with lazy load flow)
+        dotsContainer.innerHTML = '';
+        slides.forEach((_, i) => {
+            const dot = document.createElement('span');
+            if (i === 0) dot.classList.add('active');
+            dotsContainer.appendChild(dot);
+        });
+    }
+
+    // Helper to ensure all slides are loaded before moving
+    function checkLoad() {
+        if (slider.loadRemaining) slider.loadRemaining();
     }
     const dots = dotsContainer ? Array.from(dotsContainer.children) : [];
 
@@ -153,14 +173,17 @@ export async function initSlider() {
 
 
     function nextSlide() {
+        if (slider.loadRemaining) slider.loadRemaining();
         showSlide(index + 1);
     }
 
     function prevSlide() {
+        if (slider.loadRemaining) slider.loadRemaining();
         showSlide(index - 1);
     }
 
     function manualSlide(i) {
+        if (slider.loadRemaining) slider.loadRemaining();
         stopTimer(); // specific stop for interaction
         showSlide(i);
         startTimer(); // restart
