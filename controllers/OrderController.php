@@ -35,7 +35,7 @@ class OrderController {
     }
 
     private function getAllOrders() {
-        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.created_at, o.completed_at, u.username, u.email 
+        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at, u.username, u.email 
                 FROM orders o 
                 JOIN users u ON o.user_id = u.id 
                 ORDER BY o.pickup_time ASC"; 
@@ -43,7 +43,7 @@ class OrderController {
     }
 
     private function getRunningOrders() {
-        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.created_at, o.completed_at, u.username, u.email 
+        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at, u.username, u.email 
                 FROM orders o 
                 JOIN users u ON o.user_id = u.id 
                 WHERE o.status NOT IN ('completed', 'cancelled')

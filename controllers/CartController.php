@@ -39,6 +39,9 @@ class CartController {
             case 'checkout':
                 $this->checkout();
                 break;
+            case 'validate_checkout':
+                $this->validate_checkout();
+                break;
             default:
                 sendError("Invalid cart action.");
         }
@@ -105,7 +108,7 @@ class CartController {
         sendSuccess(['message' => 'Cart cleared.']);
     }
 
-    private function checkout() {
+    private function validate_checkout() {
         // Fix for "Network Error": Suppress HTML output errors that break JSON
         ini_set('display_errors', '0'); 
         error_reporting(E_ALL);
@@ -113,22 +116,24 @@ class CartController {
         $pickupTimeStr = $_POST['pickup_time'] ?? '';
         $token = $_POST['token'] ?? '';
         
-        $tableId = null;
-        $formattedTime = null;
         $userId = $_SESSION['user_id'] ?? null;
-
+        
         // 0. CHECK CART (First Priority)
         if (empty($_SESSION['cart'])) {
             sendError("Cart is empty.");
         }
 
-        // --- TOKEN HANDLING (Moved Up) ---
+        $validation = $this->performValidation($token, $pickupTimeStr, $userId);
+        sendSuccess(['message' => 'Validation successful', 'tableId' => $validation['tableId']]);
+    }
+
+    private function performValidation($token, $pickupTimeStr, $userId) {
         $isTableOrder = false;
+        $tableId = null;
+        $formattedTime = null;
 
         if (!empty($token)) {
             $decoded = base64_decode($token);
-            // Expected format: "Table {id}" or "Website"
-            
             if (strpos($decoded, 'Table ') === 0) {
                 // It is a Table Order
                 $isTableOrder = true;
@@ -147,7 +152,6 @@ class CartController {
         if (!$userId) {
             if ($isTableOrder) {
                 // Allow Guest Checkout for Table Orders
-                $userId = $this->getOrCreateGuestUser();
             } else {
                 sendError("You must be logged in to checkout.");
             }
@@ -213,9 +217,43 @@ class CartController {
                 $formattedTime = $pickupTime->format('Y-m-d H:i:s');
                 
             } catch (Throwable $e) {
-                // DB or Logic error during schedule check
-                // error_log("Checkout Schedule Error: " . $e->getMessage());
                 sendError("Schedule check failed. Please try again or contact us.");
+            }
+        }
+        
+        return ['isTableOrder' => $isTableOrder, 'tableId' => $tableId, 'formattedTime' => $formattedTime];
+    }
+
+    private function checkout() {
+        // Fix for "Network Error": Suppress HTML output errors that break JSON
+        ini_set('display_errors', '0'); 
+        error_reporting(E_ALL);
+
+        $pickupTimeStr = $_POST['pickup_time'] ?? '';
+        $token = $_POST['token'] ?? '';
+        $paymentMethod = $_POST['payment_method'] ?? 'card'; // Default to card for legacy/web
+        
+        $userId = $_SESSION['user_id'] ?? null;
+        
+        // 0. CHECK CART (First Priority)
+        if (empty($_SESSION['cart'])) {
+            sendError("Cart is empty.");
+        }
+        
+        // Re-run validation to be safe (incase direct call)
+        $valData = $this->performValidation($token, $pickupTimeStr, $userId);
+        
+        $isTableOrder = $valData['isTableOrder'];
+        $tableId = $valData['tableId'];
+        $formattedTime = $valData['formattedTime'];
+
+        // --- AUTH CHECK ---
+        if (!$userId) {
+            if ($isTableOrder) {
+                // Allow Guest Checkout for Table Orders
+                $userId = $this->getOrCreateGuestUser();
+            } else {
+                sendError("You must be logged in to checkout.");
             }
         }
 
@@ -246,9 +284,9 @@ class CartController {
         $this->conn->begin_transaction();
 
         try {
-            // Updated INSERT to include table_id
-            $stmt = $this->conn->prepare("INSERT INTO orders (user_id, pickup_time, total_price, status, table_id) VALUES (?, ?, ?, 'pending', ?)");
-            $stmt->bind_param("isdi", $userId, $formattedTime, $totalPrice, $tableId);
+            // Updated INSERT to include table_id and payment_method
+            $stmt = $this->conn->prepare("INSERT INTO orders (user_id, pickup_time, total_price, status, table_id, payment_method) VALUES (?, ?, ?, 'pending', ?, ?)");
+            $stmt->bind_param("isdis", $userId, $formattedTime, $totalPrice, $tableId, $paymentMethod);
             
             if (!$stmt->execute()) {
                 throw new Exception("Order creation failed: " . $stmt->error);

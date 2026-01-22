@@ -26,7 +26,6 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
         const urlToken = urlParams.get('token');
         if (urlToken) {
             sessionStorage.setItem('orderToken', urlToken);
-            // Clean URL? Optional.
             window.history.replaceState({}, document.title, window.location.pathname + '?page=cart');
         }
 
@@ -141,9 +140,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                     const isPlus = e.target.classList.contains('plus');
                     const currentQty = parseInt(e.target.parentElement.querySelector('.qty-val').innerText);
                     const newQty = isPlus ? currentQty + 1 : currentQty - 1;
-
                     if (newQty < 1) return; 
-
                     await updateCartItem(id, newQty);
                 });
             });
@@ -160,66 +157,6 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
             });
         }
         
-        async function handleCheckoutClick() {
-            const token = sessionStorage.getItem('orderToken');
-            let isTable = false;
-            
-            if (token) {
-                try {
-                    const decoded = atob(token); // Base64 decode
-                    if (decoded.startsWith('Table ')) {
-                        isTable = true;
-                    }
-                } catch(e) {
-                    console.warn("Invalid token stored", e);
-                }
-            }
-            
-            if (isTable) {
-                // Skip Modal, Send Order Immediately
-                if (!confirm("Send order to kitchen?")) return;
-                await performCheckout(token, null); // Token handles table assignment
-            } else {
-                // Show Modal (Website or default)
-                document.getElementById('checkout-modal').style.display = 'flex';
-            }
-        }
-
-        async function performCheckout(token, pickupTime) {
-            const formData = new FormData();
-            formData.append('action', 'checkout');
-            if (token) formData.append('token', token);
-            if (pickupTime) formData.append('pickup_time', pickupTime);
-            
-            try {
-                const res = await fetch('?page=cart_handler&action=checkout', {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                
-                const text = await res.text();
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                     console.error("Server Error:", text);
-                     alert("Server error during checkout. See console.");
-                     return;
-                }
-
-                if (data.success) {
-                    alert(data.message); // "Order sent to kitchen" or "Order placed"
-                    location.reload(); 
-                } else {
-                    alert("Checkout Failed: " + data.message);
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Network error.");
-            }
-        }
-
         async function updateCartItem(id, qty) {
             const formData = new FormData();
             formData.append('action', 'update_quantity');
@@ -263,40 +200,38 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
              }
         }
         
-        // Modal Logic
-        const modal = document.getElementById('checkout-modal');
-        const closeBtn = document.querySelector('.close-modal');
-        const checkoutForm = document.getElementById('checkout-form');
-
-        closeBtn.onclick = () => modal.style.display = 'none';
-
-        // Message Modal Logic
+        // --- MODAL HANDLING ---
+        const pickupModal = document.getElementById('checkout-modal');
+        const paymentModal = document.getElementById('payment-modal');
         const msgModal = document.getElementById('message-modal');
-        const msgClose = msgModal.querySelector('.close-modal');
-        const msgTitle = document.getElementById('msg-modal-title');
-        const msgText = document.getElementById('msg-modal-text');
-        const msgBtn = document.getElementById('msg-modal-btn');
-        let msgCallback = null;
+        const mockPaymentOverlay = document.getElementById('mock-payment-overlay');
+        
+        // Close handlers
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.onclick = function() {
+                this.closest('.modal').style.display = 'none';
+            }
+        });
+
+        window.onclick = (event) => {
+            if (event.target == pickupModal) pickupModal.style.display = 'none';
+            if (event.target == paymentModal) paymentModal.style.display = 'none';
+            if (event.target == msgModal) msgModal.style.display = 'none';
+        }
 
         function showMessageModal(title, text, callback = null) {
-            msgTitle.innerText = title;
-            msgText.innerText = text;
-            msgCallback = callback;
+            document.getElementById('msg-modal-title').innerText = title;
+            document.getElementById('msg-modal-text').innerText = text;
+            const btn = document.getElementById('msg-modal-btn');
+            
+            btn.onclick = () => {
+                msgModal.style.display = 'none';
+                if (callback) callback();
+            };
             msgModal.style.display = 'flex';
         }
 
-        const closeMsgModal = () => {
-            msgModal.style.display = 'none';
-            if (msgCallback) msgCallback();
-        };
-
-        msgClose.onclick = closeMsgModal;
-        msgBtn.onclick = closeMsgModal;
-        
-        window.onclick = (event) => {
-            if (event.target == modal) modal.style.display = 'none';
-            if (event.target == msgModal) closeMsgModal();
-        }
+        // --- CHECKOUT LOGIC ---
 
         async function handleCheckoutClick() {
             const token = sessionStorage.getItem('orderToken');
@@ -312,28 +247,107 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
             }
             
             if (isTable) {
-                // Direct checkout for Table
-                await performCheckout(token, null);
+                // Show Payment Method Modal for Table Orders
+                paymentModal.style.display = 'flex';
             } else {
                 // Check Login for Website Orders
                 const currentUser = window.APP_CONFIG ? window.APP_CONFIG.currentUser : null;
                 if (!currentUser) {
-                    showMessageModal("Login Required", "You must be logged in to place an order.", () => {
-                         // Optional: Redirect to login
-                         // loadPage('login'); // If I had access to loadPage here, but it's module based. Can use window.location or just message.
-                    });
+                    showMessageModal("Login Required", "You must be logged in to place an order.");
                     return;
                 }
-                
-                document.getElementById('checkout-modal').style.display = 'flex';
+                // Show Pickup Time Modal
+                pickupModal.style.display = 'flex';
             }
         }
 
-        async function performCheckout(token, pickupTime) {
+        // --- PAYMENT SELECTION ---
+        document.getElementById('pay-cash-btn').addEventListener('click', () => {
+            const token = sessionStorage.getItem('orderToken');
+            paymentModal.style.display = 'none';
+            performCheckout(token, null, 'cash');
+        });
+
+        document.getElementById('pay-card-btn').addEventListener('click', () => {
+            const token = sessionStorage.getItem('orderToken');
+            paymentModal.style.display = 'none';
+            // Redirect to Payment Page
+            goToPaymentPage(token, null, 'card');
+        });
+
+        // --- PICKUP SUBMIT ---
+        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pickupTime = document.getElementById('pickup-time').value;
+            
+            if(!pickupTime) {
+                showMessageModal("Required", "Please select a pickup time.");
+                return;
+            }
+            
+            pickupModal.style.display = 'none';
+            
+            // Standard Web Checkout -> Redirect to "Payment"
+            goToPaymentPage(null, pickupTime, 'card');
+        });
+
+        async function goToPaymentPage(token, pickupTime, paymentMethod) {
+            // Validate first before redirecting to Payment Page
+            const formData = new FormData();
+            formData.append('action', 'validate_checkout');
+            if (token) formData.append('token', token);
+            if (pickupTime) formData.append('pickup_time', pickupTime);
+            
+            try {
+                const res = await fetch('?page=cart_handler&action=validate_checkout', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                
+                let data;
+                try {
+                     data = await res.json();
+                } catch(e) {
+                     console.error("Validation Parse Error", e);
+                     showMessageModal("Error", "Server validation error.");
+                     return;
+                }
+                
+                if (!data.success) {
+                    showMessageModal("Cannot Proceed", data.message);
+                    return; // Stop redirection
+                }
+
+                // Save checkout details to SessionStorage for the Payment Page to read
+                const orderData = {
+                    token: token,
+                    pickupTime: pickupTime,
+                    paymentMethod: paymentMethod
+                };
+                sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
+                
+                // Navigate to Payment Page
+                import('./assets/js/modules/router.js')
+                    .then(module => {
+                        module.loadPage('payment');
+                    })
+                    .catch(err => {
+                        console.error("Router load failed, falling back to reload", err);
+                        window.location.href = '?page=payment';
+                    });
+            } catch (err) {
+                 console.error(err);
+                 showMessageModal("Error", "Network error during validation.");
+            }
+        }
+
+        async function performCheckout(token, pickupTime, paymentMethod = 'card') {
             const formData = new FormData();
             formData.append('action', 'checkout');
             if (token) formData.append('token', token);
             if (pickupTime) formData.append('pickup_time', pickupTime);
+            formData.append('payment_method', paymentMethod);
             
             try {
                 const res = await fetch('?page=cart_handler&action=checkout', {
@@ -353,7 +367,9 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                 }
 
                 if (data.success) {
-                    showMessageModal("Success", data.message, () => location.reload());
+                    let msg = data.message;
+                    if(paymentMethod === 'cash') msg += " Please wait for the waiter to collect the cash.";
+                    showMessageModal("Order Placed", msg, () => location.reload());
                 } else {
                     showMessageModal("Failed", data.message);
                 }
@@ -363,29 +379,11 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
             }
         }
 
-        // ... existing update/remove functions ...
-
-        checkoutForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const pickupTime = document.getElementById('pickup-time').value;
-            
-            if(!pickupTime) {
-                showMessageModal("Required", "Please select a pickup time.");
-                return;
-            }
-            
-            // Hide pickup modal before processing
-            modal.style.display = 'none';
-            
-            const token = sessionStorage.getItem('orderToken');
-            await performCheckout(token, pickupTime);
-        });
-
         loadCart();
     })();
 </script>
 
-<!-- Checkout Modal -->
+<!-- Checkout Modal (Pickup Time) -->
 <div id="checkout-modal" class="modal">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
@@ -397,8 +395,27 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                 <input type="datetime-local" id="pickup-time" name="pickup_time" required class="form-control">
                 <small>Must be at least 15 minutes from now.</small>
             </div>
-            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Confirm Order</button>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Continue to Payment</button>
         </form>
+    </div>
+</div>
+
+<!-- Payment Method Modal -->
+<div id="payment-modal" class="modal">
+    <div class="modal-content" style="max-width: 500px; text-align: center;">
+        <span class="close-modal">&times;</span>
+        <h2 style="color: #2a0e02;">Payment Method</h2>
+        <p style="margin-bottom: 20px;">How would you like to pay?</p>
+        <div class="payment-options" style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+             <button id="pay-cash-btn" class="btn-secondary" style="padding: 20px; flex: 1; min-width: 140px; border-radius: 12px; transition: transform 0.2s; background-color: #2a0e02; color: #ffffff; border: 2px solid #2a0e02;">
+                <i class="fas fa-money-bill-wave" style="font-size: 2.5rem; display: block; margin-bottom: 10px; color: #4CAF50;"></i>
+                <span style="font-weight: bold; font-size: 1.1rem;">Cash</span>
+             </button>
+             <button id="pay-card-btn" class="btn-primary" style="padding: 20px; flex: 1; min-width: 140px; border-radius: 12px; transition: transform 0.2s;">
+                <i class="fas fa-credit-card" style="font-size: 2.5rem; display: block; margin-bottom: 10px; color: #fff;"></i>
+                <span style="font-weight: bold; font-size: 1.1rem;">Card (Online)</span>
+             </button>
+        </div>
     </div>
 </div>
 
@@ -410,6 +427,16 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
         <p id="msg-modal-text" style="margin: 20px 0; font-size: 1.1rem;">...</p>
         <button id="msg-modal-btn" class="btn-primary" style="width: 100px;">OK</button>
     </div>
+</div>
+
+<!-- Mock Payment Overlay -->
+<div id="mock-payment-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+    <h1><i class="fas fa-lock" style="color:green;"></i> Secure Payment</h1>
+    <p>Simulating external payment gateway...</p>
+    <div class="spinner" style="border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-top: 20px;"></div>
+    <style>
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </div>
 
 <style>

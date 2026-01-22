@@ -95,6 +95,7 @@ if ($currentUser && isset($conn)) {
                 'tables' => 'views/pages/tables.php',
                 'profile_picture_upload' => 'views/forms/profile_picture_upload.php',
                 'cart' => 'views/pages/cart.php',
+                'payment' => 'views/pages/payment.php',
                 'cart_handler' => 'controllers/CartController.php',
                 'forgot_password' => 'views/auth/forgot_password.php',
                 'reset_password' => 'views/auth/reset_password.php',

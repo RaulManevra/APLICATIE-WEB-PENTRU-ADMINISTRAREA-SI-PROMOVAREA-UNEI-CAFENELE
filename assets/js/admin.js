@@ -1432,6 +1432,21 @@ function renderOrderCard(order) {
     )
     .join("");
 
+  // Determine Payment Badge
+  const payMethod = order.payment_method || 'card';
+  const isCash = payMethod === 'cash';
+  const payBadgeColor = isCash ? '#2ecc71' : '#3498db';
+  const payIcon = isCash ? '<i class="fas fa-money-bill-wave"></i>' : '<i class="fas fa-credit-card"></i>';
+
+  let cashAlert = '';
+  if (isCash && order.status !== 'completed' && order.status !== 'cancelled') {
+    cashAlert = `
+        <div style="background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; padding: 10px; border-radius: 6px; margin: 10px 0; font-weight: bold; text-align: center;">
+            <i class="fas fa-hand-holding-usd"></i> COLLECT: ${parseFloat(order.total_price).toFixed(2)} RON
+        </div>
+      `;
+  }
+
   return `
     <div class="order-card" style="border: 1px solid #ddd; background: #fff; padding: 15px; border-radius: 8px; width: 350px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:10px; border-left: 10px solid ${statusColor};">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -1439,12 +1454,17 @@ function renderOrderCard(order) {
                 <h4 style="margin:0;">Order #${order.id}</h4>
                 <small style="color:#666;">${order.username}</small>
             </div>
-            <span style="background:${statusColor}; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.8rem;">${order.status.toUpperCase()}</span>
+            <div style="text-align:right;">
+                <div style="margin-bottom:2px;"><span style="background:${statusColor}; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.8rem;">${order.status.toUpperCase()}</span></div>
+                <div><span style="background:${payBadgeColor}; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.75rem;">${payIcon} ${payMethod.toUpperCase()}</span></div>
+            </div>
         </div>
         
         <div style="max-height: 150px; overflow-y:auto; background:#f9f9f9; padding:5px; border-radius:4px;">
             <ul style="margin:0; padding-left:20px; font-size:0.9rem;">${itemsHtml}</ul>
         </div>
+        
+        ${cashAlert}
 
         <div style="font-size: 0.85rem; color: #555;">
              <div style="display:flex; justify-content:space-between;">
@@ -1454,6 +1474,7 @@ function renderOrderCard(order) {
       : '<span>Table Order</span>'
     }
              </div>
+             <div style="margin-top:5px; font-weight:bold;">Total: ${parseFloat(order.total_price).toFixed(2)} RON</div>
         </div>
 
         <div style="display:flex; gap:5px; margin-top:5px;">
