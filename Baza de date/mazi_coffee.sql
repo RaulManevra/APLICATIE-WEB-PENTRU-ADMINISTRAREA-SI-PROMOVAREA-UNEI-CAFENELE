@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.44, for macos10.15 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
 -- Host: localhost    Database: mazi_coffee
 -- ------------------------------------------------------
--- Server version	8.0.44
+-- Server version	8.0.31
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -63,30 +63,6 @@ LOCK TABLES `global_settings` WRITE;
 /*!40000 ALTER TABLE `global_settings` DISABLE KEYS */;
 INSERT INTO `global_settings` VALUES ('newsletter_email','zarnescuraul@gmail.com','2026-01-10 10:58:30'),('support_email','','2026-01-10 10:58:30');
 /*!40000 ALTER TABLE `global_settings` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `ingredients`
---
-
-DROP TABLE IF EXISTS `ingredients`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ingredients` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ingredients`
---
-
-LOCK TABLES `ingredients` WRITE;
-/*!40000 ALTER TABLE `ingredients` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ingredients` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -206,32 +182,6 @@ LOCK TABLES `password_resets` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `product_ingredients`
---
-
-DROP TABLE IF EXISTS `product_ingredients`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `product_ingredients` (
-  `product_id` int NOT NULL,
-  `ingredient_id` int NOT NULL,
-  PRIMARY KEY (`product_id`,`ingredient_id`),
-  KEY `ingredient_id` (`ingredient_id`),
-  CONSTRAINT `product_ingredients_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `product_ingredients_ibfk_2` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredients` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `product_ingredients`
---
-
-LOCK TABLES `product_ingredients` WRITE;
-/*!40000 ALTER TABLE `product_ingredients` DISABLE KEYS */;
-/*!40000 ALTER TABLE `product_ingredients` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `products`
 --
 
@@ -243,12 +193,13 @@ CREATE TABLE `products` (
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `ingredients` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `quantity` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `price` decimal(10,2) NOT NULL,
   `image_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `category` enum('coffee','other') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'coffee',
+  `category` enum('coffee','tea','chocolate','refreshment','signature','addon') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'coffee',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -257,7 +208,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'Caramel Macchiato','Delicious Caramel Macchiato',NULL,13.00,'assets/menu/images/Caramel Macchiato.jpeg','coffee','2025-12-07 19:52:52'),(2,'Caramel Mocha','Rich Caramel Mocha','CACAT',15.00,'assets/menu/images/Caramel Mocha.jpg','coffee','2025-12-07 19:52:52'),(3,'Espresso','Strong and pure Espresso','sabrina carpenter',10.00,'assets/menu/images/Espresso.webp','coffee','2025-12-07 19:52:52'),(4,'Iced Americano','Refreshing Iced Americano',NULL,12.00,'assets/menu/images/Iced Americano.jpg','coffee','2025-12-07 19:52:52'),(5,'Latte','Smooth and creamy Latte','Lapte',14.00,'assets/menu/images/Latte.webp','coffee','2025-12-07 19:52:52'),(6,'Dorian Cafelutza','HATZ MAESTRE',NULL,6700.00,'assets/menu/images/prod_694d66784164b.jpeg','coffee','2025-12-25 16:29:44'),(7,'Capuccino','Un echilibru perfect între espresso intens, lapte fierbinte catifelat și spumă fină de lapte. O cafea cremoasă, aromată, ideală pentru orice moment al zilei.',NULL,5.00,'assets/menu/images/prod_694ffeafc7eda.jpg','coffee','2025-12-27 15:43:43'),(9,'Cortado','Espresso intens, echilibrat cu o cantitate egală de lapte cald, pentru o băutură fină, cremoasă și fără să fie prea dulce.',NULL,15.00,'assets/menu/images/prod_69500f45814e3.jpeg','coffee','2025-12-27 15:47:30'),(10,'Mocha','Combinația perfectă de espresso intens, ciocolată fină și lapte catifelat, decorată cu spumă delicată pentru o experiență dulce și aromată.',NULL,15.00,'assets/menu/images/prod_69500f8bf17c6.jpeg','coffee','2025-12-27 15:48:27'),(11,'Iced latte','Espresso rece, lapte proaspăt și cuburi de gheață, pentru o băutură răcoritoare, fină și revigorantă.',NULL,7.00,'assets/menu/images/prod_6950001b8e7e2.jfif','coffee','2025-12-27 15:49:47'),(12,'Ice-caramell-latte','Espresso rece, lapte proaspăt și gheață, cu un strop de caramel dulce, pentru o băutură cremoasă și răcoritoare.','Lapte, Caramel, Cafea',7.00,'assets/menu/images/prod_69500064bfede.jpg','coffee','2025-12-27 15:51:00'),(13,'Iced-mocha','Espresso rece, ciocolată fină, lapte proaspăt și gheață, pentru o băutură cremoasă și răcoritoare, cu gust bogat de ciocolată.',NULL,7.00,'assets/menu/images/prod_695000a881661.jpg','coffee','2025-12-27 15:52:08'),(14,'Ice-spanish-latte','Espresso de specialitate, lapte fin și gheață, îndulcit subtil cu zahăr caramelizat, pentru o experiență rafinată și revigorantă.',NULL,7.00,'assets/menu/images/prod_6950010c326ac.jpg','coffee','2025-12-27 15:53:48'),(15,'Cicolată caldă','O îmbrățișare într-o ceașcă! Ciocolată dulce, lapte cremos și spumă pufoasă, perfectă pentru momentele de relaxare.','Ciocolata, lapte cald',7.00,'assets/menu/images/prod_6950014e93c55.jpg','coffee','2025-12-27 15:54:54');
+INSERT INTO `products` VALUES (1,'Espresso single','Esența pură a cafelei: un shot intens, bogat și plin de caracter, extras cu măiestrie pentru a trezi toate simțurile.','cafea, apă','20ml',10.00,'assets/menu/images/espresso.webp','coffee','2026-01-22 15:04:24'),(2,'Espresso dublu','Energie la dublu. Aceeași intensitate remarcabilă, într-o doză generoasă care îți oferă impulsul perfect pentru întreaga zi.','cafea, apă','40ml',12.00,'assets/menu/images/TBD.jpg','coffee','2026-01-22 15:04:24'),(3,'Long Black','Eleganță în simplitate. Un dublu espresso turnat delicat peste apă fierbinte, păstrând crema bogată și aromele intense.','espresso dublu, apă','80ml',12.00,'assets/menu/images/TBD.jpg','coffee','2026-01-22 15:04:24'),(4,'V60','O experiență artizanală. Cafea preparată manual, picătură cu picătură, pentru a dezvălui notele florale și fructate subtile ale boabelor de origine.','cafea, apă','200ml',20.00,'assets/menu/images/TBD.jpg','coffee','2026-01-22 15:04:24'),(5,'Cortado','Echilibrul ideal. Tăria unui espresso întâlnește dulceața laptelui cald, într-o armonie perfectă de gust și textură.','espresso single, cremă de lapte','120ml',12.00,'assets/menu/images/cortado.jpeg','coffee','2026-01-22 15:04:24'),(6,'Cappuccino','Clasicul italian desăvârșit. Espresso catifelat îmbrățișat de lapte cald și o coroană bogată de spumă fină.','espresso single, cremă de lapte','200ml',14.00,'assets/menu/images/cappuccino.jpg','coffee','2026-01-22 15:04:24'),(7,'Flat White','Cremozitate absolută. Două shot-uri de espresso învăluite în cremă de lapte micro-texturată, pentru o băutură fină, dar puternică.','espresso dublu, cremă de lapte','180ml',15.00,'assets/menu/images/TBD.jpg','coffee','2026-01-22 15:04:24'),(8,'Latte','Răsfăț cremos. O îmbrățișare caldă de lapte spumat și espresso, perfectă pentru momentele lungi de relaxare.','espresso single, cremă de lapte','300ml',16.00,'assets/menu/images/latte.webp','coffee','2026-01-22 15:04:24'),(9,'Babyccino','Bucuria celor mici. Spumă de lapte pufoasă, pudrată cu cacao fină – un deliciu jucăuș fără cofeină.','cremă de lapte','120ml',6.00,'assets/menu/images/babycino.jpg','chocolate','2026-01-22 15:04:24'),(10,'Hot Cioco','Decadență lichidă. Ciocolată caldă premium, densă și catifelată, care îți încălzește sufletul cu fiecare înghițitură.','ciocolată caldă pudră, cremă de lapte','200ml',15.00,'assets/menu/images/hot_chocolate.jpg','chocolate','2026-01-22 15:04:24'),(11,'Ceai','Infuzia liniștii. O selecție de frunze de ceai premium, alese cu grijă pentru a oferi o pauză de prospețime și calm.','ceai, apă','300ml',14.00,'assets/menu/images/ceai.jpg','tea','2026-01-22 15:04:24'),(12,'Espresso Tonic','Efervescență și energie. Întâlnirea surprinzătoare dintre espresso intens și apa tonică rece, pentru un cocktail de cafea revitalizant.','espresso dublu, apă tonică, gheață','180ml',17.00,'assets/menu/images/TBD.jpg','signature','2026-01-22 15:04:24'),(13,'Cold Brew Tonic','Răcorire sofisticată. Finețea cafelei cold brew combinată cu perlajul apei tonice, o băutură vibrantă și cristalină.','cold brew, apă tonică, gheață','180ml',17.00,'assets/menu/images/cold_brew_tonic.jpg','signature','2026-01-22 15:04:24'),(14,'Cold Brew Latte','Dulceață naturală. Cafea extrasă la rece și lapte proaspăt, o alternativă fină, lipsită de aciditate, perfectă pentru zilele calde.','cold brew, apă, gheață','250ml',16.00,'assets/menu/images/cold_brew_latte.webp','coffee','2026-01-22 15:04:24'),(15,'Cold Brew','Răbdarea gustului. Cafea infuzată lent în apă rece timp îndelungat, rezultând un elixir dulceag, energizant și plin de claritate.','cafea, apă, gheață','180ml',14.00,'assets/menu/images/cold_brew.jpg','coffee','2026-01-22 15:04:24'),(16,'Ice Cappuccino','Cappuccino-ul tău preferat, servit „on the rocks”. Espresso rece, lapte și spumă, pentru o plăcere răcoroasă.','espresso single, cremă de lapte, gheață','180ml',14.00,'assets/menu/images/TBD.jpg','coffee','2026-01-22 15:04:24'),(17,'Ice Latte','Clasicul Latte în variantă estivală. Espresso rece turnat peste lapte și gheață, simplu și revigorant.','espresso single, cremă de lapte, gheață','250ml',16.00,'assets/menu/images/ice_latte.jfif','coffee','2026-01-22 15:04:24'),(18,'Matcha Latte','Ritualul verde. Pudră fină de ceai verde Matcha japonez, bogată în antioxidanți, combinată cu lapte cremos pentru o energie zen.','ceai matcha pudră, apă, cremă de lapte','300ml',20.00,'assets/menu/images/TBD.jpg','tea','2026-01-22 15:04:24'),(19,'Ice Matcha Latte','Zen în pahar de gheață. Prospețimea vegetală a ceaiului Matcha întâlnește răcoarea laptelui cu gheață.','ceai matcha pudră, apă, cremă de lapte, gheață','250ml',20.00,'assets/menu/images/TBD.jpg','tea','2026-01-22 15:04:24'),(20,'Matcha Tonic','Energie efervescentă. O băutură modernă și vibrantă, unde Matcha întâlnește apa tonică pentru un boost de vitalitate.','ceai matcha pudră, apă, apă tonică','180ml',22.00,'assets/menu/images/TBD.jpg','signature','2026-01-22 15:04:24'),(21,'Socată / Limonadă cu soc','Gustul copilăriei reinterpretat. O băutură artizanală răcoritoare, cu arome florale de soc și lămâie proaspătă.','sirop de soc, zeamă de lămâie, apă carbogazoasă, gheață','250ml',14.00,'assets/menu/images/TBD.jpg','refreshment','2026-01-22 15:04:24'),(22,'Limonadă cu zmeură','Explozie fructată. Limonadă clasică îmbogățită cu sirop natural de zmeură, dulce-acrișoară și irezistibilă.','sirop de zmeură, zeamă de lămâie, apă carbogazoasă','250ml',14.00,'assets/menu/images/TBD.jpg','refreshment','2026-01-22 15:04:24'),(23,'Extra shot','Boost-ul tău de energie. Adaugă încă o doză de intensitate băuturii tale preferate.','espresso single','20ml',3.00,'assets/menu/images/TBD.jpg','addon','2026-01-22 15:04:24'),(24,'Lapte vegetal','Alternative delicioase. Optează pentru lapte de ovăz sau mazăre, cremos și prietenos cu natura, pentru cafeaua ta.','lapte de ovăz/mazăre',NULL,3.00,'assets/menu/images/TBD.jpg','addon','2026-01-22 15:04:24');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -453,4 +404,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-10 20:39:41
+-- Dump completed on 2026-01-22 18:52:10

@@ -713,7 +713,7 @@ async function loadProducts() {
         (p) => `
             <tr>
                 <td><img src="${p.image_path || "assets/menu/images/coffee.jpg"}" onerror="this.src='assets/img/Logo Modificat.png'"></td>
-                <td>${p.name}</td>
+                <td>${p.name}<br><small class="text-muted">${p.quantity || ''}</small></td>
                 <td>${p.category}</td>
                 <td>${p.price} RON</td>
                 <td>
@@ -722,6 +722,7 @@ async function loadProducts() {
                         data-name="${(p.name || '').replace(/"/g, '&quot;')}"
                         data-desc="${(p.description || '').replace(/"/g, '&quot;')}"
                         data-ingredients="${(p.ingredients || '').replace(/"/g, '&quot;')}"
+                        data-quantity="${(p.quantity || '').replace(/"/g, '&quot;')}"
                         data-price="${p.price}"
                         data-category="${p.category}"
                         data-img="${p.image_path || ''}">
@@ -738,7 +739,7 @@ async function loadProducts() {
   }
 }
 
-function editProduct(id, name, desc, ingredients, price, cat, img) {
+function editProduct(id, name, desc, ingredients, quantity, price, cat, img) {
   document.getElementById("product-form").reset();
   document.getElementById("prod-id").value = id;
   document.getElementById("form-action").value = "update";
@@ -746,6 +747,7 @@ function editProduct(id, name, desc, ingredients, price, cat, img) {
   document.getElementById("prod-name").value = name;
   document.getElementById("prod-desc").value = desc;
   document.getElementById("prod-ingredients").value = ingredients;
+  document.getElementById("prod-quantity").value = quantity;
   document.getElementById("prod-price").value = price;
   document.getElementById("prod-category").value = cat;
   if (img) {
@@ -1574,8 +1576,8 @@ function setupProductEvents() {
       const deleteBtn = e.target.closest('.btn-delete-product');
 
       if (editBtn) {
-        const { id, name, desc, ingredients, price, category, img } = editBtn.dataset;
-        editProduct(id, name, desc, ingredients, price, category, img);
+        const { id, name, desc, ingredients, quantity, price, category, img } = editBtn.dataset;
+        editProduct(id, name, desc, ingredients, quantity, price, category, img);
       }
 
       if (deleteBtn) {

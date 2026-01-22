@@ -1,0 +1,286 @@
+/* =========================
+   SKELETON SCREENS
+   ========================= */
+
+/* Shimmer Animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Base Skeleton Class */
+.skeleton {
+    background: #f0f0f0;
+    background-image: linear-gradient(90deg,
+            #f0f0f0 0%,
+            #e0e0e0 50%,
+            #f0f0f0 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+}
+
+/* Darker shimmer for dark backgrounds/cards */
+.skeleton-dark {
+    background: #e0e0e0;
+    background-image: linear-gradient(90deg,
+            #e0e0e0 0%,
+            #d0d0d0 50%,
+            #e0e0e0 100%);
+}
+
+/* Utilities */
+.skeleton-text {
+    height: 1em;
+    margin-bottom: 0.5em;
+    width: 100%;
+}
+
+.skeleton-text.title {
+    height: 2em;
+    width: 60%;
+    margin-bottom: 1em;
+}
+
+.skeleton-text.subtitle {
+    height: 1.2em;
+    width: 40%;
+}
+
+.skeleton-img {
+    width: 100%;
+    height: 200px;
+    /* default */
+    display: block;
+}
+
+.skeleton-btn {
+    height: 40px;
+    width: 120px;
+    border-radius: 20px;
+}
+
+/* =========================
+   PAGE SPECIFIC SKELETONS
+   ========================= */
+
+/* Menu Page Skeleton */
+.skeleton-menu-page {
+    padding: 4rem 1rem;
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #2a130d, #5c2c18, #b97c4b);
+    box-sizing: border-box;
+}
+
+.skeleton-menu-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.skeleton-title-placeholder {
+    height: 3rem;
+    width: 300px;
+    margin: 2rem auto 4rem auto;
+    /* Match .section-title margins */
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.skeleton-menu-layout {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.skeleton-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    height: 400px;
+    border-radius: 20px;
+    background: rgba(30, 15, 10, 0.6);
+}
+
+/* Content Wrapper */
+.skeleton-menu-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.skeleton-search-placeholder {
+    height: 50px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-bottom: 2.5rem;
+    /* Match .menu-search margin */
+}
+
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2rem;
+}
+
+/* Detailed Card */
+.skeleton-card {
+    height: 380px;
+    border-radius: 18px;
+    background: rgba(30, 15, 10, 0.4);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.skeleton-card-img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-card-body {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+@media (max-width: 992px) {
+    .skeleton-menu-layout {
+        flex-direction: column;
+    }
+
+    .skeleton-sidebar {
+        width: 100%;
+        height: 120px;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Tables Page Skeleton */
+.skeleton-tables-page {
+    padding: 120px 20px 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: center;
+}
+
+.tables-intro {
+    /* Used by both, ensure alignment */
+    margin-bottom: 20px;
+}
+
+.skeleton-map-layout {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(168, 168, 168, 0.18);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 24px 48px;
+    border: 1px solid rgba(255, 255, 255, 0.192);
+}
+
+.skeleton-map {
+    width: 100%;
+    height: 600px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.skeleton-legend {
+    width: 200px;
+    height: 300px;
+    border-radius: 16px;
+    background: rgba(4, 2, 32, 0.463);
+    /* Match real legend bg */
+    backdrop-filter: blur(6px);
+}
+
+@media (max-width: 900px) {
+    .skeleton-map-layout {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+
+    .skeleton-legend {
+        width: 100%;
+        height: 100px;
+        order: 1;
+        margin-bottom: 20px;
+    }
+
+    .skeleton-map {
+        order: 2;
+        height: 400px;
+    }
+}
+
+/* Home Page Skeleton */
+.skeleton-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 80px 6%;
+    min-height: 95vh;
+    box-sizing: border-box;
+}
+
+.skeleton-hero-left {
+    width: 50%;
+    max-width: 750px;
+    height: 80vh;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    /* Placeholder for slider */
+    margin-right: 20px;
+}
+
+.skeleton-hero-right {
+    width: 45%;
+    max-width: 550px;
+    margin-left: -40px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 960px) {
+    .skeleton-hero {
+        flex-direction: column-reverse;
+        /* Match real hero */
+        justify-content: center;
+        text-align: center;
+        gap: 40px;
+        padding-top: 120px;
+    }
+
+    .skeleton-hero-left {
+        width: 100%;
+        margin: 0;
+        height: 50vh;
+    }
+
+    .skeleton-hero-right {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        align-items: center;
+    }
+}

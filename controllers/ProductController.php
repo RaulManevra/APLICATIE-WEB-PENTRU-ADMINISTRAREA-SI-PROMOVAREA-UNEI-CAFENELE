@@ -45,7 +45,8 @@ class ProductController {
     private function add() {
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $ingredients = trim($_POST['ingredients'] ?? ''); // New field
+        $ingredients = trim($_POST['ingredients'] ?? '');
+        $quantity = trim($_POST['quantity'] ?? ''); // New field
         $price = floatval($_POST['price'] ?? 0);
         $category = trim($_POST['category'] ?? 'coffee');
 
@@ -54,15 +55,13 @@ class ProductController {
         }
 
         $imagePath = $this->handleUpload();
-        // If image upload failed but was required? For now optional or default used? 
-        // SQL dump shows some have images.
         
-        $sql = "INSERT INTO products (name, description, ingredients, price, category, image_path) VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO products (name, description, ingredients, quantity, price, category, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
              sendError("Prepare failed (Add): " . $this->conn->error);
         }
-        $stmt->bind_param("sssdss", $name, $description, $ingredients, $price, $category, $imagePath);
+        $stmt->bind_param("ssssdss", $name, $description, $ingredients, $quantity, $price, $category, $imagePath);
 
         if ($stmt->execute()) {
             sendSuccess(['message' => 'Product added successfully.']);
@@ -77,7 +76,8 @@ class ProductController {
 
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $ingredients = trim($_POST['ingredients'] ?? ''); // New field
+        $ingredients = trim($_POST['ingredients'] ?? '');
+        $quantity = trim($_POST['quantity'] ?? ''); // New field
         $price = floatval($_POST['price'] ?? 0);
         $category = trim($_POST['category'] ?? 'coffee');
 
@@ -89,19 +89,19 @@ class ProductController {
         $imagePath = $this->handleUpload();
         
         if ($imagePath) {
-             $sql = "UPDATE products SET name=?, description=?, ingredients=?, price=?, category=?, image_path=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, category=?, image_path=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update Img): " . $this->conn->error);
              }
-             $stmt->bind_param("sssdssi", $name, $description, $ingredients, $price, $category, $imagePath, $id);
+             $stmt->bind_param("ssssdssi", $name, $description, $ingredients, $quantity, $price, $category, $imagePath, $id);
         } else {
-             $sql = "UPDATE products SET name=?, description=?, ingredients=?, price=?, category=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, category=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update NoImg): " . $this->conn->error);
              }
-             $stmt->bind_param("sssdsi", $name, $description, $ingredients, $price, $category, $id);
+             $stmt->bind_param("ssssdsi", $name, $description, $ingredients, $quantity, $price, $category, $id);
         }
 
         if ($stmt->execute()) {

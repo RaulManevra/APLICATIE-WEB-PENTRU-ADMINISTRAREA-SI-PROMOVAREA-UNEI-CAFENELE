@@ -467,6 +467,11 @@ require_admin();
                 <label for="prod-category">Category</label>
                 <select id="prod-category" name="category">
                     <option value="coffee">Coffee</option>
+                    <option value="tea">Tea</option>
+                    <option value="chocolate">Chocolate</option>
+                    <option value="refreshment">Refreshment</option>
+                    <option value="signature">Signature</option>
+                    <option value="addon">Add-on</option>
                     <option value="other">Other</option>
                 </select>
             </div>
@@ -479,6 +484,11 @@ require_admin();
             <div class="form-group">
                 <label for="prod-ingredients">Ingredients</label>
                 <textarea id="prod-ingredients" name="ingredients" rows="2" placeholder="e.g. Espresso, Milk, Sugar"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="prod-quantity">Quantity</label>
+                <input type="text" id="prod-quantity" name="quantity" placeholder="e.g. 200ml">
             </div>
 
             <div class="form-group">

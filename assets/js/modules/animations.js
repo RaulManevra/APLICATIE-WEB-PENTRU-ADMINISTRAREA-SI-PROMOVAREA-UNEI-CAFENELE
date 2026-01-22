@@ -6,18 +6,28 @@
 /**
  * Initializes scroll animations for elements with class .animate-on-scroll
  */
+let observer;
+
+/**
+ * Initializes scroll animations for elements with class .animate-on-scroll
+ */
 export function initAnimations() {
+    // Disconnect previous observer if it exists
+    if (observer) {
+        observer.disconnect();
+    }
+
     const observerOptions = {
         root: null, // viewport
         rootMargin: '0px',
         threshold: 0.1 // trigger when 10% visible
     };
 
-    const observer = new IntersectionObserver((entries, observer) => {
+    observer = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-                observer.unobserve(entry.target); // run once
+                obs.unobserve(entry.target); // run once
             }
         });
     }, observerOptions);
@@ -26,7 +36,6 @@ export function initAnimations() {
     elements.forEach(el => observer.observe(el));
 
     // Also handle elements that might already be visible immediately
-    // or if the page is short.
     elements.forEach(el => {
         if (isElementInViewport(el)) {
             el.classList.add('visible');
