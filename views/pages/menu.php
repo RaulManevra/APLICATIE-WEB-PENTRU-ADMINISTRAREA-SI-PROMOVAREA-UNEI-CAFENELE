@@ -75,7 +75,6 @@ while ($c = $catResult->fetch_assoc()) {
 }
 ?>
 
-<link rel="stylesheet" href="assets/css/menu.css?v=<?= time() ?>">
 
 <section class="menu-section">
     <div class="menu-container">

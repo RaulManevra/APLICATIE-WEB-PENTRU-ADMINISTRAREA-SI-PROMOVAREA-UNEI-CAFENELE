@@ -400,7 +400,7 @@ p {
 .section-title {
     font-family: "Playfair Display", serif;
     font-size: 2.8rem;
-    color: #2b1205;
+    color: #d7d2cf;
     margin-bottom: 50px;
     position: relative;
     display: inline-block;
@@ -412,7 +412,7 @@ p {
     display: block;
     width: 60px;
     height: 3px;
-    background: #522F25;
+    background: #c58a56;
     margin: 15px auto 0;
     border-radius: 2px;
 }

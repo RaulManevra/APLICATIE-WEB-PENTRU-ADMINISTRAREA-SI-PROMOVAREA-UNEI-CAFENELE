@@ -48,7 +48,6 @@ $isLoggedIn = SessionManager::isLoggedIn();
 ?>
 <!-- Inject CSRF for JS -->
 <input type="hidden" id="csrf-token-global" value="<?= csrf_token() ?>">
-<link rel="stylesheet" href="assets/css/tables.css?v=<?= time() ?>">
 <style>
     /* Modal Styles (Embedded for simplicity or move to css) */
     .res-modal {
