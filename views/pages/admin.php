@@ -538,6 +538,11 @@ require_role(['admin', 'employer']);
             </div>
 
             <div class="form-group">
+                <label for="prod-tags">Tags</label>
+                <input type="text" id="prod-tags" name="tags" placeholder="e.g. ice, chocolate, sweet (comma separated)">
+            </div>
+
+            <div class="form-group">
                 <label for="prod-image">Image</label>
                 <input type="file" id="prod-image" name="image" accept="image/*">
                 <div id="current-image-preview" style="margin-top: 10px; display: none;">

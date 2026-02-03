@@ -392,18 +392,19 @@
 
 @media (max-width: 768px) {
     .section-title {
-        width:100%;
+        width: 100%;
         text-align: center;
         font-size: 2rem;
         margin-bottom: 2.5rem;
-        
+
     }
+
     .menu-search {
         justify-content: center;
     }
 
     .menu-grid {
-        
+
         gap: 1rem;
     }
 
@@ -419,6 +420,7 @@
         font-size: 0.85rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
@@ -454,13 +456,14 @@
     backdrop-filter: blur(5px);
     animation: fadeIn 0.3s;
 }
+
 .product-quantity {
     display: block;
     margin-top: 0.5rem;
     font-size: 1.2rem;
     color: #e7e7e7;
     font-weight: 700;
-    display:flex;
+    display: flex;
     justify-content: flex-end;
 }
 
@@ -571,17 +574,18 @@
     font-weight: bold;
     color: #c79a63;
 }
-.discount-pill{
-    position: absolute; 
-    top: 10px; 
-    right: 10px; 
-    background: #bc4134d4; 
-    color: white; 
-    padding: 4px 12px; 
-    border-radius: 10px; 
+
+.discount-pill {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #bc4134d4;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 10px;
     font-size: 0.8rem;
-    letter-spacing: 1px; 
-    font-weight: bold; 
+    letter-spacing: 1px;
+    font-weight: bold;
     z-index: 2;
     box-shadow: 0 2px 6px rgba(255, 255, 255, 0.3);
 }
@@ -626,4 +630,23 @@
     .modal-info-wrapper {
         padding: 1.5rem;
     }
+}
+
+/* Staggered Animation for Search Results */
+@keyframes staggerFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stagger-item {
+    opacity: 0;
+    /* Start hidden */
+    animation: staggerFadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }

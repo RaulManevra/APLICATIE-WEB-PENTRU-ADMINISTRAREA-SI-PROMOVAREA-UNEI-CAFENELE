@@ -8,7 +8,7 @@
 
 .tables-intro h2 {
     font-size: 2.2rem;
-    font-weight:700;
+    font-weight: 700;
     letter-spacing: -0.02em;
     color: #e3e3e3;
     margin-bottom: 20px;
@@ -30,7 +30,7 @@
     background: #ffffff;
     border-radius: 16px;
     padding: 32px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     background-image: radial-gradient(#d7ccc8 1px, transparent 1px);
     background-size: 20px 20px;
@@ -53,6 +53,7 @@
     cursor: default;
     border: 2px solid rgba(0, 0, 0, 0.1);
 }
+
 .map-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 260px;
@@ -72,7 +73,7 @@
 .map-table:hover {
     transform: scale(1.1);
     z-index: 10;
-    cursor:pointer;
+    cursor: pointer;
 }
 
 .status-libera {
@@ -86,16 +87,20 @@
 .status-rezervata {
     background: #f59e0b;
 }
+
 .badge {
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: white;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: white;
 }
 
 .status-inactiva {
     background-color: #95a5a6;
+}
+
+.map-table.status-inactiva {
     display: none;
 }
 
@@ -103,17 +108,18 @@
 
 .legend {
     width: 100%;
-    max-width:260px;
-    justify-self:end ;
+    max-width: 260px;
+    justify-self: end;
     background: linear-gradient(180deg, #3b2417, #24140c);
     border-radius: 18px;
     padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
 .legend-header {
     display: flex;
     align-items: center;
@@ -123,50 +129,58 @@
     font-weight: 600;
     color: #f3e6d6;
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
+
 .legend-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
+
 .legend-table {
     padding: 10px 14px;
     border-radius: 4px;
     font-size: 1.2rem;
     font-weight: 600;
-    height:50px;
+    height: 50px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: #1e120a;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
 }
+
 .legend-table.lighter-brown {
-    background: #5c3b27; /* lighter than main #3b2417 */
+    background: #5c3b27;
+    /* lighter than main #3b2417 */
     color: #f3e6d6;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
     border-radius: 10px;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
     margin-bottom: 8px;
 }
+
 .legend-table-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
+
 .legend-status-box {
     width: 20px;
     height: 20px;
     border-radius: 4px;
 }
+
 .legend-table small {
     font-size: 1 rem;
     opacity: 0.85;
 }
+
 .legend-table.status-libera {
     background: #22c55e;
 }
@@ -192,8 +206,8 @@
     gap: 8px;
     color: white;
     background: rgba(6, 5, 28, 0.819);
-    border:1px solid rgba(233, 233, 233, 0.533);
-    border-radius:99px;
+    border: 1px solid rgba(233, 233, 233, 0.533);
+    border-radius: 99px;
     padding: 6px 12px;
 }
 
@@ -220,20 +234,26 @@
     background-color: #ca8a04;
     /* Yellow-700 */
 }
+
 /* Existing mobile breakpoint */
 @media (max-width: 900px) {
     .map-layout {
-        grid-template-columns: 1fr; /* single column */
+        grid-template-columns: 1fr;
+        /* single column */
         gap: 20px;
     }
 
     /* Legend on top, full width */
     .legend {
-        order: 1;            /* put legend first */
-        width: 100% !important;  /* override fixed 240px */
+        order: 1;
+        /* put legend first */
+        width: 100% !important;
+        /* override fixed 240px */
         max-width: 100%;
-        flex-direction: row; /* horizontal layout for tables inside */
-        flex-wrap: wrap;     /* wrap if too many tables */
+        flex-direction: row;
+        /* horizontal layout for tables inside */
+        flex-wrap: wrap;
+        /* wrap if too many tables */
         padding: 16px;
         justify-content: flex-start;
         border-radius: 12px;
@@ -249,7 +269,8 @@
     }
 
     .legend-table {
-        flex: 1 1 calc(50% - 10px); /* two tables per row */
+        flex: 1 1 calc(50% - 10px);
+        /* two tables per row */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -262,9 +283,9 @@
     /* Map below legend */
     .map-container {
         order: 2;
-        width: 100% !important;  /* ensure full width */
+        width: 100% !important;
+        /* ensure full width */
         max-width: 100%;
         height: auto;
     }
 }
-
