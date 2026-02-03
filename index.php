@@ -105,8 +105,8 @@ if ($currentUser && isset($conn)) {
                 'cart' => 'views/pages/cart.php',
                 'payment' => 'views/pages/payment.php',
                 'cart_handler' => 'controllers/CartController.php',
-                'forgot_password' => 'views/auth/forgot_password.php',
-                'reset_password' => 'views/auth/reset_password.php',
+                'forgot_password' => 'views/auth/forgot_password_v2.php',
+                'reset_password' => 'views/auth/reset_password_v2.php',
                 'forgot_password_handler' => 'index.php?page=forgot_password_handler'
             ], JSON_UNESCAPED_UNICODE); ?>
         };
