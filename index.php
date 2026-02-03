@@ -65,6 +65,12 @@ if ($currentUser && isset($conn)) {
     <link rel="stylesheet" href="assets/css/modal.css">
     <link rel="stylesheet" href="assets/css/navbar.css">
     <link rel="stylesheet" href="assets/css/popup.css">
+    <link rel="stylesheet" href="assets/css/login.css">
+    <link rel="stylesheet" href="assets/css/register.css">
+    <link rel="stylesheet" href="assets/css/about.css">
+    <link rel="stylesheet" href="assets/css/cart.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="assets/css/menu.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="assets/css/tables.css?v=<?= time() ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
 </head>

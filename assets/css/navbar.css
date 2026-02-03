@@ -29,6 +29,7 @@
     backdrop-filter: blur(20px);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     height: 60px;
+    z-index: 21;
     /* Ensure height stays consistent or shrinks if desired */
 }
 
@@ -107,24 +108,19 @@
     background-color: rgb(216, 164, 50);
     border-radius: 3px;
 
-    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateX(-50%  ) scaleX(0);
+    transform-origin: center;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
-
-.navbar li a.active::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: 2.5px;
-    transform: translateX(-50%);
-    width: 60%;
-    height: 1.5px;
-    background-color: rgb(216, 164, 50);
-    border-radius: 3px;
-}
-
-.navbar li:hover:not(:has(a.active))::after {
+.navbar li:hover::after {
     transform: translateX(-50%) scaleX(1);
 }
+
+/* Active keeps it visible */
+.navbar li:has(a.active)::after {
+    transform: translateX(-50%) scaleX(1);
+}
+
 
 .navbar li a {
     display: flex;

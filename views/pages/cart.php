@@ -5,7 +5,6 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
     exit('Direct access denied.');
 }
 ?>
-<link rel="stylesheet" href="assets/css/cart.css?v=<?php echo time(); ?>">
 
 <section class="cart-section">
     <div class="cart-container">
