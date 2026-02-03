@@ -24,13 +24,19 @@ class SliderController {
             case 'delete':
                 $this->delete();
                 break;
+            case 'update':
+                $this->update();
+                break;
+            case 'reorder':
+                $this->reorder();
+                break;
             default:
                 sendError("Invalid action for slider.");
         }
     }
 
     private function getAll() {
-        $sql = "SELECT * FROM slider_images ORDER BY created_at DESC";
+        $sql = "SELECT * FROM slider_images ORDER BY display_order ASC";
         $result = $this->conn->query($sql);
         $slides = [];
         while ($row = $result->fetch_assoc()) {
@@ -51,9 +57,11 @@ class SliderController {
         if (!$imagePath) {
             sendError("Image is required for slider.");
         }
+        
+        $description = trim($_POST['description'] ?? '');
 
-        $stmt = $this->conn->prepare("INSERT INTO slider_images (image_path, title, subtitle, button_text, button_link, is_button_visible) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssi", $imagePath, $title, $subtitle, $btnText, $btnLink, $btnVisible);
+        $stmt = $this->conn->prepare("INSERT INTO slider_images (image_path, title, subtitle, description, button_text, button_link, is_button_visible) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssi", $imagePath, $title, $subtitle, $description, $btnText, $btnLink, $btnVisible);
         
         if ($stmt->execute()) {
             sendSuccess(['id' => $stmt->insert_id, 'message' => 'Slide added successfully.']);
@@ -93,6 +101,59 @@ class SliderController {
         } else {
             sendError("Failed to delete slide.");
         }
+    }
+
+    private function update() {
+        $id = intval($_POST['id'] ?? 0);
+        if ($id <= 0) sendError("Invalid Slide ID");
+
+        $title = trim($_POST['title'] ?? '');
+        $subtitle = trim($_POST['subtitle'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $btnText = trim($_POST['button_text'] ?? 'View Menu');
+        $btnLink = trim($_POST['button_link'] ?? '?page=menu');
+        $btnVisible = isset($_POST['is_button_visible']) ? 1 : 0;
+
+        // Check for new image
+        $imagePath = $this->handleUpload();
+        
+        if ($imagePath) {
+            // Delete old image
+            $stmt = $this->conn->prepare("SELECT image_path FROM slider_images WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            if ($row = $res->fetch_assoc()) {
+                $oldFile = __DIR__ . '/../' . $row['image_path'];
+                if (file_exists($oldFile)) unlink($oldFile);
+            }
+
+            $stmt = $this->conn->prepare("UPDATE slider_images SET image_path=?, title=?, subtitle=?, description=?, button_text=?, button_link=?, is_button_visible=? WHERE id=?");
+            $stmt->bind_param("ssssssii", $imagePath, $title, $subtitle, $description, $btnText, $btnLink, $btnVisible, $id);
+        } else {
+            $stmt = $this->conn->prepare("UPDATE slider_images SET title=?, subtitle=?, description=?, button_text=?, button_link=?, is_button_visible=? WHERE id=?");
+            $stmt->bind_param("sssssii", $title, $subtitle, $description, $btnText, $btnLink, $btnVisible, $id);
+        }
+
+        if ($stmt->execute()) {
+            sendSuccess(['message' => 'Slide updated successfully.']);
+        } else {
+            sendError("Failed to update slide: " . $stmt->error);
+        }
+    }
+
+    private function reorder() {
+        $order = $_POST['order'] ?? [];
+        if (!is_array($order)) {
+            sendError("Invalid order data.");
+        }
+
+        foreach ($order as $position => $id) {
+            $id = intval($id);
+            $pos = intval($position);
+            $this->conn->query("UPDATE slider_images SET display_order = $pos WHERE id = $id");
+        }
+        sendSuccess(['message' => 'Order updated.']);
     }
 
     private function handleUpload() {
