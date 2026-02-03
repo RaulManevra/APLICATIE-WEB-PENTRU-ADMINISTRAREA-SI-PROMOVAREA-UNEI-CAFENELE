@@ -543,12 +543,42 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                              let html = '';
                              if(d.items) {
                                  d.items.forEach(item => {
+                                     const p = parseFloat(item.effective_price || item.price);
                                      html += `<div class="receipt-row">
                                         <span>${item.name} x${item.quantity}</span>
-                                        <span>${(item.price * item.quantity).toFixed(2)}</span>
+                                        <span>${(p * item.quantity).toFixed(2)}</span>
                                      </div>`;
                                  });
                              }
+                             
+                             // Add Discount Row if exists
+                             if (d.discount_total > 0) {
+                                  html += `<div class="receipt-row" style="color: #d32f2f; margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 5px;">
+                                        <span>Savings</span>
+                                        <span>-${parseFloat(d.discount_total).toFixed(2)}</span>
+                                     </div>`;
+                             }
+
+                             // Add TVA Rows Breakdown
+                             if (d.tax_breakdown) {
+                                 // Sort keys A, B, C, D
+                                 Object.keys(d.tax_breakdown).sort().forEach(code => {
+                                     const t = d.tax_breakdown[code];
+                                     if(t.amount > 0) {
+                                         html += `<div class="receipt-row" style="font-size: 0.8rem; color: #888; margin-top: 2px;">
+                                            <span>TVA ${code} (${t.rate}%) included</span>
+                                            <span>${parseFloat(t.amount).toFixed(2)}</span>
+                                         </div>`;
+                                     }
+                                 });
+                             } else if (d.tva_amount > 0) {
+                                  // Fallback
+                                  html += `<div class="receipt-row" style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                                        <span>TVA Included</span>
+                                        <span>${d.tva_amount}</span>
+                                     </div>`;
+                             }
+
                              // Prepend items
                              receiptContainer.insertAdjacentHTML('afterbegin', html);
                         }

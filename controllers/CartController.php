@@ -387,7 +387,7 @@ class CartController {
         // Calculate total and prepare items
         $ids = array_keys($_SESSION['cart']);
         $idsString = implode(',', array_map('intval', $ids));
-        $sql = "SELECT id, price FROM products WHERE id IN ($idsString)";
+        $sql = "SELECT id, price, discount FROM products WHERE id IN ($idsString)";
         $result = $this->conn->query($sql);
 
         $orderItems = [];
@@ -397,13 +397,20 @@ class CartController {
             $id = $row['id'];
             $qty = $_SESSION['cart'][$id];
             $price = floatval($row['price']);
-            $subtotal = $price * $qty;
+            $discount = intval($row['discount'] ?? 0);
+            
+            $effectivePrice = $price;
+            if ($discount > 0) {
+                $effectivePrice = $price - ($price * $discount / 100);
+            }
+            
+            $subtotal = $effectivePrice * $qty;
             
             $totalPrice += $subtotal;
             $orderItems[] = [
                 'product_id' => $id,
                 'quantity' => $qty,
-                'price' => $price
+                'price' => $effectivePrice // Save the discounted price at time of order
             ];
         }
 
@@ -459,40 +466,87 @@ class CartController {
 
     private function getCart() {
         if (empty($_SESSION['cart'])) {
-            sendSuccess(['items' => [], 'total' => 0]);
+            sendSuccess(['items' => [], 'total' => 0, 'subtotal' => 0, 'discount_total' => 0, 'tva_amount' => 0, 'tva_rate' => 0]);
         }
 
         $ids = array_keys($_SESSION['cart']);
         if (empty($ids)) {
-             sendSuccess(['items' => [], 'total' => 0]);
+             sendSuccess(['items' => [], 'total' => 0, 'subtotal' => 0, 'discount_total' => 0, 'tva_amount' => 0, 'tva_rate' => 0]);
         }
 
         $idsString = implode(',', array_map('intval', $ids));
         
-        $sql = "SELECT id, name, price, image_path FROM products WHERE id IN ($idsString)";
+        $sql = "SELECT id, name, price, discount, image_path, tva_code FROM products WHERE id IN ($idsString)";
         $result = $this->conn->query($sql);
 
         $items = [];
-        $grandTotal = 0;
+        $originalSubtotal = 0;
+        $finalTotal = 0;
+        $tvaTotal = 0;
+        $taxBreakdown = [];
+
+        // Fetch TVA Settings
+        $tvaRates = ['A' => 19, 'B' => 9, 'C' => 5, 'D' => 0];
+        $resSettings = $this->conn->query("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'tva_%'");
+        if ($resSettings) {
+            while ($row = $resSettings->fetch_assoc()) {
+                $k = strtoupper(substr($row['setting_key'], -1)); // tva_a -> A
+                if (isset($tvaRates[$k])) {
+                    $tvaRates[$k] = floatval($row['setting_value']);
+                }
+            }
+        }
 
         while ($row = $result->fetch_assoc()) {
             $id = $row['id'];
             $qty = $_SESSION['cart'][$id];
-            $subtotal = $row['price'] * $qty;
+            $price = floatval($row['price']);
+            $discount = intval($row['discount'] ?? 0);
+            $tvaCode = strtoupper($row['tva_code'] ?? 'A');
+            $tvaRate = $tvaRates[$tvaCode] ?? 0;
             
+            $effectivePrice = $price;
+            if ($discount > 0) {
+                $effectivePrice = $price - ($price * $discount / 100);
+            }
+
+            $lineOriginal = $price * $qty;
+            $lineFinal = $effectivePrice * $qty;
+            
+            // Calculate TVA (Inclusive)
+            // TVA = Total * Rate / (100 + Rate)
+            $taxAmount = $lineFinal * $tvaRate / (100 + $tvaRate);
+            
+            $tvaTotal += $taxAmount;
+
+            if (!isset($taxBreakdown[$tvaCode])) {
+                $taxBreakdown[$tvaCode] = ['rate' => $tvaRate, 'amount' => 0, 'net' => 0];
+            }
+            $taxBreakdown[$tvaCode]['amount'] += $taxAmount;
+            $taxBreakdown[$tvaCode]['net'] += ($lineFinal - $taxAmount);
+
             $row['quantity'] = $qty;
-            $row['subtotal'] = $subtotal;
+            $row['original_price'] = $price;
+            $row['effective_price'] = $effectivePrice;
+            $row['line_total'] = $lineFinal; // Final price for line
+            $row['tva_code'] = $tvaCode;
             
             $items[] = $row;
-            $grandTotal += $subtotal;
+            $originalSubtotal += $lineOriginal;
+            $finalTotal += $lineFinal;
         }
 
         sendSuccess([
             'items' => $items,
-            'total' => $grandTotal,
-            'count' => array_sum($_SESSION['cart'])
+            'subtotal' => $originalSubtotal, 
+            'discount_total' => $originalSubtotal - $finalTotal,
+            'total' => $finalTotal,
+            'tva_amount' => number_format($tvaTotal, 2),
+            'tva_rate' => 0, // Deprecated single rate
+            'tax_breakdown' => $taxBreakdown
         ]);
     }
+
 
 
     private function getOrCreateGuestUser() {

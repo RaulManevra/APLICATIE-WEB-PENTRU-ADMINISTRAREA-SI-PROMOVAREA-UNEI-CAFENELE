@@ -727,7 +727,17 @@ async function loadSettings() {
     if (document.getElementById("support-email"))
       document.getElementById("support-email").value = res2.data.support_email || "";
   }
+
+  // Load Financial Settings (Multi-TVA)
+  const res3 = await apiRequest("settings", "get_general");
+  if (res3.success) {
+    if (document.getElementById("setting-tva-a")) document.getElementById("setting-tva-a").value = res3.data.tva_a || 19;
+    if (document.getElementById("setting-tva-b")) document.getElementById("setting-tva-b").value = res3.data.tva_b || 9;
+    if (document.getElementById("setting-tva-c")) document.getElementById("setting-tva-c").value = res3.data.tva_c || 5;
+    if (document.getElementById("setting-tva-d")) document.getElementById("setting-tva-d").value = res3.data.tva_d || 0;
+  }
 }
+
 function setupScheduleForm() {
   const f = document.getElementById("schedule-form");
   if (f)
@@ -740,6 +750,16 @@ function setupScheduleForm() {
       );
       alert(res.success ? res.message : res.message || res.error);
     });
+
+  // Financial Form
+  const fFin = document.getElementById("financial-settings-form");
+  if (fFin) {
+    fFin.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const res = await apiRequest("settings", "update_general", new FormData(fFin));
+      alert(res.success ? res.message : res.message || res.error);
+    });
+  }
 }
 
 function setupEmailSettingsForm() {
@@ -767,7 +787,11 @@ async function loadProducts() {
                 <td><img src="${p.image_path || "assets/menu/images/coffee.jpg"}" onerror="this.src='assets/img/Logo Modificat.png'"></td>
                 <td>${p.name}<br><small class="text-muted">${p.quantity || ''}</small></td>
                 <td>${p.category}</td>
-                <td>${p.price} RON</td>
+                <td>
+                    ${p.price} RON
+                    ${p.discount && p.discount > 0 ? `<br><small class="text-success">-${p.discount}% Off</small>` : ''}
+                </td>
+                <td>${p.discount || 0}%</td>
                 <td>
                     <button class="btn btn-sm btn-edit btn-edit-product" 
                         data-id="${p.id}"
@@ -776,6 +800,8 @@ async function loadProducts() {
                         data-ingredients="${(p.ingredients || '').replace(/"/g, '&quot;')}"
                         data-quantity="${(p.quantity || '').replace(/"/g, '&quot;')}"
                         data-price="${p.price}"
+                        data-discount="${p.discount || 0}"
+                        data-tva-code="${p.tva_code || 'A'}"
                         data-category="${p.category}"
                         data-img="${p.image_path || ''}">
                         <i class="fas fa-edit"></i>
@@ -791,7 +817,7 @@ async function loadProducts() {
   }
 }
 
-function editProduct(id, name, desc, ingredients, quantity, price, cat, img) {
+function editProduct(id, name, desc, ingredients, quantity, price, discount, tvaCode, cat, img) {
   document.getElementById("product-form").reset();
   document.getElementById("prod-id").value = id;
   document.getElementById("form-action").value = "update";
@@ -801,6 +827,8 @@ function editProduct(id, name, desc, ingredients, quantity, price, cat, img) {
   document.getElementById("prod-ingredients").value = ingredients;
   document.getElementById("prod-quantity").value = quantity;
   document.getElementById("prod-price").value = price;
+  document.getElementById("prod-discount").value = discount;
+  document.getElementById("prod-tva-code").value = tvaCode || 'A';
   document.getElementById("prod-category").value = cat;
   if (img) {
     document.getElementById("current-image-preview").style.display = "block";
@@ -1652,8 +1680,9 @@ function setupProductEvents() {
       const deleteBtn = e.target.closest('.btn-delete-product');
 
       if (editBtn) {
-        const { id, name, desc, ingredients, quantity, price, category, img } = editBtn.dataset;
-        editProduct(id, name, desc, ingredients, quantity, price, category, img);
+        // Updated destructing with camelCase conversion for data-tva-code
+        const { id, name, desc, ingredients, quantity, price, discount, tvaCode, category, img } = editBtn.dataset;
+        editProduct(id, name, desc, ingredients, quantity, price, discount, tvaCode, category, img);
       }
 
       if (deleteBtn) {

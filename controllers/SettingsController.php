@@ -24,9 +24,55 @@ class SettingsController {
             case 'update_schedule':
                 $this->updateSchedule();
                 break;
+            case 'get_general': // New action
+                $this->getGeneralSettings();
+                break;
+            case 'update_general': // New action
+                $this->updateGeneralSettings();
+                break;
+            case 'get_emails':
+                $this->getEmailSettings();
+                break;
+            case 'update_emails':
+                $this->updateEmailSettings();
+                break;
             default:
                 sendError("Invalid settings action");
         }
+    }
+
+    private function getGeneralSettings() {
+        $sql = "SELECT setting_key, setting_value FROM settings";
+        $res = $this->conn->query($sql);
+        $settings = [];
+        while($row = $res->fetch_assoc()) {
+            $settings[$row['setting_key']] = $row['setting_value'];
+        }
+        sendSuccess(['data' => $settings]);
+    }
+
+    private function updateGeneralSettings() {
+        $data = [
+            'tva_a' => $_POST['tva_a'] ?? '19',
+            'tva_b' => $_POST['tva_b'] ?? '9',
+            'tva_c' => $_POST['tva_c'] ?? '5',
+            'tva_d' => $_POST['tva_d'] ?? '0'
+        ];
+
+        foreach ($data as $key => $val) {
+             $this->saveGlobalSetting($key, $val); // Use existing helper? No, that's private in this class for email. Let's make it more generic or duplicate.
+             // Actually, Settings usually go to `settings` table (key/value), Global Settings for emails go to `global_settings`...
+             // Wait, previous code used `settings` table for TVA in `updateGeneralSettings`.
+             // And `email` settings used `global_settings`.
+             // `updateGeneralSettings` used `settings` table.
+             
+            $stmt = $this->conn->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
+            $stmt->bind_param("ss", $key, $val);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
+        sendSuccess(['message' => 'Settings updated successfully']);
     }
 
     private function getSchedule() {
@@ -80,5 +126,33 @@ class SettingsController {
         }
 
         sendSuccess(['message' => 'Schedule updated successfully']);
+    }
+
+    private function getEmailSettings() {
+        $settings = ['newsletter_email' => '', 'support_email' => ''];
+        $res = $this->conn->query("SELECT key_name, value FROM global_settings WHERE key_name IN ('newsletter_email', 'support_email')");
+        if ($res) {
+            while ($row = $res->fetch_assoc()) {
+                $settings[$row['key_name']] = $row['value'];
+            }
+        }
+        sendSuccess(['data' => $settings]);
+    }
+
+    private function updateEmailSettings() {
+        // Auth check happens in handleRequest generally, but can enforce admin here
+        $newsletter = $_POST['newsletter_email'] ?? '';
+        $support = $_POST['support_email'] ?? '';
+
+        $this->saveGlobalSetting('newsletter_email', $newsletter);
+        $this->saveGlobalSetting('support_email', $support);
+
+        sendSuccess(['message' => 'Email settings updated']);
+    }
+
+    private function saveGlobalSetting($key, $val) {
+        $stmt = $this->conn->prepare("INSERT INTO global_settings (key_name, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = ?");
+        $stmt->bind_param("sss", $key, $val, $val);
+        $stmt->execute();
     }
 }

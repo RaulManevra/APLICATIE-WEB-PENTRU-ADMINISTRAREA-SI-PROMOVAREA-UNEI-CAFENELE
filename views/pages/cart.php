@@ -61,7 +61,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
         }
 
         function renderCart(data) {
-            const { items, total } = data;
+            const { items, total, subtotal, discount_total, tva_amount, tva_rate } = data;
 
             if (!items || items.length === 0) {
                 cartContent.innerHTML = `
@@ -90,13 +90,21 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
             `;
 
             items.forEach(item => {
+                const originalPrice = parseFloat(item.original_price || item.price);
+                const effectivePrice = parseFloat(item.effective_price || item.price);
+                const hasDiscount = originalPrice > effectivePrice;
+
+                const priceDisplay = hasDiscount 
+                    ? `<span style="text-decoration: line-through; color: #999; font-size: 0.9em;">${originalPrice.toFixed(2)}</span> <br> <span style="color: #d32f2f; font-weight: bold;">${effectivePrice.toFixed(2)} RON</span>`
+                    : `${effectivePrice.toFixed(2)} RON`;
+
                 html += `
                     <tr>
                         <td class="cart-product-info">
                             <img src="${item.image_path}" alt="${item.name}" class="cart-thumb">
                             <span>${item.name}</span>
                         </td>
-                        <td>${parseFloat(item.price).toFixed(2)} RON</td>
+                        <td>${priceDisplay}</td>
                         <td>
                             <div class="qty-control">
                                 <button class="qty-btn minus" data-id="${item.id}">-</button>
@@ -104,7 +112,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                                 <button class="qty-btn plus" data-id="${item.id}">+</button>
                             </div>
                         </td>
-                        <td>${parseFloat(item.subtotal).toFixed(2)} RON</td>
+                        <td>${parseFloat(item.line_total || item.subtotal).toFixed(2)} RON</td>
                         <td>
                             <button class="remove-btn" data-id="${item.id}"><i class="fa-solid fa-trash"></i></button>
                         </td>
@@ -117,16 +125,48 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                     </table>
                 </div>
                 <div class="cart-summary">
-                    <div class="cart-total">
+                    <div class="cart-row">
+                         <span>Subtotal (Net):</span>
+                         <span>${parseFloat(subtotal).toFixed(2)} RON</span>
+                    </div>
+                    ${discount_total > 0 ? `
+                    <div class="cart-row" style="color: #d32f2f;">
+                         <span>Discount:</span>
+                         <span>-${parseFloat(discount_total).toFixed(2)} RON</span>
+                    </div>` : ''}
+                     <div class="cart-total" style="border-top: 2px dashed #ddd; margin-top: 10px; padding-top: 10px;">
                         <span>Total:</span>
                         <span class="total-price">${parseFloat(total).toFixed(2)} RON</span>
                     </div>
-                    <div class="cart-actions">
+                    ${tva_amount > 0 ? `
+                    <div class="cart-row" style="font-size: 0.85rem; color: #666; margin-top: 5px; flex-direction: column; align-items: flex-end;">
+                         ${data.tax_breakdown ? 
+                            Object.keys(data.tax_breakdown).map(k => {
+                                const t = data.tax_breakdown[k];
+                                if(t.amount > 0) return `<span>TVA ${k} (${t.rate}%): ${parseFloat(t.amount).toFixed(2)} RON</span>`;
+                                return '';
+                            }).join('')
+                            : `<span>(Includes TVA: ${tva_amount} RON)</span>`
+                         }
+                    </div>` : ''}
+                   
+                    <div class="cart-actions" style="margin-top: 20px;">
                         <a href="?page=menu" class="nav-link btn-secondary" data-page="menu">Continue Shopping</a>
                         <button class="btn-primary checkout-btn">Checkout</button>
                     </div>
                 </div>
             `;
+            
+            // Add style for cart-row if not exists
+             const styleCheck = document.getElementById('cart-dynamic-styles');
+             if(!styleCheck) {
+                 const sty = document.createElement('style');
+                 sty.id = 'cart-dynamic-styles';
+                 sty.textContent = `
+                    .cart-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 1rem; }
+                 `;
+                 document.head.appendChild(sty);
+             }
 
             cartContent.innerHTML = html;
             attachCartListeners();
