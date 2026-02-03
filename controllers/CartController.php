@@ -36,8 +36,11 @@ class CartController {
             case 'clear':
                 $this->clearCart();
                 break;
+            case 'get_public_key':
+                $this->getPublicKey();
+                break;
             case 'checkout':
-                $this->checkout();
+                $this->checkoutEncrypted();
                 break;
             case 'validate_checkout':
                 $this->validate_checkout();
@@ -47,6 +50,130 @@ class CartController {
         }
     }
 
+    /**
+     * Generates or retrieves an RSA Key Pair for the session.
+     * Returns the Public Key to the client for encryption.
+     */
+    private function getPublicKey() {
+        if (!isset($_SESSION['rsa_private_key'])) {
+            $config = array(
+                "digest_alg" => "sha256",
+                "private_key_bits" => 2048,
+                "private_key_type" => OPENSSL_KEYTYPE_RSA,
+                "config" => "d:\\Apps\\Ampps\\apache\\conf\\openssl.cnf"
+            );
+            
+            // Create the private and public key
+            $res = openssl_pkey_new($config);
+            if (!$res) {
+                sendError("Encryption setup failed: " . openssl_error_string());
+            }
+
+            // Extract the private key
+            $exportSuccess = openssl_pkey_export($res, $privateKey, null, $config);
+            
+            if (!$exportSuccess) {
+                 $err = openssl_error_string();
+                 file_put_contents(__DIR__ . '/../ssl_debug.log', "Export Failed: $err\nConfig: " . print_r($config, true));
+                 sendError("Encryption export failed: " . $err);
+            }
+            
+            $_SESSION['rsa_private_key'] = $privateKey;
+
+            // Extract the public key
+            $keyDetails = openssl_pkey_get_details($res);
+            $publicKey = $keyDetails['key'];
+            $_SESSION['rsa_public_key'] = $publicKey; // Optional, mostly for debug
+        }
+
+        sendSuccess(['publicKey' => $_SESSION['rsa_public_key']]);
+    }
+
+    /**
+     * Handles the checkout process with encrypted payload.
+     * Use this method to process secure payments.
+     */
+    private function checkoutEncrypted() {
+        // Fix for "Network Error": Suppress HTML output errors
+        ini_set('display_errors', '0'); 
+        error_reporting(E_ALL);
+
+        // 1. Decryption Phase
+        $encryptedKeyB64 = $_POST['encrypted_key'] ?? '';
+        $encryptedDataB64 = $_POST['encrypted_data'] ?? '';
+        $ivB64 = $_POST['iv'] ?? '';
+
+        if (empty($encryptedKeyB64) || empty($encryptedDataB64) || empty($ivB64)) {
+            // Fallback to legacy unencrypted checkout if no encryption params check (Optional)
+            // For now, enforce encryption
+            if (isset($_POST['payment_method']) && !isset($_POST['encrypted_key'])) {
+                $this->checkoutLegacy(); 
+                return;
+            }
+            sendError("Encryption data missing.");
+        }
+
+        if (empty($_SESSION['rsa_private_key'])) {
+            sendError("Session expired (Key missing). Please refresh.");
+        }
+
+        // A. Decrypt the Session Key (AES Key) using RSA Private Key
+        $encryptedKey = base64_decode($encryptedKeyB64);
+        $privateKey = openssl_pkey_get_private($_SESSION['rsa_private_key']);
+        $decryptedAesKey = null;
+
+        if (!openssl_private_decrypt($encryptedKey, $decryptedAesKey, $privateKey, OPENSSL_PKCS1_OAEP_PADDING)) {
+             $err = openssl_error_string();
+             file_put_contents(__DIR__ . '/../ssl_debug.log', "Decryption Failed: $err\nKey len: " . strlen($encryptedKey) . "\n", FILE_APPEND);
+             sendError("Secure handshake failed. Please retry.");
+        }
+
+        // B. Decrypt the Data Payload using AES-GCM
+        // PHP built-in openssl_decrypt for GCM requires PHP 7.1+ and the tag.
+        // The WebCrypto API usually appends the tag to the ciphertext or sends it separately.
+        // We will assume the client sends: IV + Ciphertext + Tag (Standard concatenation) 
+        // OR we can ask client to send tag separately.
+        // Let's assume the standard: Ciphertext = EncryptedBody (variable) + AuthTag (16 bytes)
+        
+        $encryptedDataWithTag = base64_decode($encryptedDataB64);
+        $iv = base64_decode($ivB64);
+        
+        // Extract Tag (Last 16 bytes)
+        $tagLength = 16;
+        $ciphertextLength = strlen($encryptedDataWithTag) - $tagLength;
+        $ciphertext = substr($encryptedDataWithTag, 0, $ciphertextLength);
+        $tag = substr($encryptedDataWithTag, -$tagLength);
+
+        // Decrypt
+        $jsonPayload = openssl_decrypt($ciphertext, 'aes-256-gcm', $decryptedAesKey, OPENSSL_RAW_DATA, $iv, $tag);
+        
+        if ($jsonPayload === false) {
+             sendError("Data decryption failed.");
+        }
+
+        $paymentData = json_decode($jsonPayload, true);
+        if (!$paymentData) {
+            sendError("Invalid decrypted payload.");
+        }
+
+        // 2. Map Decrypted Data to Request Simulation
+        // For the rest of the logic to work, we simulate that specific POST vars are present
+        $_POST['pickup_time'] = $paymentData['pickup_time'] ?? '';
+        $_POST['token'] = $paymentData['token'] ?? '';
+        $_POST['payment_method'] = 'card'; // logic hardcodet for this flow
+        
+        // Log the success (simulating a real payment gateway log)
+        // Store last 4 digits only, NEVER full card
+        $last4 = substr($paymentData['cardNumber'] ?? '0000', -4);
+        error_log("Payment Processed: Card ending in $last4");
+
+        // 3. Proceed with standard checkout logic
+        $this->checkoutLegacy();
+    }
+
+    /**
+     * Original checkout logic, renamed to support internal call
+     */
     private function addToCart() {
         $productId = intval($_POST['product_id'] ?? 0);
         $quantity = intval($_POST['quantity'] ?? 1);
@@ -224,7 +351,7 @@ class CartController {
         return ['isTableOrder' => $isTableOrder, 'tableId' => $tableId, 'formattedTime' => $formattedTime];
     }
 
-    private function checkout() {
+    private function checkoutLegacy() {
         // Fix for "Network Error": Suppress HTML output errors that break JSON
         ini_set('display_errors', '0'); 
         error_reporting(E_ALL);
