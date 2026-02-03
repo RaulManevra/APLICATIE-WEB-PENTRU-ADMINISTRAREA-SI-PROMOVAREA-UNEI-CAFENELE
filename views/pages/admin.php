@@ -557,11 +557,12 @@ require_role(['admin', 'employer']);
 <div id="slider-modal" class="modal">
     <div class="modal-content">
         <span class="close-modal" data-target="slider-modal">&times;</span>
-        <h3>Add New Slide</h3>
+        <h3 id="slider-modal-title">Add New Slide</h3>
         <form id="slider-form" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="action" id="slider-form-action" value="add">
             <input type="hidden" name="entity" value="slider">
+            <input type="hidden" name="id" id="slide-id">
             
             <div class="form-group">
                 <label for="slide-title">Title (Optional)</label>
@@ -574,8 +575,17 @@ require_role(['admin', 'employer']);
             </div>
 
             <div class="form-group">
-                <label for="slide-image">Image (Required)</label>
-                <input type="file" id="slide-image" name="image" accept="image/*" required>
+                <label for="slide-description">Description (Optional)</label>
+                <textarea id="slide-description" name="description" rows="3" placeholder="Additional text..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="slide-image">Image</label>
+                <div id="slide-current-image" style="display:none; margin-bottom:5px;">
+                    <img id="slide-img-preview" src="" style="height:50px;">
+                    <small>Leave empty to keep current image</small>
+                </div>
+                <input type="file" id="slide-image" name="image" accept="image/*">
             </div>
 
             <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">

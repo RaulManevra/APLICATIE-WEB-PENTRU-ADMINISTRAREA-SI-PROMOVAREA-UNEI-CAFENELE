@@ -872,6 +872,9 @@ async function deleteProduct(id) {
 // ==========================================
 // =============== SLIDER ===================
 // ==========================================
+// ==========================================
+// =============== SLIDER ===================
+// ==========================================
 async function loadSlides() {
   const res = await apiRequest("slider", "get_all");
   const container = document.getElementById("slider-list");
@@ -880,18 +883,31 @@ async function loadSlides() {
       container.innerHTML = "<p>No slides found.</p>";
       return;
     }
+
+    // Global Access for Reorder
+    window.currentSlides = res.data;
+
     container.innerHTML = `
             <div class="slider-grid">
                 ${res.data
         .map(
-          (s) => `
-                    <div class="slide-card">
-                        <img src="${s.image_path}">
-                        <div class="slide-info">
+          (s, index) => `
+                    <div class="slide-card" data-id="${s.id}">
+                        <div style="position:relative;">
+                             <img src="${s.image_path}" style="width:100%; height:150px; object-fit:cover; border-radius:4px;">
+                             <div style="position:absolute; top:5px; right:5px; background:rgba(0,0,0,0.5); border-radius:4px; padding:2px;">
+                                 <button class="btn btn-sm btn-secondary" onclick="moveSlide(${index}, -1)" title="Move Left/Up"><i class="fas fa-arrow-left"></i></button>
+                                 <button class="btn btn-sm btn-secondary" onclick="moveSlide(${index}, 1)" title="Move Right/Down"><i class="fas fa-arrow-right"></i></button>
+                             </div>
+                        </div>
+                        <div class="slide-info" style="padding:10px;">
                             <strong>${s.title || "No Title"}</strong>
-                            <p>${s.subtitle || ""}</p>
-                            <button class="btn btn-sm btn-danger" onclick="deleteSlide(${s.id
-            })">Delete</button>
+                            <p style="font-size:0.85rem; color:#666;">${s.subtitle || ""}</p>
+                            <p style="font-size:0.8rem; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${(s.description || '').replace(/"/g, '&quot;')}">${s.description || "No Description"}</p>
+                            <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                                <button class="btn btn-sm btn-edit" onclick='openEditSlide(${JSON.stringify(s).replace(/'/g, "&#39;")})'>Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteSlide(${s.id})">Delete</button>
+                            </div>
                         </div>
                     </div>
                 `
@@ -902,22 +918,94 @@ async function loadSlides() {
   }
 }
 
+async function moveSlide(index, direction) {
+  if (!window.currentSlides) return;
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= window.currentSlides.length) return;
+
+  // Swap in local array
+  const temp = window.currentSlides[index];
+  window.currentSlides[index] = window.currentSlides[newIndex];
+  window.currentSlides[newIndex] = temp;
+
+  // Construct order map
+  const orderData = window.currentSlides.map((s, i) => s.id);
+
+  // Create FormData manually to handle array
+  const fd = new FormData();
+  orderData.forEach((id, i) => fd.append(`order[${i}]`, id));
+
+  // Optimistic UI Update
+  loadSlides();
+
+  await apiRequest("slider", "reorder", fd);
+  loadSlides(); // Refresh to ensure sync
+}
+
+function openEditSlide(slide) {
+  document.getElementById("slider-form").reset();
+  document.getElementById("slider-modal-title").innerText = "Edit Slide";
+  document.getElementById("slider-form-action").value = "update";
+  document.getElementById("slide-id").value = slide.id;
+
+  document.getElementById("slide-title").value = slide.title || '';
+  document.getElementById("slide-subtitle").value = slide.subtitle || '';
+  document.getElementById("slide-description").value = slide.description || '';
+
+  // Button Logic
+  const hasBtn = slide.is_button_visible == "1";
+  document.getElementById("slide-btn-visible").checked = hasBtn;
+  document.getElementById("slide-btn-options").style.display = hasBtn ? 'block' : 'none';
+
+  document.getElementById("slide-btn-text").value = slide.button_text || '';
+  document.getElementById("slide-btn-link").value = slide.button_link || '';
+
+  // Image Preview
+  const imgPreview = document.getElementById("slide-current-image");
+  if (imgPreview) {
+    imgPreview.style.display = "block";
+    document.getElementById("slide-img-preview").src = slide.image_path;
+  }
+
+  document.getElementById("slider-modal").style.display = "block";
+}
+
 async function handleSliderSubmit(e) {
   e.preventDefault();
-  const res = await apiRequest("slider", "add", new FormData(e.target));
-  if (res.success) {
-    alert(res.data.message);
-    document.getElementById("slider-modal").style.display = "none";
-    loadSlides();
-  } else {
-    alert(res.error);
+  const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  const originalText = btn.innerText;
+
+  // Loading State
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+  try {
+    const res = await apiRequest("slider", document.getElementById("slider-form-action").value, new FormData(form));
+    if (res.success) {
+      // Success Modal or Toast
+      showToast(res.data.message || "Saved successfully", 'success');
+      document.getElementById("slider-modal").style.display = "none";
+      loadSlides();
+    } else {
+      alert(res.error || res.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error saving slide");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = originalText;
   }
 }
 
 async function deleteSlide(id) {
   if (!confirm("Delete this slide?")) return;
   const res = await apiRequest("slider", "delete", { id: id });
-  if (res.success) loadSlides();
+  if (res.success) {
+    showToast("Slide deleted", 'success');
+    loadSlides();
+  }
   else alert(res.error);
 }
 

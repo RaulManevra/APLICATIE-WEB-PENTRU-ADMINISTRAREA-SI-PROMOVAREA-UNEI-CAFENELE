@@ -4,7 +4,7 @@ require_once __DIR__ . '/../config/db.php';
 header('Content-Type: application/json');
 
 try {
-    $stmt = $conn->prepare("SELECT * FROM slider_images ORDER BY created_at DESC");
+    $stmt = $conn->prepare("SELECT * FROM slider_images ORDER BY display_order ASC");
     $stmt->execute();
     $result = $stmt->get_result();
     

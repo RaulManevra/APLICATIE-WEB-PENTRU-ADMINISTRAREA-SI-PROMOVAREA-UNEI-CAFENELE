@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
 -- Host: localhost    Database: mazi_coffee
 -- ------------------------------------------------------
--- Server version	8.0.31
+-- Server version	8.0.44
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -61,7 +61,7 @@ CREATE TABLE `global_settings` (
 
 LOCK TABLES `global_settings` WRITE;
 /*!40000 ALTER TABLE `global_settings` DISABLE KEYS */;
-INSERT INTO `global_settings` VALUES ('newsletter_email','zarnescuraul@gmail.com','2026-01-10 10:58:30'),('support_email','zarnescuraul@gmail.com','2026-02-03 15:42:59'),('tva_a','19','2026-02-03 14:50:17'),('tva_b','9','2026-02-03 14:50:17'),('tva_c','5','2026-02-03 14:50:17'),('tva_d','0','2026-02-03 14:50:17');
+INSERT INTO `global_settings` VALUES ('newsletter_email','zarnescuraul@gmail.com','2026-01-10 10:58:30'),('support_email','','2026-01-10 10:58:30'),('tva_a','19','2026-02-03 14:50:17'),('tva_b','9','2026-02-03 14:50:17'),('tva_c','5','2026-02-03 14:50:17'),('tva_d','0','2026-02-03 14:50:17');
 /*!40000 ALTER TABLE `global_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -318,7 +318,6 @@ CREATE TABLE `slider_images` (
   `button_text` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'View Menu',
   `button_link` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '?page=menu',
   `is_button_visible` tinyint(1) DEFAULT '1',
-  `display_order` int DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -329,7 +328,7 @@ CREATE TABLE `slider_images` (
 
 LOCK TABLES `slider_images` WRITE;
 /*!40000 ALTER TABLE `slider_images` DISABLE KEYS */;
-INSERT INTO `slider_images` VALUES (1,'assets/img/slider_1.webp','Dimineți Perfecte','Savurează un Cappuccino autentic',NULL,'2025-12-29 10:20:49','Vezi Meniul','?page=menu',1,1),(2,'assets/img/slider_2.webp','Gustări Proaspete','Croissant cu unt, scos din cuptor',NULL,'2025-12-29 10:20:49','Comandă Acum','?page=menu',1,0),(3,'assets/img/slider_3.webp','Aromă Intensă','Cele mai bune boabe de cafea',NULL,'2025-12-29 10:20:49','Rezervă Masă','?page=tables',1,3),(5,'assets/images/slider/slide_69821575bc989.jpg','Oferta Saptamanii','Bine ati venit',NULL,'2026-02-03 15:34:13','View Menu','?page=menu',1,2);
+INSERT INTO `slider_images` VALUES (1,'assets/img/slider_1.webp','Dimineți Perfecte','Savurează un Cappuccino autentic',NULL,'2025-12-29 10:20:49','Vezi Meniul','?page=menu',1),(2,'assets/img/slider_2.webp','Gustări Proaspete','Croissant cu unt, scos din cuptor',NULL,'2025-12-29 10:20:49','Comandă Acum','?page=menu',1),(3,'assets/img/slider_3.webp','Aromă Intensă','Cele mai bune boabe de cafea',NULL,'2025-12-29 10:20:49','Rezervă Masă','?page=tables',1),(5,'assets/images/slider/slide_69821575bc989.jpg','Oferta Saptamanii','Bine ati venit',NULL,'2026-02-03 15:34:13','View Menu','?page=menu',1);
 /*!40000 ALTER TABLE `slider_images` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -358,7 +357,7 @@ CREATE TABLE `tables` (
 
 LOCK TABLES `tables` WRITE;
 /*!40000 ALTER TABLE `tables` DISABLE KEYS */;
-INSERT INTO `tables` VALUES (1,'Libera',27.6382,10.0671,'circle',9.375,12.3296),(2,'Ocupata',43.8442,56.2081,'circle',5.62186,7.49266),(3,'Libera',56.7839,56.0403,'circle',5.62186,7.49266),(4,'Ocupata',69.598,56.2081,'circle',5.62382,7.4979),(5,'Libera',22.2362,40.7718,'square',6.74859,6.99979),(6,'Libera',45.9799,76.8456,'rectangle',5.25,14.1667),(7,'Libera',67.2111,77.1812,'rectangle',5.37453,13.6666);
+INSERT INTO `tables` VALUES (1,'Libera',27.7638,10.0671,'circle',9.375,12.3296),(2,'Ocupata',43.7186,56.2081,'circle',5.62382,7.4979),(3,'Libera',56.6583,56.2081,'circle',5.62382,7.4979),(4,'Ocupata',69.598,56.2081,'circle',5.62382,7.4979),(5,'Libera',22.2365,40.8233,'square',6.75,7),(6,'Libera',45.9799,76.8456,'rectangle',5.25,14.1667),(7,'Libera',67.2111,77.1812,'rectangle',5.37453,13.6666);
 /*!40000 ALTER TABLE `tables` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -434,4 +433,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-03 19:00:29
+-- Dump completed on 2026-02-03 17:34:29
