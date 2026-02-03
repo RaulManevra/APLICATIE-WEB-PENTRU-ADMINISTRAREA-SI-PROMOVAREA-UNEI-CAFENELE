@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
 -- Host: localhost    Database: mazi_coffee
 -- ------------------------------------------------------
--- Server version	8.0.31
+-- Server version	8.0.44
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -61,7 +61,7 @@ CREATE TABLE `global_settings` (
 
 LOCK TABLES `global_settings` WRITE;
 /*!40000 ALTER TABLE `global_settings` DISABLE KEYS */;
-INSERT INTO `global_settings` VALUES ('newsletter_email','zarnescuraul@gmail.com','2026-01-10 10:58:30'),('support_email','','2026-01-10 10:58:30'),('tva_a','19','2026-02-03 14:50:17'),('tva_b','9','2026-02-03 14:50:17'),('tva_c','5','2026-02-03 14:50:17'),('tva_d','0','2026-02-03 14:50:17');
+INSERT INTO `global_settings` VALUES ('newsletter_email','zarnescuraul@gmail.com','2026-01-10 10:58:30'),('support_email','','2026-01-10 10:58:30');
 /*!40000 ALTER TABLE `global_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -200,8 +200,6 @@ CREATE TABLE `products` (
   `image_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category` enum('coffee','tea','chocolate','refreshment','signature','addon') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'coffee',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `discount` int DEFAULT '0',
-  `tva_code` char(1) COLLATE utf8mb4_unicode_ci DEFAULT 'A',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -212,7 +210,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'Espresso single','Esența pură a cafelei: un shot intens, bogat și plin de caracter, extras cu măiestrie pentru a trezi toate simțurile.','cafea, apă','20ml',10.00,'assets/menu/images/espresso.webp','coffee','2026-01-22 15:04:24',20,'A'),(2,'Espresso dublu','Energie la dublu. Aceeași intensitate remarcabilă, într-o doză generoasă care îți oferă impulsul perfect pentru întreaga zi.','cafea, apă','40ml',12.00,'assets/menu/images/prod_6981e6ec6d71a.webp','coffee','2026-01-22 15:04:24',0,'A'),(3,'Long Black','Eleganță în simplitate. Un dublu espresso turnat delicat peste apă fierbinte, păstrând crema bogată și aromele intense.','espresso dublu, apă','80ml',12.00,'assets/menu/images/prod_6981e7e620e8a.webp','coffee','2026-01-22 15:04:24',0,'A'),(4,'V60','O experiență artizanală. Cafea preparată manual, picătură cu picătură, pentru a dezvălui notele florale și fructate subtile ale boabelor de origine.','cafea, apă','200ml',20.00,'assets/menu/images/prod_6981e873deb8d.webp','coffee','2026-01-22 15:04:24',0,'A'),(5,'Cortado','Echilibrul ideal. Tăria unui espresso întâlnește dulceața laptelui cald, într-o armonie perfectă de gust și textură.','espresso single, cremă de lapte','120ml',12.00,'assets/menu/images/cortado.webp','coffee','2026-01-22 15:04:24',0,'A'),(6,'Cappuccino','Clasicul italian desăvârșit. Espresso catifelat îmbrățișat de lapte cald și o coroană bogată de spumă fină.','espresso single, cremă de lapte','200ml',14.00,'assets/menu/images/cappuccino.webp','coffee','2026-01-22 15:04:24',0,'A'),(7,'Flat White','Cremozitate absolută. Două shot-uri de espresso învăluite în cremă de lapte micro-texturată, pentru o băutură fină, dar puternică.','espresso dublu, cremă de lapte','180ml',15.00,'assets/menu/images/prod_6981e8f815ea7.webp','coffee','2026-01-22 15:04:24',0,'A'),(8,'Latte','Răsfăț cremos. O îmbrățișare caldă de lapte spumat și espresso, perfectă pentru momentele lungi de relaxare.','espresso single, cremă de lapte','300ml',16.00,'assets/menu/images/latte.webp','coffee','2026-01-22 15:04:24',0,'A'),(9,'Babyccino','Bucuria celor mici. Spumă de lapte pufoasă, pudrată cu cacao fină – un deliciu jucăuș fără cofeină.','cremă de lapte','120ml',6.00,'assets/menu/images/babycino.webp','chocolate','2026-01-22 15:04:24',0,'A'),(10,'Hot Cioco','Decadență lichidă. Ciocolată caldă premium, densă și catifelată, care îți încălzește sufletul cu fiecare înghițitură.','ciocolată caldă pudră, cremă de lapte','200ml',15.00,'assets/menu/images/hot_chocolate.webp','chocolate','2026-01-22 15:04:24',0,'A'),(11,'Ceai','Infuzia liniștii. O selecție de frunze de ceai premium, alese cu grijă pentru a oferi o pauză de prospețime și calm.','ceai, apă','300ml',14.00,'assets/menu/images/ceai.webp','tea','2026-01-22 15:04:24',0,'A'),(12,'Espresso Tonic','Efervescență și energie. Întâlnirea surprinzătoare dintre espresso intens și apa tonică rece, pentru un cocktail de cafea revitalizant.','espresso dublu, apă tonică, gheață','180ml',17.00,'assets/menu/images/prod_6981e935443de.webp','signature','2026-01-22 15:04:24',0,'A'),(13,'Cold Brew Tonic','Răcorire sofisticată. Finețea cafelei cold brew combinată cu perlajul apei tonice, o băutură vibrantă și cristalină.','cold brew, apă tonică, gheață','180ml',17.00,'assets/menu/images/cold_brew_tonic.webp','signature','2026-01-22 15:04:24',0,'A'),(14,'Cold Brew Latte','Dulceață naturală. Cafea extrasă la rece și lapte proaspăt, o alternativă fină, lipsită de aciditate, perfectă pentru zilele calde.','cold brew, apă, gheață','250ml',16.00,'assets/menu/images/cold_brew_latte.webp','coffee','2026-01-22 15:04:24',0,'A'),(15,'Cold Brew','Răbdarea gustului. Cafea infuzată lent în apă rece timp îndelungat, rezultând un elixir dulceag, energizant și plin de claritate.','cafea, apă, gheață','180ml',14.00,'assets/menu/images/cold_brew.webp','coffee','2026-01-22 15:04:24',0,'A'),(16,'Ice Cappuccino','Cappuccino-ul tău preferat, servit „on the rocks”. Espresso rece, lapte și spumă, pentru o plăcere răcoroasă.','espresso single, cremă de lapte, gheață','180ml',14.00,'assets/menu/images/prod_6981e981c5e2e.webp','coffee','2026-01-22 15:04:24',0,'A'),(17,'Ice Latte','Clasicul Latte în variantă estivală. Espresso rece turnat peste lapte și gheață, simplu și revigorant.','espresso single, cremă de lapte, gheață','250ml',16.00,'assets/menu/images/ice_latte.webp','coffee','2026-01-22 15:04:24',0,'A'),(18,'Matcha Latte','Ritualul verde. Pudră fină de ceai verde Matcha japonez, bogată în antioxidanți, combinată cu lapte cremos pentru o energie zen.','ceai matcha pudră, apă, cremă de lapte','300ml',20.00,'assets/menu/images/prod_6981e9d36c66e.webp','tea','2026-01-22 15:04:24',0,'A'),(19,'Ice Matcha Latte','Zen în pahar de gheață. Prospețimea vegetală a ceaiului Matcha întâlnește răcoarea laptelui cu gheață.','ceai matcha pudră, apă, cremă de lapte, gheață','250ml',20.00,'assets/menu/images/prod_6981ea3a11af9.webp','tea','2026-01-22 15:04:24',0,'A'),(20,'Matcha Tonic','Energie efervescentă. O băutură modernă și vibrantă, unde Matcha întâlnește apa tonică pentru un boost de vitalitate.','ceai matcha pudră, apă, apă tonică','180ml',22.00,'assets/menu/images/prod_6981eb677c4ee.webp','signature','2026-01-22 15:04:24',0,'A'),(21,'Socată / Limonadă cu soc','Gustul copilăriei reinterpretat. O băutură artizanală răcoritoare, cu arome florale de soc și lămâie proaspătă.','sirop de soc, zeamă de lămâie, apă carbogazoasă, gheață','250ml',14.00,'assets/menu/images/prod_6981ebcb46aac.webp','refreshment','2026-01-22 15:04:24',0,'A'),(22,'Limonadă cu zmeură','Explozie fructată. Limonadă clasică îmbogățită cu sirop natural de zmeură, dulce-acrișoară și irezistibilă.','sirop de zmeură, zeamă de lămâie, apă carbogazoasă','250ml',14.00,'assets/menu/images/prod_6981ec3a70adb.webp','refreshment','2026-01-22 15:04:24',0,'A'),(23,'Extra shot','Boost-ul tău de energie. Adaugă încă o doză de intensitate băuturii tale preferate.','espresso single','20ml',3.00,'assets/menu/images/prod_6981ec85d73e8.webp','addon','2026-01-22 15:04:24',0,'A'),(24,'Lapte vegetal','Alternative delicioase. Optează pentru lapte de ovăz sau mazăre, cremos și prietenos cu natura, pentru cafeaua ta.','lapte de ovăz/mazăre','',3.00,'assets/menu/images/prod_6981ecdd5c5cd.webp','addon','2026-01-22 15:04:24',0,'A');
+INSERT INTO `products` VALUES (1,'Espresso single','Esența pură a cafelei: un shot intens, bogat și plin de caracter, extras cu măiestrie pentru a trezi toate simțurile.','cafea, apă','20ml',10.00,'assets/menu/images/espresso.webp','coffee','2026-01-22 15:04:24'),(2,'Espresso dublu','Energie la dublu. Aceeași intensitate remarcabilă, într-o doză generoasă care îți oferă impulsul perfect pentru întreaga zi.','cafea, apă','40ml',12.00,'assets/menu/images/prod_6981e6ec6d71a.webp','coffee','2026-01-22 15:04:24'),(3,'Long Black','Eleganță în simplitate. Un dublu espresso turnat delicat peste apă fierbinte, păstrând crema bogată și aromele intense.','espresso dublu, apă','80ml',12.00,'assets/menu/images/prod_6981e7e620e8a.webp','coffee','2026-01-22 15:04:24'),(4,'V60','O experiență artizanală. Cafea preparată manual, picătură cu picătură, pentru a dezvălui notele florale și fructate subtile ale boabelor de origine.','cafea, apă','200ml',20.00,'assets/menu/images/prod_6981e873deb8d.webp','coffee','2026-01-22 15:04:24'),(5,'Cortado','Echilibrul ideal. Tăria unui espresso întâlnește dulceața laptelui cald, într-o armonie perfectă de gust și textură.','espresso single, cremă de lapte','120ml',12.00,'assets/menu/images/cortado.webp','coffee','2026-01-22 15:04:24'),(6,'Cappuccino','Clasicul italian desăvârșit. Espresso catifelat îmbrățișat de lapte cald și o coroană bogată de spumă fină.','espresso single, cremă de lapte','200ml',14.00,'assets/menu/images/cappuccino.webp','coffee','2026-01-22 15:04:24'),(7,'Flat White','Cremozitate absolută. Două shot-uri de espresso învăluite în cremă de lapte micro-texturată, pentru o băutură fină, dar puternică.','espresso dublu, cremă de lapte','180ml',15.00,'assets/menu/images/prod_6981e8f815ea7.webp','coffee','2026-01-22 15:04:24'),(8,'Latte','Răsfăț cremos. O îmbrățișare caldă de lapte spumat și espresso, perfectă pentru momentele lungi de relaxare.','espresso single, cremă de lapte','300ml',16.00,'assets/menu/images/latte.webp','coffee','2026-01-22 15:04:24'),(9,'Babyccino','Bucuria celor mici. Spumă de lapte pufoasă, pudrată cu cacao fină – un deliciu jucăuș fără cofeină.','cremă de lapte','120ml',6.00,'assets/menu/images/babycino.webp','chocolate','2026-01-22 15:04:24'),(10,'Hot Cioco','Decadență lichidă. Ciocolată caldă premium, densă și catifelată, care îți încălzește sufletul cu fiecare înghițitură.','ciocolată caldă pudră, cremă de lapte','200ml',15.00,'assets/menu/images/hot_chocolate.webp','chocolate','2026-01-22 15:04:24'),(11,'Ceai','Infuzia liniștii. O selecție de frunze de ceai premium, alese cu grijă pentru a oferi o pauză de prospețime și calm.','ceai, apă','300ml',14.00,'assets/menu/images/ceai.webp','tea','2026-01-22 15:04:24'),(12,'Espresso Tonic','Efervescență și energie. Întâlnirea surprinzătoare dintre espresso intens și apa tonică rece, pentru un cocktail de cafea revitalizant.','espresso dublu, apă tonică, gheață','180ml',17.00,'assets/menu/images/prod_6981e935443de.webp','signature','2026-01-22 15:04:24'),(13,'Cold Brew Tonic','Răcorire sofisticată. Finețea cafelei cold brew combinată cu perlajul apei tonice, o băutură vibrantă și cristalină.','cold brew, apă tonică, gheață','180ml',17.00,'assets/menu/images/cold_brew_tonic.webp','signature','2026-01-22 15:04:24'),(14,'Cold Brew Latte','Dulceață naturală. Cafea extrasă la rece și lapte proaspăt, o alternativă fină, lipsită de aciditate, perfectă pentru zilele calde.','cold brew, apă, gheață','250ml',16.00,'assets/menu/images/cold_brew_latte.webp','coffee','2026-01-22 15:04:24'),(15,'Cold Brew','Răbdarea gustului. Cafea infuzată lent în apă rece timp îndelungat, rezultând un elixir dulceag, energizant și plin de claritate.','cafea, apă, gheață','180ml',14.00,'assets/menu/images/cold_brew.webp','coffee','2026-01-22 15:04:24'),(16,'Ice Cappuccino','Cappuccino-ul tău preferat, servit „on the rocks”. Espresso rece, lapte și spumă, pentru o plăcere răcoroasă.','espresso single, cremă de lapte, gheață','180ml',14.00,'assets/menu/images/prod_6981e981c5e2e.webp','coffee','2026-01-22 15:04:24'),(17,'Ice Latte','Clasicul Latte în variantă estivală. Espresso rece turnat peste lapte și gheață, simplu și revigorant.','espresso single, cremă de lapte, gheață','250ml',16.00,'assets/menu/images/ice_latte.webp','coffee','2026-01-22 15:04:24'),(18,'Matcha Latte','Ritualul verde. Pudră fină de ceai verde Matcha japonez, bogată în antioxidanți, combinată cu lapte cremos pentru o energie zen.','ceai matcha pudră, apă, cremă de lapte','300ml',20.00,'assets/menu/images/prod_6981e9d36c66e.webp','tea','2026-01-22 15:04:24'),(19,'Ice Matcha Latte','Zen în pahar de gheață. Prospețimea vegetală a ceaiului Matcha întâlnește răcoarea laptelui cu gheață.','ceai matcha pudră, apă, cremă de lapte, gheață','250ml',20.00,'assets/menu/images/prod_6981ea3a11af9.webp','tea','2026-01-22 15:04:24'),(20,'Matcha Tonic','Energie efervescentă. O băutură modernă și vibrantă, unde Matcha întâlnește apa tonică pentru un boost de vitalitate.','ceai matcha pudră, apă, apă tonică','180ml',22.00,'assets/menu/images/prod_6981eb677c4ee.webp','signature','2026-01-22 15:04:24'),(21,'Socată / Limonadă cu soc','Gustul copilăriei reinterpretat. O băutură artizanală răcoritoare, cu arome florale de soc și lămâie proaspătă.','sirop de soc, zeamă de lămâie, apă carbogazoasă, gheață','250ml',14.00,'assets/menu/images/prod_6981ebcb46aac.webp','refreshment','2026-01-22 15:04:24'),(22,'Limonadă cu zmeură','Explozie fructată. Limonadă clasică îmbogățită cu sirop natural de zmeură, dulce-acrișoară și irezistibilă.','sirop de zmeură, zeamă de lămâie, apă carbogazoasă','250ml',14.00,'assets/menu/images/prod_6981ec3a70adb.webp','refreshment','2026-01-22 15:04:24'),(23,'Extra shot','Boost-ul tău de energie. Adaugă încă o doză de intensitate băuturii tale preferate.','espresso single','20ml',3.00,'assets/menu/images/prod_6981ec85d73e8.webp','addon','2026-01-22 15:04:24'),(24,'Lapte vegetal','Alternative delicioase. Optează pentru lapte de ovăz sau mazăre, cremos și prietenos cu natura, pentru cafeaua ta.','lapte de ovăz/mazăre','',3.00,'assets/menu/images/prod_6981ecdd5c5cd.webp','addon','2026-01-22 15:04:24');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -230,14 +228,13 @@ CREATE TABLE `reservations` (
   `table_id` int NOT NULL,
   `reservation_time` datetime NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `status` enum('active','deleted','closed') COLLATE utf8mb4_general_ci DEFAULT 'active',
-  `checked_in` tinyint(1) DEFAULT '0',
+  `status` enum('active','deleted') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'active',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `table_id` (`table_id`),
   CONSTRAINT `reservations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`table_id`) REFERENCES `tables` (`ID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -246,7 +243,7 @@ CREATE TABLE `reservations` (
 
 LOCK TABLES `reservations` WRITE;
 /*!40000 ALTER TABLE `reservations` DISABLE KEYS */;
-INSERT INTO `reservations` VALUES (1,1,NULL,1,'2026-01-03 14:34:00','2026-01-03 12:33:36','closed',0),(2,1,'Raul Zarnescu',1,'2026-01-14 15:22:00','2026-01-04 09:22:37','closed',0),(3,1,'Raul',3,'2026-02-04 16:00:00','2026-02-03 15:03:25','active',1);
+INSERT INTO `reservations` VALUES (1,1,NULL,1,'2026-01-03 14:34:00','2026-01-03 12:33:36','active'),(2,1,'Raul Zarnescu',1,'2026-01-14 15:22:00','2026-01-04 09:22:37','active');
 /*!40000 ALTER TABLE `reservations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -275,30 +272,6 @@ LOCK TABLES `schedule` WRITE;
 /*!40000 ALTER TABLE `schedule` DISABLE KEYS */;
 INSERT INTO `schedule` VALUES (0,'Sunday','08:00:00','17:00:00',1),(1,'Monday','08:00:00','17:00:00',0),(2,'Tuesday','08:00:00','17:00:00',0),(3,'Wednesday','08:00:00','17:00:00',0),(4,'Thursday','08:00:00','17:00:00',0),(5,'Friday','08:00:00','17:00:00',0),(6,'Saturday','08:00:00','17:00:00',0);
 /*!40000 ALTER TABLE `schedule` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `settings`
---
-
-DROP TABLE IF EXISTS `settings`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `settings` (
-  `setting_key` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `setting_value` text COLLATE utf8mb4_general_ci,
-  PRIMARY KEY (`setting_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `settings`
---
-
-LOCK TABLES `settings` WRITE;
-/*!40000 ALTER TABLE `settings` DISABLE KEYS */;
-INSERT INTO `settings` VALUES ('tva','9'),('tva_a','19'),('tva_b','9'),('tva_c','5'),('tva_d','0');
-/*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -401,7 +374,7 @@ CREATE TABLE `users` (
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `role` enum('user','admin','employer') COLLATE utf8mb4_unicode_ci DEFAULT 'user',
+  `role` enum('user','admin') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'user',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `PuncteFidelitate` int DEFAULT NULL,
   `PPicture` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'assets/public/default.png',
@@ -420,7 +393,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'zarnescuraul@gmail.com','Raul','$2y$12$j09C55tliX7bS9ZCNMLFJuerVS.0DZ0pG/pgqVzLaFcFtYosnA8Iq','admin','2025-11-24 10:19:31',34,'assets/uploads/profile_pictures/PP_userid_1.jpg','google','105941628733277196959',0,NULL),(2,'davidrares56@yahoo.com','raress_tc','$2y$12$ud4pLmRn0Vx6Vm0NpNqXY.nnTbNMkNqKmvsru14zHnrYoXpm/.JHi','admin','2025-12-08 17:24:04',10000,'assets/uploads/profile_pictures/PP_userid_2.gif',NULL,NULL,0,NULL),(3,'erwin.georgescu@student.unitbv.ro','erwin','$2y$12$K6Bet6UcpmUmXdC9I4FlYOhtazj9eQf.UeIxyKgoiQ7FuQxmSTmDW','admin','2025-12-27 15:34:58',0,'assets/public/default.png',NULL,NULL,0,NULL),(4,'guest@mazicoffee.com','Guest','$2y$10$ya7vmoIY9nQQDqeBygttKOiTfRSHLBNvxc02utkPBrEUmLzQZIEtK','user','2026-01-08 17:27:05',NULL,'assets/public/default.png',NULL,NULL,0,NULL),(5,'sisea.ianis@gmail.com','ianis','$2y$12$w1.oeOUzogdPxmvjKgbZqO/gT9Lxnyaj1a7NJW.QE3QmwqXmph6/W','employer','2026-01-10 13:15:52',0,'assets/public/default.png',NULL,NULL,0,NULL);
+INSERT INTO `users` VALUES (1,'zarnescuraul@gmail.com','Raul','$2y$12$j09C55tliX7bS9ZCNMLFJuerVS.0DZ0pG/pgqVzLaFcFtYosnA8Iq','admin','2025-11-24 10:19:31',34,'assets/uploads/profile_pictures/PP_userid_1.jpg','google','105941628733277196959',0,NULL),(2,'davidrares56@yahoo.com','raress_tc','$2y$12$ud4pLmRn0Vx6Vm0NpNqXY.nnTbNMkNqKmvsru14zHnrYoXpm/.JHi','admin','2025-12-08 17:24:04',10000,'assets/uploads/profile_pictures/PP_userid_2.gif',NULL,NULL,0,NULL),(3,'erwin.georgescu@student.unitbv.ro','erwin','$2y$12$K6Bet6UcpmUmXdC9I4FlYOhtazj9eQf.UeIxyKgoiQ7FuQxmSTmDW','admin','2025-12-27 15:34:58',0,'assets/public/default.png',NULL,NULL,0,NULL),(4,'guest@mazicoffee.com','Guest','$2y$10$ya7vmoIY9nQQDqeBygttKOiTfRSHLBNvxc02utkPBrEUmLzQZIEtK','user','2026-01-08 17:27:05',NULL,'assets/public/default.png',NULL,NULL,0,NULL),(5,'sisea.ianis@gmail.com','ianis','$2y$12$w1.oeOUzogdPxmvjKgbZqO/gT9Lxnyaj1a7NJW.QE3QmwqXmph6/W','user','2026-01-10 13:15:52',0,'assets/public/default.png',NULL,NULL,0,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -433,4 +406,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-03 17:09:21
+-- Dump completed on 2026-02-03 14:43:53

@@ -6,8 +6,11 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
 
 require_once __DIR__ . '/../../core/auth.php';
 require_once __DIR__ . '/../../core/csrf.php';
-require_admin();
+require_role(['admin', 'employer']);
 ?>
+<script>
+    window.currentUserRole = <?= json_encode(SessionManager::getCurrentUserData()['roles']) ?>;
+</script>
 <input type="hidden" id="csrf-token-global" value="<?= csrf_token() ?>">
 <link rel="stylesheet" href="assets/css/admin.css?v=<?= time(); ?>">
 <!-- Chart.js -->
@@ -188,6 +191,7 @@ require_admin();
                             <th>Name</th>
                             <th>Category</th>
                             <th>Price (RON)</th>
+                            <th>Discount (%)</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -402,6 +406,32 @@ require_admin();
                 <h2>Business Settings</h2>
             </div>
             
+            <div class="settings-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
+                <h3>Financial Settings</h3>
+                <form id="financial-settings-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>TVA Code A (%)</label>
+                            <input type="number" name="tva_a" id="setting-tva-a" class="form-control" placeholder="19" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>TVA Code B (%)</label>
+                            <input type="number" name="tva_b" id="setting-tva-b" class="form-control" placeholder="9" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>TVA Code C (%)</label>
+                            <input type="number" name="tva_c" id="setting-tva-c" class="form-control" placeholder="5" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>TVA Code D (%)</label>
+                            <input type="number" name="tva_d" id="setting-tva-d" class="form-control" placeholder="0" step="0.1" min="0" max="100">
+                        </div>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Configure TVA rates for each code. Usually A=19%, B=9%, C=5%, D=0%.</p>
+                    <button type="submit" class="btn btn-success" style="margin-top: 10px;">Save Financials</button>
+                </form>
+            </div>
+            
             <div class="settings-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee;">
                 <h3>Working Hours Schedule</h3>
                 <p>Configure when the cafe is open. Reservations and Orders will only be allowed during these times.</p>
@@ -462,6 +492,22 @@ require_admin();
                 <label for="prod-price">Price (RON)</label>
                 <input type="number" id="prod-price" name="price" step="0.01" min="0" required>
             </div>
+
+                <div class="form-row" style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;">
+                        <label for="prod-discount">Discount (%)</label>
+                        <input type="number" id="prod-discount" name="discount" step="1" min="0" max="100" value="0">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label for="prod-tva-code">TVA Code</label>
+                        <select id="prod-tva-code" name="tva_code" class="form-control">
+                            <option value="A">A (Standard)</option>
+                            <option value="B">B (Reduced)</option>
+                            <option value="C">C (Super Reduced)</option>
+                            <option value="D">D (Zero/Exempt)</option>
+                        </select>
+                    </div>
+                </div>
 
             <div class="form-group">
                 <label for="prod-category">Category</label>

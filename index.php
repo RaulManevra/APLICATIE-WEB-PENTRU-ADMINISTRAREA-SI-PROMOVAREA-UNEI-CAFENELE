@@ -1,6 +1,7 @@
 <?php
 ob_start();
 require_once __DIR__ . '/core/security.php'; // starts session and sets secure cookie params
+require_once __DIR__ . '/core/csrf.php';
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/controllers/ReservationController.php';
 
@@ -55,6 +56,7 @@ if ($currentUser && isset($conn)) {
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="<?= csrf_token() ?>">
     <title>Mazi Coffee</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/icons/css/fontawesome.min.css">
@@ -103,8 +105,8 @@ if ($currentUser && isset($conn)) {
                 'cart' => 'views/pages/cart.php',
                 'payment' => 'views/pages/payment.php',
                 'cart_handler' => 'controllers/CartController.php',
-                'forgot_password' => 'views/auth/forgot_password.php',
-                'reset_password' => 'views/auth/reset_password.php',
+                'forgot_password' => 'views/auth/forgot_password_v2.php',
+                'reset_password' => 'views/auth/reset_password_v2.php',
                 'forgot_password_handler' => 'index.php?page=forgot_password_handler'
             ], JSON_UNESCAPED_UNICODE); ?>
         };

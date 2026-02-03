@@ -39,9 +39,31 @@ if (!SessionManager::isLoggedIn()) {
 
 $userData = SessionManager::getCurrentUserData();
 $roles = $userData['roles'] ?? [];
-if (!in_array('admin', $roles)) {
+
+// Allow 'admin' OR 'employer'
+if (!in_array('admin', $roles) && !in_array('employer', $roles)) {
     http_response_code(403);
-    sendError("Forbidden. Admin access required.");
+    sendError("Forbidden. Admin or Employer access required.");
+}
+
+$entity = $_POST['entity'] ?? $_GET['entity'] ?? 'product';
+
+// ROLE RESTRICTIONS FOR EMPLOYER
+if (in_array('employer', $roles) && !in_array('admin', $roles)) {
+    // Forbidden entities: product (Menu), slider (Slider), settings (Settings), user (User Management - Write)
+    // Note: We'll allow 'user' entity generally for READ (get_all), but block WRITE in UserController? 
+    // Wait, the plan says: "Modify Admin UI to hide restricted (user/menu/slider/settings)". 
+    // And backend restrictions.
+    // If I block 'user' here, they can't see the users list. 
+    // The requirement: "access to everything except Menu, slider, settings".
+    // So 'user' SHOULD be allowed, but maybe restrict 'change_role'? 
+    // Yes, allow 'user' entity here, but handle specific action restrictions in UserController.
+    
+    $forbidden = ['product', 'slider', 'settings']; 
+    if (in_array($entity, $forbidden)) {
+         http_response_code(403);
+         sendError("Forbidden. Restricted access for Employer.");
+    }
 }
 
 // ====================================
@@ -57,9 +79,12 @@ if ($entity === 'slider') {
 } elseif ($entity === 'reservation') {
     require_once __DIR__ . '/ReservationController.php';
     $controller = new ReservationController($conn);
-} elseif ($entity === 'dashboard' || $entity === 'settings') {
+} elseif ($entity === 'dashboard') {
     require_once __DIR__ . '/DashboardController.php';
     $controller = new DashboardController($conn);
+} elseif ($entity === 'settings') {
+    require_once __DIR__ . '/SettingsController.php';
+    $controller = new SettingsController($conn);
 } elseif ($entity === 'user') {
     require_once __DIR__ . '/UserController.php';
     $controller = new UserController($conn);

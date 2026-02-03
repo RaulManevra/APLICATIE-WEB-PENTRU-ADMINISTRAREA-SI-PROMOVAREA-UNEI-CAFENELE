@@ -43,7 +43,7 @@ export async function loadPage(page, pushState = true) {
 
     if (page === "admin") {
         const roles = window.APP_CONFIG?.currentUserRoles || [];
-        if (!roles.includes("admin")) {
+        if (!roles.includes("admin") && !roles.includes("employer")) {
             showModal("Nu esti autorizat să accesezi pagina de administrare.");
             setActiveLink("home");
             return loadPage("home");

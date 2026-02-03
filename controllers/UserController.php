@@ -23,6 +23,9 @@ class UserController {
             case 'get_one':
                 $this->getOne();
                 break;
+            case 'change_role':
+                $this->changeRole();
+                break;
             default:
                 sendError("Invalid user action");
         }
@@ -86,5 +89,39 @@ class UserController {
             sendError("User not found");
         }
         $stmt->close();
+    }
+    private function changeRole() {
+        // Only ADMIN can change roles
+        $currentUser = SessionManager::getCurrentUserData();
+        if (!in_array('admin', $currentUser['roles'] ?? [])) {
+            sendError("Forbidden. Only Admins can change roles.");
+        }
+
+        $userId = intval($_POST['user_id'] ?? 0);
+        $newRole = $_POST['new_role'] ?? '';
+
+        if ($userId <= 0) sendError("Invalid User ID");
+        
+        // Validate Role
+        $validRoles = ['user', 'employer', 'admin'];
+        if (!in_array($newRole, $validRoles)) {
+            sendError("Invalid role selected.");
+        }
+
+        // Prevent self-demotion (optional, but good practice to warn or allow)
+        if ($userId === $currentUser['id'] && $newRole !== 'admin') {
+             // If admin demotes themselves, they might lose access.
+             // Allow it, but maybe client side warns? 
+             // We'll allow it.
+        }
+
+        $stmt = $this->conn->prepare("UPDATE users SET role = ? WHERE id = ?");
+        $stmt->bind_param("si", $newRole, $userId);
+        
+        if ($stmt->execute()) {
+            sendSuccess(['message' => "User role updated to '$newRole'."]);
+        } else {
+            sendError("Failed to update role: " . $stmt->error);
+        }
     }
 }

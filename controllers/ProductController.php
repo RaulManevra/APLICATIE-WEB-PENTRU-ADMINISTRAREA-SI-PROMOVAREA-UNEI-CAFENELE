@@ -46,22 +46,29 @@ class ProductController {
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $ingredients = trim($_POST['ingredients'] ?? '');
-        $quantity = trim($_POST['quantity'] ?? ''); // New field
+        $quantity = trim($_POST['quantity'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
+        $discount = intval($_POST['discount'] ?? 0);
+        $tvaCode = $_POST['tva_code'] ?? 'A';
+        if (!in_array($tvaCode, ['A', 'B', 'C', 'D'])) $tvaCode = 'A';
+
         $category = trim($_POST['category'] ?? 'coffee');
 
         if (empty($name) || $price < 0) {
             sendError("Name and valid Price are required.");
         }
+        if ($discount < 0 || $discount > 100) {
+            sendError("Discount must be between 0 and 100.");
+        }
 
         $imagePath = $this->handleUpload();
         
-        $sql = "INSERT INTO products (name, description, ingredients, quantity, price, category, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO products (name, description, ingredients, quantity, price, discount, tva_code, category, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
              sendError("Prepare failed (Add): " . $this->conn->error);
         }
-        $stmt->bind_param("ssssdss", $name, $description, $ingredients, $quantity, $price, $category, $imagePath);
+        $stmt->bind_param("ssssidsss", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $imagePath);
 
         if ($stmt->execute()) {
             sendSuccess(['message' => 'Product added successfully.']);
@@ -77,31 +84,38 @@ class ProductController {
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $ingredients = trim($_POST['ingredients'] ?? '');
-        $quantity = trim($_POST['quantity'] ?? ''); // New field
+        $quantity = trim($_POST['quantity'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
+        $discount = intval($_POST['discount'] ?? 0); // New field
         $category = trim($_POST['category'] ?? 'coffee');
 
         if (empty($name) || $price < 0) {
             sendError("Name and valid Price are required.");
         }
+        if ($discount < 0 || $discount > 100) {
+            sendError("Discount must be between 0 and 100.");
+        }
+
+        $tvaCode = $_POST['tva_code'] ?? 'A';
+        if (!in_array($tvaCode, ['A', 'B', 'C', 'D'])) $tvaCode = 'A';
 
         // Check if image is uploaded
         $imagePath = $this->handleUpload();
         
         if ($imagePath) {
-             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, category=?, image_path=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, discount=?, tva_code=?, category=?, image_path=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update Img): " . $this->conn->error);
              }
-             $stmt->bind_param("ssssdssi", $name, $description, $ingredients, $quantity, $price, $category, $imagePath, $id);
+             $stmt->bind_param("ssssidsssi", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $id);
         } else {
-             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, category=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, discount=?, tva_code=?, category=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update NoImg): " . $this->conn->error);
              }
-             $stmt->bind_param("ssssdsi", $name, $description, $ingredients, $quantity, $price, $category, $id);
+             $stmt->bind_param("ssssidssi", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $id);
         }
 
         if ($stmt->execute()) {

@@ -211,13 +211,27 @@ document.addEventListener('click', (e) => {
 // ====================================
 // Menu Details Modal Logic
 // ====================================
-function openProductDetailsModal(name, desc, price, img, ingredients) {
+function openProductDetailsModal(name, desc, price, discount, img, ingredients) {
     const modal = document.getElementById('product-details-modal');
     if (!modal) return;
 
     document.getElementById('modal-prod-name').innerText = name || '';
     document.getElementById('modal-prod-desc').innerText = desc || '';
-    document.getElementById('modal-prod-price').innerText = (price || '0') + ' RON';
+
+    // Price Logic
+    const p = parseFloat(price.replace(/,/g, '')); // Assuming formatted input might have commas? Or cleaned. "10.00"
+    const d = parseInt(discount || 0);
+    let priceHtml = price + ' RON';
+
+    if (d > 0) {
+        const finalP = p - (p * d / 100);
+        priceHtml = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em; margin-right: 10px;">${p.toFixed(2)} RON</span>` +
+            `<span style="color: #e74c3c; font-weight: bold;">${finalP.toFixed(2)} RON</span>` +
+            `<span style="background: #e74c3c; color: white; padding: 2px 5px; border-radius: 4px; font-size: 0.7rem; margin-left: 10px; vertical-align: middle;">-${d}%</span>`;
+    }
+
+    document.getElementById('modal-prod-price').innerHTML = priceHtml;
+
     const imgEl = document.getElementById('modal-prod-img');
     if (imgEl) imgEl.src = img || 'assets/menu/images/default_coffee.jpg';
 
@@ -249,8 +263,8 @@ document.addEventListener('click', e => {
         // Prevent opening if clicking add-to-cart
         if (e.target.closest('.add-to-cart-btn-full')) return;
 
-        const { name, desc, price, img, ingredients } = card.dataset;
-        openProductDetailsModal(name, desc, price, img, ingredients);
+        const { name, desc, price, discount, img, ingredients } = card.dataset;
+        openProductDetailsModal(name, desc, price, discount, img, ingredients);
     }
 
     // 2. Close Modal (Button)

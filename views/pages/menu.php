@@ -125,14 +125,30 @@ while ($c = $catResult->fetch_assoc()) {
 
                 <?php if ($result && $result->num_rows > 0): ?>
                     <div class="menu-grid" id="menu-grid">
-                        <?php while ($row = $result->fetch_assoc()): ?>
+                        <?php while ($row = $result->fetch_assoc()): 
+                            $price = floatval($row['price']);
+                            $discount = intval($row['discount'] ?? 0);
+                            $finalPrice = $price;
+                            $oldPriceHtml = '';
+                            $discountBadge = '';
+
+                            if ($discount > 0) {
+                                $finalPrice = $price - ($price * $discount / 100);
+                                $oldPriceHtml = '<span style="text-decoration: line-through; color: #999; font-size: 0.9em; margin-right: 5px;">' . number_format($price, 2) . '</span>';
+                                $discountBadge = '<div class="discount-pill" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; z-index: 2;">-' . $discount . '%</div>';
+                            }
+                        ?>
                             <div class="product-card animate-on-scroll" 
+                                 style="position: relative;"
                                  data-name="<?= htmlspecialchars($row['name']) ?>"
                                  data-desc="<?= htmlspecialchars($row['description']) ?>"
-                                 data-price="<?= number_format($row['price'], 2) ?>"
+                                 data-price="<?= number_format($price, 2) ?>"
+                                 data-discount="<?= $discount ?>"
                                  data-img="<?= htmlspecialchars($row['image_path']) ?>"
                                  data-ingredients="<?= htmlspecialchars($row['ingredients'] ?? '') ?>"
                                  data-quantity="<?= intval($row['quantity']) ?>">
+                                
+                                <?= $discountBadge ?>
 
                                 <div class="product-image">
                                     <img src="<?= htmlspecialchars($row['image_path']) ?>" alt="<?= htmlspecialchars($row['name']) ?>" loading="lazy" onerror="this.src='assets/menu/images/default_coffee.jpg'">
@@ -143,7 +159,7 @@ while ($c = $catResult->fetch_assoc()) {
                                         <div class="product-price">
                                             <button class="add-to-cart-btn-full" data-id="<?= $row['id'] ?>">
                                                 <i class="fa-solid fa-cart-shopping"></i>
-                                                <span><?= number_format($row['price'], 2) ?> RON</span>
+                                                <span><?= $oldPriceHtml . number_format($finalPrice, 2) ?> RON</span>
                                             </button>
                                         </div>
                                     </div>
