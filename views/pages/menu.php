@@ -27,8 +27,10 @@ if ($category !== 'all') {
 
 // 2. Search Filter (Server Side)
 $searchQuery = $_GET['q'] ?? '';
+$searchQuery = $_GET['q'] ?? '';
 if (!empty($searchQuery)) {
-    $where[] = "(name LIKE ? OR description LIKE ?)";
+    // Search in Name OR Tags (Excluded Description as per request)
+    $where[] = "(name LIKE ? OR tags LIKE ?)";
     $like = "%" . $searchQuery . "%";
     $params[] = $like;
     $params[] = $like;
@@ -123,57 +125,59 @@ while ($c = $catResult->fetch_assoc()) {
                     </div>
                 </div>
 
-                <?php if ($result && $result->num_rows > 0): ?>
-                    <div class="menu-grid" id="menu-grid">
-                        <?php while ($row = $result->fetch_assoc()): 
-                            $price = floatval($row['price']);
-                            $discount = intval($row['discount'] ?? 0);
-                            $finalPrice = $price;
-                            $oldPriceHtml = '';
-                            $discountBadge = '';
-
-                            if ($discount > 0) {
-                                $finalPrice = $price - ($price * $discount / 100);
-                                $oldPriceHtml = '<span style="text-decoration: line-through; color: #999; font-size: 0.9em; margin-right: 5px;">' . number_format($price, 2) . '</span>';
-                                $discountBadge = '<div class="discount-pill" >-' . $discount . '%</div>';
-                            }
-                        ?>
-                            <div class="product-card animate-on-scroll" 
-                                 style="position: relative;"
-                                 data-name="<?= htmlspecialchars($row['name']) ?>"
-                                 data-desc="<?= htmlspecialchars($row['description']) ?>"
-                                 data-price="<?= number_format($price, 2) ?>"
-                                 data-discount="<?= $discount ?>"
-                                 data-img="<?= htmlspecialchars($row['image_path']) ?>"
-                                 data-ingredients="<?= htmlspecialchars($row['ingredients'] ?? '') ?>"
-                                 data-quantity="<?= intval($row['quantity']) ?>">
-                                
-                                <?= $discountBadge ?>
-
-                                <div class="product-image">
-                                    <img src="<?= htmlspecialchars($row['image_path']) ?>" alt="<?= htmlspecialchars($row['name']) ?>" loading="lazy" onerror="this.src='assets/menu/images/default_coffee.jpg'">
-                                </div>
-                                <div class="product-info">
-                                    <div class="product-header">
-                                        <h3 class="product-name"><?= htmlspecialchars($row['name']) ?></h3>
-                                        <div class="product-price">
-                                            <button class="add-to-cart-btn-full" data-id="<?= $row['id'] ?>">
-                                                <i class="fa-solid fa-cart-shopping"></i>
-                                                <span><?= $oldPriceHtml . number_format($finalPrice, 2) ?> RON</span>
-                                            </button>
-                                        </div>
+                <div id="results-container">
+                    <?php if ($result && $result->num_rows > 0): ?>
+                        <div class="menu-grid" id="menu-grid">
+                            <?php while ($row = $result->fetch_assoc()): 
+                                $price = floatval($row['price']);
+                                $discount = intval($row['discount'] ?? 0);
+                                $finalPrice = $price;
+                                $oldPriceHtml = '';
+                                $discountBadge = '';
+    
+                                if ($discount > 0) {
+                                    $finalPrice = $price - ($price * $discount / 100);
+                                    $oldPriceHtml = '<span style="text-decoration: line-through; color: #999; font-size: 0.9em; margin-right: 5px;">' . number_format($price, 2) . '</span>';
+                                    $discountBadge = '<div class="discount-pill" >-' . $discount . '%</div>';
+                                }
+                            ?>
+                                <div class="product-card animate-on-scroll" 
+                                     style="position: relative;"
+                                     data-name="<?= htmlspecialchars($row['name']) ?>"
+                                     data-desc="<?= htmlspecialchars($row['description']) ?>"
+                                     data-price="<?= number_format($price, 2) ?>"
+                                     data-discount="<?= $discount ?>"
+                                     data-img="<?= htmlspecialchars($row['image_path']) ?>"
+                                     data-ingredients="<?= htmlspecialchars($row['ingredients'] ?? '') ?>"
+                                     data-quantity="<?= intval($row['quantity']) ?>">
+                                    
+                                    <?= $discountBadge ?>
+    
+                                    <div class="product-image">
+                                        <img src="<?= htmlspecialchars($row['image_path']) ?>" alt="<?= htmlspecialchars($row['name']) ?>" loading="lazy" onerror="this.src='assets/menu/images/default_coffee.jpg'">
                                     </div>
-                                    <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
-                                    <span class="product-quantity"><?= intval ($row['quantity']) ?> ml</span>
+                                    <div class="product-info">
+                                        <div class="product-header">
+                                            <h3 class="product-name"><?= htmlspecialchars($row['name']) ?></h3>
+                                            <div class="product-price">
+                                                <button class="add-to-cart-btn-full" data-id="<?= $row['id'] ?>">
+                                                    <i class="fa-solid fa-cart-shopping"></i>
+                                                    <span><?= $oldPriceHtml . number_format($finalPrice, 2) ?> RON</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
+                                        <span class="product-quantity"><?= intval ($row['quantity']) ?> ml</span>
+                                    </div>
                                 </div>
-                            </div>
-                        <?php endwhile; ?>
-                    </div>
-                <?php else: ?>
-                    <div class="no-results">
-                        <span class="not-found-pill">Ne pare rău, nu am găsit niciun produs!</span>
-                    </div>
-                <?php endif; ?>
+                            <?php endwhile; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="no-results">
+                            <span class="not-found-pill">Ne pare rău, nu am găsit niciun produs!</span>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>
@@ -231,28 +235,37 @@ while ($c = $catResult->fetch_assoc()) {
                 // Parse HTML to extract the new container content
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                const newContent = doc.querySelector('.menu-section').innerHTML;
+                const newContent = doc.getElementById('results-container').innerHTML;
                 
-                container.innerHTML = newContent;
+                // Target the specific results container NOT the whole section
+                const resultsContainer = document.getElementById('results-container');
+                if(resultsContainer) {
+                    resultsContainer.innerHTML = newContent;
+                    
+                    // Trigger reflow to restart animations if any (standard practice)
+                    // Apply staggered animation
+                    const cards = resultsContainer.querySelectorAll('.product-card');
+                    cards.forEach((card, index) => {
+                        card.classList.add('stagger-item');
+                        card.style.animationDelay = `${index * 0.05}s`; // 50ms delay per card
+                    });
+                }
                 
-                // Re-initialize scripts (since we replaced the script tag too potentially, or at least the logic)
-                // Actually, replacing innerHTML of container kills this script execution context if it was inside?
-                // No, this script is OUTSIDE .menu-section in my layout structure? 
-                // Wait, in the file I put <script> at the bottom.
-                // If I replace .menu-section innerHTML, the <script> is outside, so it persists.
-                // BUT the event listeners inside .menu-section are gone.
-                // We need to re-attach listeners.
-                attachListeners();
+                // No need to re-attach listeners if they are delegated or outside.
+                // But wait, the listeners we attached were:
+                // 1. Sidebar Links (OUTSIDE results-container) -> Safe
+                // 2. Sort Dropdown (OUTSIDE) -> Safe
+                // 3. Search Input (OUTSIDE) -> Safe
+                // So actually, we DON'T need to call attachListeners() again!
                 
-                // Update Browser URL (optional, but good for shareability)
-                // We should prepend ?page=menu
+                // Update Browser URL
                 const newUrl = `?page=menu&${qs}`;
                 window.history.pushState({page: 'menu'}, '', newUrl);
 
             } catch(e) {
                 console.error(e);
                 if(grid) grid.style.opacity = '1';
-                alert("Failed to load products.");
+                // alert("Failed to load products."); // Silent fail on typeahead is better
             }
         }
 
@@ -288,12 +301,12 @@ while ($c = $catResult->fetch_assoc()) {
                 });
             }
 
-            // 3. Search
+            // 3. Search (Instant with Debounce)
             const searchInput = document.getElementById('menuSearchInput');
             const searchBtn = document.getElementById('search-btn');
-            
-            const handleSearch = () => {
-                const val = searchInput.value.trim();
+            let searchTimeout;
+
+            const performSearch = (val) => {
                 const currentParams = new URLSearchParams(window.location.search);
                 currentParams.delete('page');
                 if(val) currentParams.set('q', val);
@@ -302,10 +315,30 @@ while ($c = $catResult->fetch_assoc()) {
                 fetchFilteredContent(currentParams);
             };
 
-            if(searchBtn) searchBtn.addEventListener('click', handleSearch);
+            const handleSearch = () => {
+                const val = searchInput.value.trim();
+                performSearch(val);
+            };
+
+            if(searchBtn) {
+                searchBtn.addEventListener('click', handleSearch);
+            }
+
             if(searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const val = e.target.value.trim();
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        performSearch(val);
+                    }, 300); // 300ms debounce
+                });
+
+                // Keep Enter for immediate search
                 searchInput.addEventListener('keypress', (e) => {
-                    if(e.key === 'Enter') handleSearch();
+                    if(e.key === 'Enter') {
+                        clearTimeout(searchTimeout);
+                        handleSearch();
+                    }
                 });
             }
         }

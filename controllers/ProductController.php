@@ -63,12 +63,14 @@ class ProductController {
 
         $imagePath = $this->handleUpload();
         
-        $sql = "INSERT INTO products (name, description, ingredients, quantity, price, discount, tva_code, category, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $tags = trim($_POST['tags'] ?? '');
+
+        $sql = "INSERT INTO products (name, description, ingredients, quantity, price, discount, tva_code, category, image_path, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
              sendError("Prepare failed (Add): " . $this->conn->error);
         }
-        $stmt->bind_param("ssssidsss", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $imagePath);
+        $stmt->bind_param("ssssidssss", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags);
 
         if ($stmt->execute()) {
             sendSuccess(['message' => 'Product added successfully.']);
@@ -102,20 +104,22 @@ class ProductController {
         // Check if image is uploaded
         $imagePath = $this->handleUpload();
         
+        $tags = trim($_POST['tags'] ?? '');
+        
         if ($imagePath) {
-             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, discount=?, tva_code=?, category=?, image_path=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, discount=?, tva_code=?, category=?, image_path=?, tags=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update Img): " . $this->conn->error);
              }
-             $stmt->bind_param("ssssidsssi", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $id);
+             $stmt->bind_param("ssssidssssi", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags, $id);
         } else {
-             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, discount=?, tva_code=?, category=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, discount=?, tva_code=?, category=?, tags=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update NoImg): " . $this->conn->error);
              }
-             $stmt->bind_param("ssssidssi", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $id);
+             $stmt->bind_param("ssssidsssi", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $tags, $id);
         }
 
         if ($stmt->execute()) {

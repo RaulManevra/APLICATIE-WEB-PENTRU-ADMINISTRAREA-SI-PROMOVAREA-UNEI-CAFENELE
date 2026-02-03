@@ -799,6 +799,7 @@ async function loadProducts() {
                         data-desc="${(p.description || '').replace(/"/g, '&quot;')}"
                         data-ingredients="${(p.ingredients || '').replace(/"/g, '&quot;')}"
                         data-quantity="${(p.quantity || '').replace(/"/g, '&quot;')}"
+                        data-tags="${(p.tags || '').replace(/"/g, '&quot;')}"
                         data-price="${p.price}"
                         data-discount="${p.discount || 0}"
                         data-tva-code="${p.tva_code || 'A'}"
@@ -817,7 +818,7 @@ async function loadProducts() {
   }
 }
 
-function editProduct(id, name, desc, ingredients, quantity, price, discount, tvaCode, cat, img) {
+function editProduct(id, name, desc, ingredients, quantity, tags, price, discount, tvaCode, cat, img) {
   document.getElementById("product-form").reset();
   document.getElementById("prod-id").value = id;
   document.getElementById("form-action").value = "update";
@@ -826,6 +827,7 @@ function editProduct(id, name, desc, ingredients, quantity, price, discount, tva
   document.getElementById("prod-desc").value = desc;
   document.getElementById("prod-ingredients").value = ingredients;
   document.getElementById("prod-quantity").value = quantity;
+  document.getElementById("prod-tags").value = tags;
   document.getElementById("prod-price").value = price;
   document.getElementById("prod-discount").value = discount;
   document.getElementById("prod-tva-code").value = tvaCode || 'A';
