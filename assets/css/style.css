@@ -257,7 +257,7 @@ p {
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
-    z-index: 20;
+    z-index: 5;
     display: flex;
     align-items: center;
     justify-content: center;

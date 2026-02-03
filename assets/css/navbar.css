@@ -226,97 +226,169 @@
     display: none;
 }
 
+/* Sidebar Styling */
+/* Sidebar Styling */
 .dropdown_menu {
-    position: absolute;
-    right: 2rem;
-    top: 60px;
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    width: 300px;
-    height: 0;
-    border-radius: 10px;
-    overflow: hidden;
-    display: none;
-    transition: height .2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: fixed;
+    top: 0;
+    left: -100%; /* Start off-screen to the left */
+    width: 50vw; /* Half screen width */
+    height: 100vh; /* Full screen height */
+    background-color: #2b1205f0 !important; /* Force white background */
+    z-index: 10000;
+    border-right:2px solid rgba(43, 14, 4, 0.768);
+    color:#333;
+    transition: left 0.4s ease;
+    box-shadow: none;
+    display: block !important; /* Ensure it's not set to display:none */
 }
 
-.dropdown_menu .open {
-    height: 240px;
+/* When the menu is active */
+.dropdown_menu.open {
+    left: 0 !important;
+    box-shadow: 5px 0px 15px rgba(0,0,0,0.2);
 }
 
-.dropdown_menu li {
-    padding: 0.7rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* List Styling inside Sidebar */
+.dropdown_menu ul {
+    list-style: none;
+    padding: 100px 20px 20px 20px; /* Extra top padding to clear the logo area */
+    margin: 0;
+    display: block !important;
+}
+
+.dropdown_menu ul li {
+    padding:10px 0;
+    width: 100%;
+    text-align: left; /* Align text to left for sidebar look */
+}
+
+.dropdown_menu ul li a {
+    text-decoration: none;
+    color: #e9e9e9 !important; /* Dark Coffee color for the text */
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: block;
+}
+.navbar .toggle_btn {
+    z-index: 10001;
+    position: relative;
 }
 
 @media screen and (max-width: 992px) {
-
     .navbar {
         display: flex !important;
-        /* switch from grid to flex */
         justify-content: space-between;
-        /* logo left, toggle right */
         align-items: center;
-        width: 100vw;
-        /* full viewport width */
-        left: 0;
-        /* fixed left */
+        width: 100%;
         padding: 0 1rem;
         box-sizing: border-box;
-        /* include padding in width */
     }
 
-    /* Center nav links hidden */
-    .navbar ul {
-        display: none;
-    }
-
-    /* Auth buttons hidden */
+    /* Hide horizontal nav and desktop auth buttons */
+    .navbar ul:not(.dropdown_menu ul), 
     .auth-buttons {
-        display: none;
+        display: none !important;
     }
 
     /* Show hamburger toggle */
     .navbar .toggle_btn {
-        display: block;
-        font-size: 1.5rem;
-        color: #fff;
-        cursor: pointer;
+        display: block !important;
+        z-index: 10001; /* Stay above sidebar */
     }
 
-    /* Dropdown menu for mobile */
-    .dropdown_menu {
-        position: fixed;
-        top: 60px;
+    /* IMPORTANT: We remove the old .dropdown_menu styles from here 
+       because they were forcing it to be black and full-width.
+    */
+}
+/* Sidebar Profile/Cart Header */
+.sidebar-auth {
+    padding: 80px 20px 10px 20px; /* Space for the top navbar */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.mobile-profile-info {
+    background: rgba(15, 15, 15, 0.95);
+    border: none;
+    color: #e3e3e3;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 10px 22px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.25s ease;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+}
+
+.mobile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgb(216, 164, 50);
+}
+
+.mobile-cart-link {
+    background: rgba(15, 15, 15, 0.95);
+    border: none;
+    color: #e3e3e3;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 10px 22px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.25s ease;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+/* Adjusting the UL padding since we have a header now */
+.dropdown_menu ul {
+    padding: 10px 20px !important;
+}
+
+/* Make sure logout stands out */
+.dropdown_menu li a[href*="logout"] {
+    color: #e74c3c !important; 
+}
+@media screen and (max-width: 992px) {
+    
+    /* 1. Make the link container only as wide as the text */
+    .dropdown_menu li a {
+        display: inline-block !important; /* This is the secret sauce */
+        position: relative; 
+        padding: 5px 0; /* Vertical spacing */
+        width: auto;    /* Ensure it doesn't stretch to 100% */
+    }
+
+    /* 2. Reset the desktop line and attach it to the link width */
+    .dropdown_menu li::after {
+        display: none !important; /* Kill the old li-based line */
+    }
+
+    .dropdown_menu li a::after {
+        content: '';
+        position: absolute;
         left: 0;
-        width: 100vw;
-        /* full width */
-        background-color: rgba(0, 0, 0, 0.85);
-        backdrop-filter: blur(15px);
-        flex-direction: column;
-        display: none;
-        /* shown when toggle clicked */
-        z-index: 25;
+        bottom: 0;
+        width: 100%; /* Now 100% means 100% of the text width */
+        height: 2px;
+        background-color: rgb(216, 164, 50); /* Your gold color */
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
     }
 
-    .dropdown_menu.open {
-        display: flex;
-    }
-
-    .dropdown_menu li {
-        width: 100%;
-        text-align: center;
-        padding: 0.8rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .dropdown_menu li a,
-    .dropdown_menu li .auth-btn {
-        display: block;
-        width: 100%;
-        padding: 10px 0;
-        font-size: 1.1rem;
+    /* 3. Trigger animation on hover or if active */
+    .dropdown_menu li a.active::after {
+        transform: scaleX(1);
     }
 }

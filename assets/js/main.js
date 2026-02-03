@@ -279,5 +279,20 @@ document.addEventListener('click', e => {
     }
 });
 
+const toggleBtn = document.querySelector('.toggle_btn');
+const sidebar = document.querySelector('.dropdown_menu');
+
+toggleBtn.onclick = function () {
+    sidebar.classList.toggle('open');
+}
+document.addEventListener('click', function(event) {
+    const sidebar = document.querySelector('.dropdown_menu');
+    const toggleBtn = document.querySelector('.toggle_btn');
+
+    // If the click is NOT on the sidebar and NOT on the toggle button
+    if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+        sidebar.classList.remove('open');
+    }
+});
 
 

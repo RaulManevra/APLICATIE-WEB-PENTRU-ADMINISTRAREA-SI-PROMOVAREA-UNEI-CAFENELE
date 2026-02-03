@@ -26,6 +26,7 @@ export function updateHero(page) {
 // ===== NAV LINK ACTIVE STATE =====
 export function setActiveLink(page) {
   document.querySelectorAll(".nav-link").forEach((link) => {
+    // This now works for desktop <ul> and the mobile .dropdown_menu <ul>
     link.classList.toggle("active", link.dataset.page === page);
   });
 }
@@ -246,5 +247,42 @@ document.addEventListener("click", (e) => {
         }
       });
     }
+  }
+});
+// Handle Mobile Sidebar Navigation and Auto-Close
+document.addEventListener("click", (e) => {
+  const navLink = e.target.closest(".dropdown_menu .nav-link");
+  if (navLink) {
+    // 1. Prevent default <a> jump
+    e.preventDefault();
+    
+    // 2. Get the page from data-page
+    const page = navLink.dataset.page;
+    
+    // 3. Close the sidebar (slides it back to the left)
+    const sidebar = document.getElementById("mobile-sidebar");
+    if (sidebar) {
+      sidebar.classList.remove("open");
+    }
+
+    // 4. Trigger your router's loadPage function
+    // Note: ensure loadPage is imported or available globally
+    import("./router.js").then((m) => m.loadPage(page));
+  }
+});
+document.addEventListener("click", (e) => {
+  const logoutBtn = e.target.closest(".logout-trigger");
+  if (logoutBtn) {
+    e.preventDefault();
+    
+    const currentPage = new URLSearchParams(window.location.search).get('page') || 'home';
+
+    import("./api.js").then(({ safeFetch }) => {
+      safeFetch("?page=logout", { method: "POST" })
+        .then(() => {
+          // Force a reload or a re-route to the same page to clear state
+          window.location.href = `?page=${currentPage}`;
+        });
+    });
   }
 });

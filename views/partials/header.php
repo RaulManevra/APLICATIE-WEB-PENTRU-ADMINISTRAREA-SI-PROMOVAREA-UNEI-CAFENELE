@@ -76,14 +76,40 @@
 
         <div class="toggle_btn">
             <i class="fa-solid fa-bars"></i>
-        </div>
-        <div class="dropdown_menu">
-            <li><a href="?page=home" class="nav-link" data-page="home">Home</a></li>
-            <li><a href="?page=about" class="nav-link" data-page="about">About</a></li>
-            <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
-            <li><a href="?page=contact" class="nav-link" data-page="contact">Contact</a></li>
-            <li><a href="?page=tables" class="nav-link" data-page="tables">Tables</a></li>
-            <li><a href="?page=cart" class="nav-link" data-page="cart">Cart</a></li>
-        </div>
+        <div class="dropdown_menu" id="mobile-sidebar">
+    <div class="sidebar-auth">
+        <?php if ($currentUser): ?>
+            <div class="mobile-profile-info">
+                <img src="<?= htmlspecialchars($navProfilePic) ?>" alt="Profile" class="mobile-avatar">
+                <span><?= htmlspecialchars($currentUser) ?></span>
+            </div>
+        <?php endif; ?>
+        
+        <a href="?page=cart" class="mobile-cart-link">
+            <i class="fa-solid fa-cart-shopping"></i> Cart
+        </a>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 20px;">
+
+    <ul>
+        <li><a href="?page=home" class="nav-link" data-page="home">Home</a></li>
+        <li><a href="?page=about" class="nav-link" data-page="about">About</a></li>
+        <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
+        <li><a href="?page=tables" class="nav-link" data-page="tables">Tables</a></li>
+        
+        <?php if ($currentUser): ?>
+            <?php if (in_array('admin', $currentUserRoles) || in_array('employer', $currentUserRoles)): ?>
+                <li><a href="?page=admin" class="nav-link">Admin</a></li>
+            <?php endif; ?>
+            <li>
+            <li><a href="#" class="nav-link logout-trigger" data-page="logout">Logout</a></li>
+            </li>
+        <?php else: ?>
+            <li><a href="?page=login" class="nav-link" data-page="login">Login</a></li>
+            <li><a href="?page=register" class="nav-link" data-page="register">Sign Up</a></li>
+        <?php endif; ?>
+    </ul>
+</div>
     </div>
 </div>

@@ -20,6 +20,13 @@ initRippleEffect();
  * @param {boolean} pushState - Whether to push to browser history.
  */
 export async function loadPage(page, pushState = true) {
+    // --- ADD THIS BLOCK HERE ---
+    // Close mobile sidebar if it's open
+    const sidebar = document.querySelector('.dropdown_menu');
+    if (sidebar && sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+    }
+    // ---------------------------
     // ALWAYS stop the slider when navigating
     stopSlider();
 
