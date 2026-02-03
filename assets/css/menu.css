@@ -448,6 +448,15 @@
     backdrop-filter: blur(5px);
     animation: fadeIn 0.3s;
 }
+.product-quantity {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 1.2rem;
+    color: #e7e7e7;
+    font-weight: 700;
+    display:flex;
+    justify-content: flex-end;
+}
 
 .product-modal-content {
     background: #2a130d;
