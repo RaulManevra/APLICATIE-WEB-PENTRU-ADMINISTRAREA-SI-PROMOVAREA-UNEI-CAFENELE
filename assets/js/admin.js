@@ -16,6 +16,18 @@ function initAdminPanel() {
   showSection("dashboard");
 
   // Navigation Logic (Event Delegation)
+  const userRoles = window.currentUserRole || [];
+  const isAdmin = userRoles.includes('admin');
+
+  if (!isAdmin) {
+    // Hide Sidebar Links
+    const restricted = ['menu', 'slider', 'settings'];
+    restricted.forEach(sec => {
+      const link = document.querySelector(`.nav-link[data-section="${sec}"]`);
+      if (link) link.style.display = 'none';
+    });
+  }
+
   const sidebarNav = document.querySelector(".sidebar-nav");
   if (sidebarNav) {
     console.log("Sidebar nav found, attaching listener.");
@@ -573,6 +585,24 @@ async function viewUser(id) {
       }</p>
         `;
 
+    const isAdmin = (window.currentUserRole || []).includes('admin');
+
+    // Role Dropdown (Only for Admins)
+    let roleSelector = "";
+    if (isAdmin) {
+      roleSelector = `
+            <div style="margin-top:15px; background:#f5f5f5; padding:10px; border-radius:4px;">
+                <label><strong>Role:</strong></label>
+                <select id="user-role-select" onchange="updateUserRole(${u.id}, this.value)" class="form-control" style="width:100%; margin-top:5px;">
+                    <option value="user" ${u.role === 'user' ? 'selected' : ''}>User</option>
+                    <option value="employer" ${u.role === 'employer' ? 'selected' : ''}>Employer</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                </select>
+                <small style="color:#666; display:block; margin-top:5px;">Changing this updates permissions immediately.</small>
+            </div>
+        `;
+    }
+
     // Configure Blacklist Button
     const btn = document.getElementById("blacklist-btn");
     const reasonBox = document.getElementById("blacklist-reason");
@@ -580,6 +610,11 @@ async function viewUser(id) {
     // Remove old listeners to avoid stacking (simplest way is to clone or reset)
     // Better: just assign onclick here since we are in a specific context
     btn.onclick = () => handleBlacklistToggle(u.id, u.is_blacklisted);
+
+    // Insert Role Selector before buttons
+    // We need to inject it into the HTML structure
+    document.getElementById("user-details-content").innerHTML += roleSelector;
+    // (Or cleaner: put it inside the template string above, but here works too)
 
     if (u.is_blacklisted == 1) {
       btn.innerText = "Unblacklist User";
@@ -593,6 +628,23 @@ async function viewUser(id) {
     }
 
     document.getElementById("user-modal").style.display = "block";
+  }
+}
+
+async function updateUserRole(userId, newRole) {
+  if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
+    // Revert selection if canceled (tricky without storing prev value, but user can just change back)
+    return;
+  }
+
+  // Call API
+  const res = await apiRequest("user", "change_role", { user_id: userId, new_role: newRole });
+  if (res.success) {
+    showToast(res.message, 'success');
+    // Refresh list to update UI
+    loadUsers(document.getElementById("user-search").value);
+  } else {
+    showToast(res.error, 'error');
   }
 }
 

@@ -6,8 +6,11 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
 
 require_once __DIR__ . '/../../core/auth.php';
 require_once __DIR__ . '/../../core/csrf.php';
-require_admin();
+require_role(['admin', 'employer']);
 ?>
+<script>
+    window.currentUserRole = <?= json_encode(SessionManager::getCurrentUserData()['roles']) ?>;
+</script>
 <input type="hidden" id="csrf-token-global" value="<?= csrf_token() ?>">
 <link rel="stylesheet" href="assets/css/admin.css?v=<?= time(); ?>">
 <!-- Chart.js -->

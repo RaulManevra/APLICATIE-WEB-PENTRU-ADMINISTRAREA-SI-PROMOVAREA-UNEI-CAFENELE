@@ -36,14 +36,14 @@ export function setActiveLink(page) {
  */
 export function updateHeaderUI() {
   const roles = window.APP_CONFIG?.currentUserRoles || [];
-  const isAdmin = roles.includes("admin");
+  const hasAccess = roles.includes("admin") || roles.includes("employer");
   const isLoggedIn = !!window.CURRENT_USER;
   const userData = window.APP_CONFIG?.currentUserData || {};
 
   // 1. Toggle Admin Link
   const adminLinkLi = document.getElementById("admin-link-li");
   if (adminLinkLi) {
-    adminLinkLi.style.display = isAdmin ? "" : "none";
+    adminLinkLi.style.display = hasAccess ? "" : "none";
   }
 
   // 2. Toggle Popup Content / Profile Logic

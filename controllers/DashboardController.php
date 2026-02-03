@@ -67,6 +67,9 @@ class DashboardController {
     }
 
     private function updateEmailSettings() {
+        if (!in_array('admin', SessionManager::getCurrentUserData()['roles'] ?? [])) {
+             sendError("Forbidden. Admin only.");
+        }
         $newsletter = $_POST['newsletter_email'] ?? '';
         $support = $_POST['support_email'] ?? '';
 
@@ -193,6 +196,9 @@ class DashboardController {
     }
 
     private function toggleCafeStatus() {
+        if (!in_array('admin', SessionManager::getCurrentUserData()['roles'] ?? [])) {
+             sendError("Forbidden. Admin only.");
+        }
         $status = $_POST['status'] ?? 'open';
         if (!in_array($status, ['open', 'closed', 'busy'])) $status = 'open';
 
@@ -239,6 +245,9 @@ class DashboardController {
     }
 
     private function updateSchedule() {
+        if (!in_array('admin', SessionManager::getCurrentUserData()['roles'] ?? [])) {
+             sendError("Forbidden. Admin only.");
+        }
         $data = $_POST['schedule'] ?? [];
         if (!is_array($data)) sendError("Invalid data");
 
@@ -263,6 +272,10 @@ class DashboardController {
 
     // Newsletter
     private function sendNewsletter() {
+        // Allow employer to send newsletter? "Everything except Menu, slider, settings".
+        // Newsletter is on Dashboard. Dashboard is allowed.
+        // So Employer CAN send newsletter based on "access everything except..."
+        // I will NOT add restriction here unless specified.
         $subject = $_POST['subject'] ?? '';
         $body = $_POST['body'] ?? '';
         

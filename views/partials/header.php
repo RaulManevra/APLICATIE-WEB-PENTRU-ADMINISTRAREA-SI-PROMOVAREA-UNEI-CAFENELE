@@ -9,7 +9,7 @@
             <li><a href="?page=about" class="nav-link" data-page="about">About</a></li>
             <li><a href="?page=menu" class="nav-link" data-page="menu">Menu</a></li>
             <li><a href="?page=tables" class="nav-link" data-page="tables">Tables</a></li>
-            <li id="admin-link-li" style="<?php echo in_array('admin', $currentUserRoles) ? '' : 'display: none;'; ?>">
+            <li id="admin-link-li" style="<?php echo (in_array('admin', $currentUserRoles) || in_array('employer', $currentUserRoles)) ? '' : 'display: none;'; ?>">
                 <a href="?page=admin" class="nav-link" data-page="admin">Admin</a>
             </li>
         </ul>
