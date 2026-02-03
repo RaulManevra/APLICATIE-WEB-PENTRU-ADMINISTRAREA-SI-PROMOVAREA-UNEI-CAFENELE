@@ -12,6 +12,8 @@ class ReservationController {
     }
 
     public function handleRequest() {
+        $this->updateExpiredCheckins(); // Auto-close missed check-ins
+
         $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
         switch ($action) {
@@ -30,6 +32,9 @@ class ReservationController {
             case 'check_status':
                  // Optional: check status for a specific table/time
                  break;
+            case 'check_in':
+                $this->checkIn();
+                break;
             case 'get_upcoming':
                 $this->getUpcoming();
                 break;
@@ -414,6 +419,93 @@ class ReservationController {
     /**
      * Helper to get active/upcoming reservation for UI display.
      */
+    private function checkIn() {
+        if (!SessionManager::isLoggedIn()) {
+            sendError("You must be logged in to check in.");
+        }
+        
+        $user = SessionManager::getCurrentUserData();
+        $userId = $user['id'];
+        $resId = intval($_POST['id'] ?? 0);
+        
+        if ($resId <= 0) sendError("Invalid reservation.");
+
+        $stmt = $this->conn->prepare("SELECT user_id, reservation_time, checked_in, status FROM reservations WHERE id = ?");
+        $stmt->bind_param("i", $resId);
+        $stmt->execute();
+        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$res) sendError("Reservation not found.");
+        
+        // Allow admin override? The prompt implies user action. Let's restrict to user.
+        // Actually, if user ID matches.
+        if ($res['user_id'] != $userId && !in_array('admin', $user['roles'])) {
+            sendError("Unauthorized.");
+        }
+
+        if ($res['status'] !== 'active') {
+             sendError("Reservation is not active (Status: " . $res['status'] . ").");
+        }
+        
+        if ($res['checked_in']) {
+             sendSuccess(['message' => 'Already checked in.']); // Treat as success if idempotent
+        }
+
+        $resTime = new DateTime($res['reservation_time']);
+        $now = new DateTime();
+
+        // Check-in Window: [ResTime - 36h, ResTime - 12h]
+        $startWindow = clone $resTime;
+        $startWindow->modify('-36 hours');
+        
+        $endWindow = clone $resTime;
+        $endWindow->modify('-12 hours');
+        
+        if ($now < $startWindow) {
+            // Calculate hours left
+            $diff = $now->diff($startWindow);
+            $hours = $diff->h + ($diff->days * 24);
+            sendError("Check-in opens in $hours hours (36 hours before reservation).");
+        }
+        
+        if ($now > $endWindow) {
+             sendError("Check-in window has closed (12 hours before reservation).");
+        }
+
+        // Perform Check-in
+        $stmt = $this->conn->prepare("UPDATE reservations SET checked_in = 1 WHERE id = ?");
+        $stmt->bind_param("i", $resId);
+        if ($stmt->execute()) {
+             sendSuccess(['message' => 'Check-in successful!']);
+        } else {
+             sendError("Database error during check-in.");
+        }
+    }
+
+    private function updateExpiredCheckins() {
+        // Close Active reservations that have NOT checked in and are within 12 hours of start (i.e. missed the deadline).
+        // Condition: status='active' AND checked_in=0 AND reservation_time < (NOW + 12h)
+        // Note: Use a safe update.
+        // Also check if reservation_time is actually in the future? 
+        // If reservation_time was yesterday and checked_in=0, it should be closed too.
+        // So simply: if check-in deadline (ResTime - 12h) < Now.
+        // ResTime < Now + 12h.
+        
+        // Logic check:
+        // ResTime = 2026-02-04 14:00. Check-in close: 2026-02-04 02:00.
+        // Current Time: 2026-02-04 03:00. (Missed).
+        // 2026-02-04 14:00 < 2026-02-04 15:00 (Now+12h). TRUE. -> Update.
+        
+        $sql = "UPDATE reservations 
+                SET status = 'deleted' 
+                WHERE status = 'active' 
+                AND checked_in = 0 
+                AND reservation_time < DATE_ADD(NOW(), INTERVAL 12 HOUR)";
+        
+        $this->conn->query($sql);
+    }
+
     public static function getUpcomingForUser($conn, $userId) {
         $resCheckSql = "SELECT r.*, t.ID as table_name 
                         FROM reservations r 

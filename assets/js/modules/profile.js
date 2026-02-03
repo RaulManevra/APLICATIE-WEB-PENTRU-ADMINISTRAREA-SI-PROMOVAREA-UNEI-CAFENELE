@@ -92,6 +92,69 @@ export function initProfilePopup() {
                     timeEl.textContent = `${day} ${month}, ${time}`;
                 }
 
+                // Check-in Logic
+                let actionContainer = document.getElementById('res-action-container');
+                if (!actionContainer) {
+                    actionContainer = document.createElement('div');
+                    actionContainer.id = 'res-action-container';
+                    actionContainer.style.marginTop = '10px';
+                    actionContainer.style.textAlign = 'center';
+                    container.querySelector('.reservation-details').appendChild(actionContainer);
+                }
+                actionContainer.innerHTML = ''; // Clear previous
+
+                if (r.checked_in == 1) {
+                    actionContainer.innerHTML = '<span style="color:#27ae60; font-weight:bold;"><i class="fa-solid fa-check-circle"></i> Checked In</span>';
+                } else {
+                    const resTime = new Date(r.reservation_time);
+                    const now = new Date();
+                    const diffMs = resTime - now;
+                    const diffHours = diffMs / (1000 * 60 * 60);
+
+                    if (diffHours <= 36 && diffHours >= 12) {
+                        // Show Button
+                        const checkInBtn = document.createElement('button');
+                        checkInBtn.className = 'res-btn-small'; // New class or inline
+                        checkInBtn.textContent = 'Check In';
+                        checkInBtn.style.cssText = 'background:#27ae60; color:white; border:none; padding:5px 15px; border-radius:15px; cursor:pointer; font-size:14px;';
+
+                        checkInBtn.onclick = async () => {
+                            checkInBtn.textContent = '...';
+                            checkInBtn.disabled = true;
+                            try {
+                                const formData = new FormData();
+                                formData.append('action', 'check_in');
+                                formData.append('id', r.id);
+
+                                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                                if (csrfMeta) {
+                                    formData.append('csrf_token', csrfMeta.content);
+                                }
+
+                                const ciRes = await safeFetch('controllers/reservation_handler.php', { method: 'POST', body: formData });
+                                const ciData = await ciRes.json();
+                                if (ciData.success) {
+                                    updateReservationDisplay(); // Refresh
+                                } else {
+                                    alert(ciData.message || 'Check-in failed');
+                                    checkInBtn.textContent = 'Check In';
+                                    checkInBtn.disabled = false;
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                alert('Error during check-in');
+                                checkInBtn.textContent = 'Check In';
+                                checkInBtn.disabled = false;
+                            }
+                        };
+                        actionContainer.appendChild(checkInBtn);
+                    } else if (diffHours > 36) {
+                        actionContainer.innerHTML = `<span style="font-size:12px; color:#555;">Check-in opens in ${Math.round(diffHours - 36)}h</span>`;
+                    } else if (diffHours < 12) {
+                        actionContainer.innerHTML = '<span style="color:#e74c3c; font-weight:bold;">Check-in Missed</span>';
+                    }
+                }
+
                 container.hidden = false;
             } else {
                 container.hidden = true;
