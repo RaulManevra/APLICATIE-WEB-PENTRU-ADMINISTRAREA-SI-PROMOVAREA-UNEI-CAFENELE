@@ -396,6 +396,7 @@ body {
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
     background-color: #f9fafb;
+    width:150px;
 }
 
 .form-group input:focus,
@@ -983,4 +984,20 @@ body {
     display: flex;
     gap: 10px;
     flex-direction:row;
+}
+.btn-forth{
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    margin-right: 12px;
+    transition: background 0.2s;
+    transition: 0.7s ease;
+}
+.btn-forth:hover {
+    background: #374151;
+    color:#f3f4f6
 }

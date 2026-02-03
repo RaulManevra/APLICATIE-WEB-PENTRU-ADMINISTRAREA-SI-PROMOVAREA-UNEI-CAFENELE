@@ -895,9 +895,9 @@ async function loadSlides() {
                     <div class="slide-card" data-id="${s.id}">
                         <div style="position:relative;">
                              <img src="${s.image_path}" style="width:100%; height:150px; object-fit:cover; border-radius:4px;">
-                             <div style="position:absolute; top:5px; right:5px; background:rgba(0,0,0,0.5); border-radius:4px; padding:2px;">
-                                 <button class="btn btn-sm btn-secondary" onclick="moveSlide(${index}, -1)" title="Move Left/Up"><i class="fas fa-arrow-left"></i></button>
-                                 <button class="btn btn-sm btn-secondary" onclick="moveSlide(${index}, 1)" title="Move Right/Down"><i class="fas fa-arrow-right"></i></button>
+                             <div style="position:absolute; top:5px; right:5px; background:rgba(0, 0, 0, 0.17); border-radius:4px; padding:2px;">
+                                 <button class="btn btn-sm btn-forth" onclick="moveSlide(${index}, -1)" title="Move Left/Up"><i class="fas fa-arrow-left"></i></button>
+                                 <button class="btn btn-sm btn-forth" onclick="moveSlide(${index}, 1)" title="Move Right/Down"><i class="fas fa-arrow-right"></i></button>
                              </div>
                         </div>
                         <div class="slide-info" style="padding:10px;">

@@ -309,8 +309,10 @@ p {
 ========================= */
 @media (max-width: 960px) {
     .hero {
-        flex-direction: column-reverse;
+        flex-direction: column;
         text-align: center;
+        gap:35px;
+        align-items: flex-end;
     }
 
     .hero-left,
@@ -562,4 +564,14 @@ p {
     .offer-content {
         padding: 40px 30px !important;
     }
+}
+@media (max-width: 768px) {
+    .features-grid{
+        grid-template-columns: 1fr;
+        gap:24px;
+    }
+    .features-grid .feature-card:nth-child(3) {
+        grid-column: auto;
+    }
+
 }

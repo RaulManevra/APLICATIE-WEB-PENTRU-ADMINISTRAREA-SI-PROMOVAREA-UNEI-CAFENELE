@@ -202,19 +202,39 @@ $isLoggedIn = SessionManager::isLoggedIn();
         </div>
 
         <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color status-libera"></div>
-                <span class="badge available">Available (Click to Reserve)</span>
+    <div class="legend-header">
+        <i class="fa-regular fa-calendar"></i>
+        <?= date('l, d M Y') ?>
+    </div>
+
+    <div class="legend-list">
+        <?php
+        // rewind result set
+        $result->data_seek(0);
+
+        while ($row = $result->fetch_assoc()):
+            $id = $row['ID'];
+            $status = strtolower(trim($row['Status'] ?? 'inactiva'));
+            $capacity = $row['capacity'] ?? 4; // number of persons
+
+            // dynamic override
+            if ($status !== 'inactiva' && isset($activeReservations[$id])) {
+                $status = 'rezervata';
+            }
+            $statusClass = 'status-' . str_replace(' ', '-', $status);
+        ?>
+            <div class="legend-table lighter-brown">
+                <div class="legend-table-info">
+                    <strong>Table <?= $id ?></strong>
+                    <small>Seats: <?= $capacity ?> persons</small>
+                </div>
+                <div class="legend-status-box <?= $statusClass ?>"></div>
             </div>
-            <div class="legend-item">
-                <div class="legend-color status-ocupata"></div>
-                <span class="badge occupied">Occupied</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-rezervata"></div>
-                <span class="badge reserved">Reserved/Busy</span>
-            </div>
-        </div>
+        <?php endwhile; ?>
+    </div>
+</div>
+
+
     </div>
 </div>
 
