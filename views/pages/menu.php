@@ -135,7 +135,7 @@ while ($c = $catResult->fetch_assoc()) {
                             if ($discount > 0) {
                                 $finalPrice = $price - ($price * $discount / 100);
                                 $oldPriceHtml = '<span style="text-decoration: line-through; color: #999; font-size: 0.9em; margin-right: 5px;">' . number_format($price, 2) . '</span>';
-                                $discountBadge = '<div class="discount-pill" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; z-index: 2;">-' . $discount . '%</div>';
+                                $discountBadge = '<div class="discount-pill" >-' . $discount . '%</div>';
                             }
                         ?>
                             <div class="product-card animate-on-scroll" 

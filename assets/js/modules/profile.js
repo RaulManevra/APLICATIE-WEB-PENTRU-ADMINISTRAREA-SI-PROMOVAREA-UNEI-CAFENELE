@@ -220,6 +220,19 @@ export function initProfilePopup() {
             });
         }
 
+        // Close popup when user switches tab or minimizes
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        closeProfilePopup();
+    }
+});
+
+// Optional: also catch window losing focus
+window.addEventListener('blur', () => {
+    closeProfilePopup();
+});
+
+
         btn._profileInit = true;
     }
 }

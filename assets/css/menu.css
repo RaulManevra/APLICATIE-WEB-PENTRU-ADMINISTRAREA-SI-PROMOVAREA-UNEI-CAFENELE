@@ -565,6 +565,20 @@
     font-weight: bold;
     color: #c79a63;
 }
+.discount-pill{
+    position: absolute; 
+    top: 10px; 
+    right: 10px; 
+    background: #bc4134d4; 
+    color: white; 
+    padding: 4px 12px; 
+    border-radius: 10px; 
+    font-size: 0.8rem;
+    letter-spacing: 1px; 
+    font-weight: bold; 
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.3);
+}
 
 @keyframes fadeIn {
     from {

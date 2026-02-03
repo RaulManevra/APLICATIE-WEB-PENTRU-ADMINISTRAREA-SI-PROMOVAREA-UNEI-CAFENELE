@@ -226,8 +226,8 @@ function openProductDetailsModal(name, desc, price, discount, img, ingredients) 
     if (d > 0) {
         const finalP = p - (p * d / 100);
         priceHtml = `<span style="text-decoration: line-through; color: #999; font-size: 0.8em; margin-right: 10px;">${p.toFixed(2)} RON</span>` +
-            `<span style="color: #e74c3c; font-weight: bold;">${finalP.toFixed(2)} RON</span>` +
-            `<span style="background: #e74c3c; color: white; padding: 2px 5px; border-radius: 4px; font-size: 0.7rem; margin-left: 10px; vertical-align: middle;">-${d}%</span>`;
+            `<span style="color: #cd4435; font-weight: bold;">${finalP.toFixed(2)} RON</span>` +
+            `<span style="background: #c64334d7; color: white; padding: 4px 10px; border-radius: 10px; font-size: 0.9rem;letter-spacing:1px; margin-left: 10px; vertical-align: middle;">-${d}%</span>`;
     }
 
     document.getElementById('modal-prod-price').innerHTML = priceHtml;

@@ -35,6 +35,8 @@
                 <?php endif; ?>
             </button>
 
+            <div id="profile-backdrop" class="profile-backdrop" hidden></div>
+
             <div id="profile-popup" class="profile-popup" hidden>
                 <button id="profile-close" class="profile-close" aria-label="Close">&times;</button>
                 <div class="profile-popup-content">

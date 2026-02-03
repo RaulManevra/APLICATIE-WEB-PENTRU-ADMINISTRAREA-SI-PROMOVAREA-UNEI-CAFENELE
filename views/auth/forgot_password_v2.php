@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../core/csrf.php';
 require_once __DIR__ . '/../../core/output.php';
 ?>
 <div class="login-wrapper">
-    <form class="login-box" action="?page=forgot_password_handler" method="post">
+    <form class="register-box login-box" action="?page=forgot_password_handler" method="post">
         <input type="hidden" name="csrf_token" value="<?php echo e(csrf_token()); ?>">
         <input type="hidden" name="action" value="request_reset">
         
@@ -17,7 +17,7 @@ require_once __DIR__ . '/../../core/output.php';
             Enter your email address and we'll send you a link to reset your password.
         </p>
 
-        <div class="input-box">
+        <div class="input-box" >
             <input type="email" name="email" required placeholder="Enter your email">
             <i class="fa-solid fa-envelope"></i>
         </div>
