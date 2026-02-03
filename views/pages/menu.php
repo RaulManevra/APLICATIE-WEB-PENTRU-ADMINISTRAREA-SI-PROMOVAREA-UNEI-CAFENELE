@@ -131,7 +131,9 @@ while ($c = $catResult->fetch_assoc()) {
                                  data-desc="<?= htmlspecialchars($row['description']) ?>"
                                  data-price="<?= number_format($row['price'], 2) ?>"
                                  data-img="<?= htmlspecialchars($row['image_path']) ?>"
-                                 data-ingredients="<?= htmlspecialchars($row['ingredients'] ?? '') ?>">
+                                 data-ingredients="<?= htmlspecialchars($row['ingredients'] ?? '') ?>"
+                                 data-quantity="<?= intval($row['quantity']) ?>">
+
                                 <div class="product-image">
                                     <img src="<?= htmlspecialchars($row['image_path']) ?>" alt="<?= htmlspecialchars($row['name']) ?>" loading="lazy" onerror="this.src='assets/menu/images/default_coffee.jpg'">
                                 </div>
@@ -146,6 +148,7 @@ while ($c = $catResult->fetch_assoc()) {
                                         </div>
                                     </div>
                                     <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
+                                    <span class="product-quantity"><?= intval ($row['quantity']) ?> ml</span>
                                 </div>
                             </div>
                         <?php endwhile; ?>
