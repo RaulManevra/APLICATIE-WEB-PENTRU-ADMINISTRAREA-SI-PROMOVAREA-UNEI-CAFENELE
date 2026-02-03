@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.31, for Win64 (x86_64)
 --
 -- Host: localhost    Database: mazi_coffee
 -- ------------------------------------------------------
--- Server version	8.0.44
+-- Server version	8.0.31
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -201,7 +201,7 @@ CREATE TABLE `products` (
   `category` enum('coffee','tea','chocolate','refreshment','signature','addon') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'coffee',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `discount` int DEFAULT '0',
-  `tva_code` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'A',
+  `tva_code` char(1) COLLATE utf8mb4_unicode_ci DEFAULT 'A',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -230,7 +230,7 @@ CREATE TABLE `reservations` (
   `table_id` int NOT NULL,
   `reservation_time` datetime NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `status` enum('active','deleted','closed') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'active',
+  `status` enum('active','deleted','closed') COLLATE utf8mb4_general_ci DEFAULT 'active',
   `checked_in` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
@@ -285,8 +285,8 @@ DROP TABLE IF EXISTS `settings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `settings` (
-  `setting_key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `setting_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `setting_key` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `setting_value` text COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`setting_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -319,7 +319,7 @@ CREATE TABLE `slider_images` (
   `button_link` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '?page=menu',
   `is_button_visible` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -328,7 +328,7 @@ CREATE TABLE `slider_images` (
 
 LOCK TABLES `slider_images` WRITE;
 /*!40000 ALTER TABLE `slider_images` DISABLE KEYS */;
-INSERT INTO `slider_images` VALUES (1,'assets/img/slider_1.webp','Dimineți Perfecte','Savurează un Cappuccino autentic',NULL,'2025-12-29 10:20:49','Vezi Meniul','?page=menu',1),(2,'assets/img/slider_2.webp','Gustări Proaspete','Croissant cu unt, scos din cuptor',NULL,'2025-12-29 10:20:49','Comandă Acum','?page=menu',1),(3,'assets/img/slider_3.webp','Aromă Intensă','Cele mai bune boabe de cafea',NULL,'2025-12-29 10:20:49','Rezervă Masă','?page=tables',1),(5,'assets/images/slider/slide_69821575bc989.jpg','Oferta Saptamanii','Bine ati venit',NULL,'2026-02-03 15:34:13','View Menu','?page=menu',1);
+INSERT INTO `slider_images` VALUES (1,'assets/img/slider_1.webp','Dimineți Perfecte','Savurează un Cappuccino autentic',NULL,'2025-12-29 10:20:49','Vezi Meniul','?page=menu',1),(2,'assets/img/slider_2.webp','Gustări Proaspete','Croissant cu unt, scos din cuptor',NULL,'2025-12-29 10:20:49','Comandă Acum','?page=menu',1),(3,'assets/img/slider_3.webp','Aromă Intensă','Cele mai bune boabe de cafea',NULL,'2025-12-29 10:20:49','Rezervă Masă','?page=tables',1),(4,'assets/img/Coffee_1.webp','Oferta Săptămânii','Bine ai venit!','Săptămâna asta te răsfățăm! La orice Caramel Macchiato cumpărat, primești încă unul din partea casei. Ofertă valabilă doar săptămâna aceasta – vino să te bucuri de gustul perfect al caramelului împreună cu un prieten!','2025-12-29 11:03:46','Vezi Meniul','?page=menu',1);
 /*!40000 ALTER TABLE `slider_images` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -401,7 +401,7 @@ CREATE TABLE `users` (
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `role` enum('user','admin','employer') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'user',
+  `role` enum('user','admin','employer') COLLATE utf8mb4_unicode_ci DEFAULT 'user',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `PuncteFidelitate` int DEFAULT NULL,
   `PPicture` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'assets/public/default.png',
@@ -433,4 +433,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-03 17:34:29
+-- Dump completed on 2026-02-03 17:09:21

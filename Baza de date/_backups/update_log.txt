@@ -882,3 +882,33 @@
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 17:32:59.53 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Tue 02/03/2026 17:33:02.32 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 17:34:26.86 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 02/03/2026 17:34:29.29 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
