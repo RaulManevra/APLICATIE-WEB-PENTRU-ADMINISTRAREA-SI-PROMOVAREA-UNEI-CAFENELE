@@ -188,9 +188,16 @@ body {
     background-size: 200% 100%;
     background-position: right;
     transition: background-position 1s ease;
+    width:auto;
+    height:auto; 
+    display:flex; 
+    flex-direction:column; 
+    justify-content:center; 
+    align-items:center;
 }
 
 .btn-secondary:hover {
+    background-position: 0% 0;
     box-shadow: 0 6px 12px rgba(111, 78, 55, 0.3);
     color: white;
     background-position: left;
@@ -797,6 +804,7 @@ body {
     padding: 8px 15px;
     border-radius: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border:1px solid #dddddd46;
 }
 
 /* Toast Notification */
@@ -835,8 +843,8 @@ body {
 
 .cafe-status-toggle select {
     padding: 5px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
+    border-radius: 20px;
+    border: 2px solid #ddd;
 }
 
 .stats-grid {
@@ -956,4 +964,23 @@ body {
     background-color: #fff;
     border-color: #2e7d32;
     box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+.form-control{
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    padding: 10px 14px;
+    font-size: 1rem;
+    background-color: #f9fafb;
+    transition: all 0.2s ease;
+    width:250px;
+}
+.status {
+    font-weight: 500;
+    font-size: 1rem;
+    color: #34495e;
+}
+.export {
+    display: flex;
+    gap: 10px;
+    flex-direction:row;
 }

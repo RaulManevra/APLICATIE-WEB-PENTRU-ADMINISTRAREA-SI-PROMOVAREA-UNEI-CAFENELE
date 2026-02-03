@@ -15,20 +15,31 @@ export function closeProfilePopup() {
     const backdrop = document.getElementById('profile-backdrop');
     const btn = document.getElementById('profile-btn');
 
-    if (popup && !popup.hasAttribute('hidden')) {
-        popup.setAttribute('hidden', '');
-        if (backdrop) backdrop.classList.remove('active');
-        if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (!popup || popup.hasAttribute('hidden') || popup.classList.contains('closing')) return;
 
-        // Remove scroll compensation
-        if (scrollCompApplied) {
-            document.body.style.paddingRight = previousBodyPaddingRight;
-            scrollCompApplied = false;
-            previousBodyPaddingRight = '';
-        }
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-    }
+    popup.classList.add('closing');
+
+    if (backdrop) backdrop.classList.remove('active');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+
+    popup.addEventListener(
+        'animationend',
+        () => {
+            popup.classList.remove('closing');
+            popup.setAttribute('hidden', '');
+
+            // Restore scroll compensation
+            if (scrollCompApplied) {
+                document.body.style.paddingRight = previousBodyPaddingRight;
+                scrollCompApplied = false;
+                previousBodyPaddingRight = '';
+            }
+
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+        },
+        { once: true }
+    );
 }
 
 /**
@@ -102,12 +113,13 @@ export function initProfilePopup() {
     }
 
     function openPopup() {
-        popup.removeAttribute('hidden');
-        backdrop.classList.add('active');
-        btn.setAttribute('aria-expanded', 'true');
-        applyScrollComp();
-        updateReservationDisplay();
-    }
+    popup.classList.remove('closing');
+    popup.removeAttribute('hidden');
+    backdrop.classList.add('active');
+    btn.setAttribute('aria-expanded', 'true');
+    applyScrollComp();
+    updateReservationDisplay();
+}
 
     // Toggle wrapper
     function togglePopup(e) {

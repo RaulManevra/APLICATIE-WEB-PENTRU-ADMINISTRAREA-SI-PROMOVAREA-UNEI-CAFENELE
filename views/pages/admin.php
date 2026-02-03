@@ -124,9 +124,9 @@ require_admin();
 
             <!-- Recent Activity & Quick Tools -->
             <div class="recent-section" style="margin-top: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items:center; margin-bottom: 15px;flex-direction:row;">
                     <h3>Recent Reservations</h3>
-                    <div>
+                    <div class="export">
                         <button class="btn btn-sm btn-secondary" onclick="exportData('reservations')"><i class="fas fa-file-csv"></i> Export Reservations</button>
                         <button class="btn btn-sm btn-secondary" onclick="exportData('users')"><i class="fas fa-file-csv"></i> Export Users</button>
                     </div>

@@ -90,6 +90,20 @@ span.psw {
     z-index: 99999;
     animation: slideInFromRight 1s ease-out forwards;
 }
+.profile-popup.closing {
+    animation: slideOutToRight 1s ease-in forwards;
+}
+@keyframes slideOutToRight {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(120px);
+    }
+}
 
 .profile-popup[hidden] {
     display: none;

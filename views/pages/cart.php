@@ -68,7 +68,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                     <div class="empty-cart">
                         <i class="fa-solid fa-cart-arrow-down"></i>
                         <p class="empty">Your cart is empty.</p>
-                        <a href="?page=menu" class="nav-link btn-secondary" data-page="menu">Browse Menu</a>
+                        <a href="?page=menu" class="nav-link btn-third" data-page="menu">Browse Menu</a>
                     </div>
                 `;
                 return;
@@ -122,7 +122,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                         <span class="total-price">${parseFloat(total).toFixed(2)} RON</span>
                     </div>
                     <div class="cart-actions">
-                        <a href="?page=menu" class="nav-link btn-secondary" data-page="menu">Continue Shopping</a>
+                        <a href="?page=menu" class="nav-link btn-third" data-page="menu">Continue Shopping</a>
                         <button class="btn-primary checkout-btn">Checkout</button>
                     </div>
                 </div>
@@ -406,7 +406,7 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
         <h2 style="color: #2a0e02;">Payment Method</h2>
         <p style="margin-bottom: 20px;">How would you like to pay?</p>
         <div class="payment-options" style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
-             <button id="pay-cash-btn" class="btn-secondary" style="padding: 20px; flex: 1; min-width: 140px; border-radius: 12px; transition: transform 0.2s; background-color: #2a0e02; color: #ffffff; border: 2px solid #2a0e02;">
+             <button id="pay-cash-btn" class="btn-third" style="padding: 20px; flex: 1; min-width: 140px; border-radius: 12px; transition: transform 0.2s; background-color: #2a0e02; color: #ffffff; border: 2px solid #2a0e02;">
                 <i class="fas fa-money-bill-wave" style="font-size: 2.5rem; display: block; margin-bottom: 10px; color: #4CAF50;"></i>
                 <span style="font-weight: bold; font-size: 1.1rem;">Cash</span>
              </button>
