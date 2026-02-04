@@ -29,6 +29,7 @@ require_role(['admin', 'employer']);
             </a>
             <a href="#" class="nav-link" data-section="orders">
                 <i class="fas fa-receipt"></i> Running Orders
+                <span id="sidebar-orders-count" class="badge" style="display:none; margin-left: auto; background: #ff4757; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem;">0</span>
             </a>
             <a href="#" class="nav-link" data-section="reservations">
                 <i class="fas fa-calendar-alt"></i> Reservations
@@ -166,7 +167,7 @@ require_role(['admin', 'employer']);
         <!-- Running Orders Section -->
         <section id="section-orders" class="admin-section" style="display: none;">
             <div class="header-actions">
-                <h2>Running Orders</h2>
+                <h2>Running Orders <span id="header-orders-count" style="font-size: 0.8em; color: #666; display:none;">(0)</span></h2>
                 <button class="btn btn-sm btn-secondary" onclick="loadRunningOrders()"><i class="fas fa-sync"></i> Refresh</button>
             </div>
             <div id="running-orders-container" style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">

@@ -317,6 +317,14 @@ function renderDashboard(data) {
     "stat-menu-items": data.stats.products_total,
     "admin-notes": data.notes,
   };
+
+  // Update Sidebar Badge
+  const badge = document.getElementById("sidebar-orders-count");
+  if (badge) {
+    const ao = data.stats.active_orders || 0;
+    badge.innerText = ao;
+    badge.style.display = ao > 0 ? "inline-block" : "none";
+  }
   for (let id in ids) {
     const el = document.getElementById(id);
     if (el) {
@@ -1610,6 +1618,18 @@ async function loadRunningOrders() {
       return;
     }
 
+    const c = document.getElementById("header-orders-count");
+    if (c) {
+      c.innerText = `(${orders.length})`;
+      c.style.display = "inline";
+    }
+
+    // Sync Sidebar Badge
+    const sb = document.getElementById("sidebar-orders-count");
+    if (sb) {
+      sb.innerText = orders.length;
+      sb.style.display = orders.length > 0 ? "inline-block" : "none";
+    }
     container.innerHTML = orders.map((o) => renderOrderCard(o)).join("");
   } else {
     container.innerHTML = `<p style="color:red">Error: ${res.error}</p>`;

@@ -116,6 +116,10 @@ class DashboardController {
         $res = $this->conn->query("SELECT COUNT(*) as c FROM tables WHERE Status = 'Ocupata' AND Status != 'Inactiva'");
         if ($row = $res->fetch_assoc()) $stats['active_tables'] = $row['c'];
 
+        // Active Orders (Running)
+        $res = $this->conn->query("SELECT COUNT(*) as c FROM orders WHERE status NOT IN ('completed', 'cancelled')");
+        if ($row = $res->fetch_assoc()) $stats['active_orders'] = $row['c'];
+
         // Chart Data: Top 5 Selling Products (Last 7 Days)
         $sevenDaysAgo = date('Y-m-d H:i:s', strtotime('-7 days'));
         $chartSql = "
