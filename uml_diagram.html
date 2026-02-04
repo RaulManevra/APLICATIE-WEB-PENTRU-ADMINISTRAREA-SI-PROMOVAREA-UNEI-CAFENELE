@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mazi Coffee - UML Class Diagram</title>
+    <!-- SVG Pan Zoom Library -->
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #fdfbf7;
+            color: #2c1810;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0 0 20px 0;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        button {
+            background: #2c1810;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #4e342e;
+        }
+
+        button.btn-success {
+            background: #2e7d32;
+        }
+
+        button.btn-success:hover {
+            background: #1b5e20;
+        }
+
+        button.btn-blue {
+            background: #1565c0;
+        }
+
+        button.btn-blue:hover {
+            background: #0d47a1;
+        }
+
+        .diagram-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(44, 24, 16, 0.1);
+            flex-grow: 1;
+            overflow: hidden;
+            /* Important for pan-zoom */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border: 1px solid #eee;
+        }
+
+        /* Ensure SVG takes full space */
+        .diagram-wrapper svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: #8d6e63;
+            flex-shrink: 0;
+        }
+
+        .alert-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>System Architecture (UML)</h1>
+
+    <div class="controls">
+        <button id="zoom-in">Zoom In (+)</button>
+        <button id="zoom-out">Zoom Out (-)</button>
+        <button id="reset">Reset</button>
+        <span style="border-right: 1px solid #ccc; margin: 0 10px;"></span>
+        <button id="export-png" class="btn-success">🖼️ Export PNG</button>
+        <button id="export-svg" class="btn-blue">📄 Download SVG</button>
+    </div>
+
+    <div class="diagram-wrapper" id="diagram-container">
+        <pre class="mermaid">
+classDiagram
+    %% Core Classes
+    class SessionManager {
+        +start()
+        +login(user)
+        +logout()
+        +isLoggedIn() bool
+        +getCurrentUserData() array
+    }
+
+    class Database {
+        +mysqli connection
+        +connect()
+    }
+
+    %% Controllers
+    class CartController {
+        -conn : mysqli
+        +handleRequest()
+        -addToCart()
+        -removeFromCart()
+        -updateQuantity()
+        -getCart()
+        -checkoutEncrypted()
+        -getPublicKey()
+    }
+
+    class OrderController {
+        -conn : mysqli
+        +handleRequest()
+        -getAllOrders()
+        -getRunningOrders()
+        -updateStatus()
+        -assignTable()
+    }
+
+    class ProductController {
+        -conn : mysqli
+        +handleRequest()
+        -getAll()
+        -add()
+        -update()
+        -delete()
+        -handleUpload() string
+    }
+
+    class ReservationController {
+        -conn : mysqli
+        +handleRequest()
+        -createReservation()
+        -getAllReservations()
+        -checkIn()
+        -toggleBlacklist()
+    }
+
+    class TableController {
+        -conn : mysqli
+        +handleRequest()
+        -getAll()
+        -updateCoordinates()
+        -updateStatus()
+        -uploadBackground()
+    }
+
+    class UserController {
+        -conn : mysqli
+        +handleRequest()
+        -getAll()
+        -getOne()
+        -changeRole()
+    }
+
+    %% Relationships
+    Database *-- CartController : Association
+    Database *-- OrderController : Association
+    Database *-- ProductController : Association
+    Database *-- ReservationController : Association
+    Database *-- TableController : Association
+    Database *-- UserController : Association
+
+    %% Dependencies
+    CartController ..> SessionManager : Uses
+    ReservationController ..> SessionManager : Uses
+    OrderController ..> SessionManager : Uses
+    UserController ..> SessionManager : Uses
+    CartController ..> OrderController : Creates Order
+    
+    %% Implicit Data Models (mapped to DB Tables)
+    class User {
+        +int id
+        +string username
+        +string email
+        +string role
+        +string password
+    }
+
+    class Product {
+        +int id
+        +string name
+        +float price
+        +int discount
+        +string category
+    }
+
+    class Order {
+        +int id
+        +int user_id
+        +int table_id
+        +datetime pickup_time
+        +string status
+    }
+
+    class Reservation {
+        +int id
+        +int user_id
+        +int table_id
+        +datetime reservation_time
+    }
+
+    %% Model Relationships
+    User "1" -- "many" Order : Places
+    User "1" -- "many" Reservation : Books
+    Order "1" -- "many" Product : Contains (OrderItems)
+        </pre>
+    </div>
+    <div class="footer">Generated by Mazi Coffee Agent</div>
+    <div id="alert-box" class="alert-box"></div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+        // CRITICAL: htmlLabels: false ensures texts are SVG types, compatible with Canvas export
+        mermaid.initialize({ startOnLoad: false, theme: 'neutral', htmlLabels: false });
+
+        let panZoomInstance;
+
+        function showAlert(msg) {
+            const box = document.getElementById('alert-box');
+            box.innerText = msg;
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 5000);
+        }
+
+        async function init() {
+            try {
+                await mermaid.run({
+                    querySelector: '.mermaid'
+                });
+
+                const svgElement = document.querySelector('.diagram-wrapper svg');
+                if (svgElement) {
+                    svgElement.style.maxWidth = 'none';
+                    svgElement.style.height = '100%';
+                    svgElement.style.width = '100%';
+
+                    panZoomInstance = svgPanZoom(svgElement, {
+                        zoomEnabled: true,
+                        controlIconsEnabled: false,
+                        fit: true,
+                        center: true,
+                        minZoom: 0.1,
+                        maxZoom: 10
+                    });
+
+                    document.getElementById('zoom-in').addEventListener('click', () => panZoomInstance.zoomIn());
+                    document.getElementById('zoom-out').addEventListener('click', () => panZoomInstance.zoomOut());
+                    document.getElementById('reset').addEventListener('click', () => panZoomInstance.reset());
+
+                    document.getElementById('export-png').addEventListener('click', exportPNG);
+                    document.getElementById('export-svg').addEventListener('click', downloadSVG);
+                }
+            } catch (e) {
+                console.error("Mermaid Init Failed", e);
+                showAlert("Init Failed: " + e.message);
+            }
+        }
+
+        function getCleanSVGBlob() {
+            const originalSvg = document.querySelector('.diagram-wrapper svg');
+            if (!originalSvg) throw new Error("SVG not found");
+
+            // 1. Get accurate Bounding Box from LIVE DOM
+            // The svg-pan-zoom viewport group usually contains the content
+            const viewportGroup = originalSvg.querySelector('.svg-pan-zoom_viewport');
+            let bbox;
+            if (viewportGroup) {
+                try {
+                    bbox = viewportGroup.getBBox();
+                } catch (e) {
+                    console.warn("Could not get BBox from viewport, falling back to SVG default", e);
+                }
+            }
+
+            // 2. Clone SVG
+            const clone = originalSvg.cloneNode(true);
+
+            // 3. Clean PanZoom garbage from Clone
+            const cloneViewport = clone.querySelector('.svg-pan-zoom_viewport');
+            if (cloneViewport) {
+                cloneViewport.setAttribute('transform', '');
+                cloneViewport.removeAttribute('style');
+                // Remove pan-zoom specific IDs if any to prevent conflicts? No need usually.
+            }
+
+            // 4. Inject styles explicitly - BUT FILTER out @import to reduce Taint risk
+            const style = document.createElement('style');
+            let cssText = '';
+            document.querySelectorAll('style').forEach(s => {
+                let txt = s.innerHTML;
+                txt = txt.replace(/@import\s+url\(.*?\);/g, '');
+                cssText += txt + '\n';
+            });
+            style.innerHTML = cssText;
+            clone.insertBefore(style, clone.firstChild);
+
+            // 5. Set ViewBox based on the Measured BBox (with padding)
+            let w, h;
+            if (bbox) {
+                const padding = 20;
+                const x = bbox.x - padding;
+                const y = bbox.y - padding;
+                w = bbox.width + (padding * 2);
+                h = bbox.height + (padding * 2);
+                clone.setAttribute('viewBox', `${x} ${y} ${w} ${h}`);
+            } else {
+                // Fallback to existing attributes if getBBox failed
+                let vb = originalSvg.getAttribute('viewBox');
+                if (vb) {
+                    const p = vb.split(' ').map(parseFloat);
+                    if (p.length === 4) { w = p[2]; h = p[3]; }
+                } else {
+                    w = 1920; h = 1080;
+                }
+            }
+
+            // Set dimensions
+            clone.setAttribute('width', w);
+            clone.setAttribute('height', h);
+            clone.setAttribute('xmlns', "http://www.w3.org/2000/svg");
+
+            const serializer = new XMLSerializer();
+            const svgData = serializer.serializeToString(clone);
+            return { blob: new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' }), width: w, height: h };
+        }
+
+        function downloadSVG() {
+            try {
+                const { blob } = getCleanSVGBlob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.download = 'mazi_coffee_uml.svg';
+                a.href = url;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                showAlert("SVG Download Failed: " + e.message);
+            }
+        }
+
+        function exportPNG() {
+            try {
+                const { blob, width: w, height: h } = getCleanSVGBlob();
+                const url = URL.createObjectURL(blob);
+                const scale = 2; // High Resolution
+
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w * scale;
+                    canvas.height = h * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    try {
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const pngUrl = canvas.toDataURL('image/png');
+
+                        const a = document.createElement('a');
+                        a.download = 'mazi_coffee_uml.png';
+                        a.href = pngUrl;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    } catch (e) {
+                        console.error("Canvas Taint Error:", e);
+                        if (confirm("PNG export blocked by browser. Download SVG instead?\n(Secure & High Quality)")) {
+                            downloadSVG();
+                        }
+                    }
+                    URL.revokeObjectURL(url);
+                };
+                img.onerror = function () {
+                    showAlert("Image Render Failed. Downloading SVG...");
+                    downloadSVG();
+                };
+                img.src = url;
+            } catch (e) {
+                showAlert("Export Init Failed: " + e.message);
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
