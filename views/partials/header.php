@@ -62,6 +62,9 @@
                                 </div>
                             </div>
                         </div>
+                        <a href="?page=order_history" class="popup-action" data-page="order_history" style="text-decoration:none; display:block; text-align:center; padding: 10px; border-bottom: 1px solid #eee;">
+                            <i class="fa-solid fa-list-check"></i> Order History
+                        </a>
                         <button id="popup-logout" class="popup-action" data-page="logout">Logout</button>
                     </div>
 
