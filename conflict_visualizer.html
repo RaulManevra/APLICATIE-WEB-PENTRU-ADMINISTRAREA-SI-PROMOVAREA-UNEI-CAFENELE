@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conflict Visualizer</title>
+    <style>
+        :root {
+            --scale: 3px;
+            /* 3px per minute */
+            --res-color: #3b82f6;
+            /* Blue */
+            --buffer-color: #f59e0b;
+            /* Orange */
+            --conflict-color: #ef4444;
+            /* Red */
+            --valid-color: #10b981;
+            /* Green */
+            --timeline-bg: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #fff;
+            color: #334155;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 40px;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+            background: #f1f5f9;
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .timeline-wrapper {
+            position: relative;
+            padding-top: 40px;
+            /* Space for markers */
+            overflow-x: auto;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .timeline-container {
+            position: relative;
+            width: 800px;
+            /* 10:40 to 14:40 approx */
+            border-left: 2px solid #cbd5e1;
+        }
+
+        .time-marker {
+            position: absolute;
+            top: -30px;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .time-marker::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            width: 1px;
+            height: 500px;
+            /* Extend down */
+            background: #e2e8f0;
+            z-index: -1;
+            border-left: 1px dashed #cbd5e1;
+        }
+
+        .track {
+            position: relative;
+            height: 70px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .track-label {
+            position: absolute;
+            left: -180px;
+            width: 160px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.2;
+        }
+
+        .track-sublabel {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: normal;
+        }
+
+        .interval {
+            position: absolute;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .interval:hover {
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        /* Styles */
+        .existing {
+            background: var(--res-color);
+            z-index: 2;
+        }
+
+        .buffer {
+            background: var(--buffer-color);
+            opacity: 0.8;
+            z-index: 1;
+            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+            background-size: 10px 10px;
+        }
+
+        .new-valid {
+            background: var(--valid-color);
+        }
+
+        .new-conflict {
+            background: var(--conflict-color);
+            border: 2px solid #b91c1c;
+        }
+
+        .new-conflict-buffer {
+            background: #f87171;
+            opacity: 0.7;
+            background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+            background-size: 10px 10px;
+        }
+
+        /* Logic Box */
+        .logic-card {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .logic-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+
+        .math {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--conflict-color);
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Conflict Visualizer</h1>
+    <p class="subtitle">Demonstrating Conflict Detection when a New Interval (B) approaches an Existing Interval (A).
+    </p>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="dot" style="background:var(--res-color)"></div> Existing (A)
+        </div>
+        <div class="legend-item">
+            <div class="dot" style="background:var(--buffer-color)"></div> Buffer
+        </div>
+        <div class="legend-item">
+            <div class="dot" style="background:var(--conflict-color)"></div> Conflict
+        </div>
+        <div class="legend-item">
+            <div class="dot" style="background:var(--valid-color)"></div> Valid
+        </div>
+    </div>
+
+    <!-- 
+        Timeline Scale: 3px per minute.
+        Start Time for View: 10:40 (0px).
+        
+        10:40 = 0px
+        11:00 = 60px
+        11:40 = 180px
+        12:00 = 240px  <-- A Starts
+        12:20 = 300px
+        12:40 = 360px
+        13:00 = 420px  <-- A Ends
+        13:20 = 480px  <-- A Buffer Ends
+        13:40 = 540px
+        14:00 = 600px
+    -->
+
+    <div class="timeline-wrapper">
+        <div class="timeline-container" style="height: 400px;">
+            <!-- Markers -->
+            <div class="time-marker" style="left: 0px">10:40</div>
+            <div class="time-marker" style="left: 60px">11:00</div>
+            <div class="time-marker" style="left: 120px">11:20</div>
+            <div class="time-marker" style="left: 180px">11:40</div>
+            <div class="time-marker" style="left: 240px; color:var(--res-color); font-weight:bold;">12:00</div>
+            <div class="time-marker" style="left: 300px">12:20</div>
+            <div class="time-marker" style="left: 360px">12:40</div>
+            <div class="time-marker" style="left: 420px">13:00</div>
+            <div class="time-marker" style="left: 480px">13:20</div>
+            <div class="time-marker" style="left: 540px">13:40</div>
+            <div class="time-marker" style="left: 600px">14:00</div>
+
+            <!-- Existing Reservation A -->
+            <div class="track" style="background:#f8fafc;">
+                <div class="track-label">
+                    Existing Reservation A
+                    <div class="track-sublabel">Start: 12:00 | End: 13:00</div>
+                </div>
+                <!-- A: 12:00 (240px) Width 180px (60m) -->
+                <div class="interval existing" style="left: 240px; width: 180px;">A: 12:00 - 13:00</div>
+                <!-- A Buffer: 13:00 (420px) Width 60px (20m) -->
+                <div class="interval buffer" style="left: 420px; width: 60px;" title="A's Clean-up Buffer">20m</div>
+            </div>
+
+            <!-- Scenario 1: New Reservation BEFORE (Conflict) -->
+            <div class="track">
+                <div class="track-label">
+                    Scenario 1: Pre-Conflict
+                    <div class="track-sublabel">New B: 11:00 - 12:00</div>
+                </div>
+                <!-- B Starts 11:00 (60px). Width 180px. Ends 12:00 (240px) -->
+                <div class="interval new-conflict" style="left: 60px; width: 180px;">B: 11:00 - 12:00</div>
+                <!-- B Buffer: 12:00 (240px). Width 60px (20m). -->
+                <div class="interval new-conflict-buffer" style="left: 240px; width: 60px;">Buf</div>
+
+                <!-- Error Annotiation -->
+                <div
+                    style="position:absolute; left: 240px; top: 50px; font-size: 0.7rem; color: #ef4444; font-weight:bold; width: 150px;">
+                    ❌ Buffer overlaps A
+                </div>
+            </div>
+
+            <!-- Scenario 2: New Reservation TOO CLOSE AFTER (Conflict) -->
+            <div class="track">
+                <div class="track-label">
+                    Scenario 2: Post-Conflict
+                    <div class="track-sublabel">New B: 13:10 - 14:10</div>
+                </div>
+                <!-- B Starts 13:10 (450px). -->
+                <div class="interval new-conflict" style="left: 450px; width: 180px;">B: 13:10 - 14:10</div>
+                <div
+                    style="position:absolute; left: 420px; top: 50px; font-size: 0.7rem; color: #ef4444; font-weight:bold; width: 150px;">
+                    ❌ Starts inside A's Buffer
+                </div>
+            </div>
+
+            <!-- Scenario 3: Valid PRE -->
+            <div class="track">
+                <div class="track-label">
+                    Scenario 3: Valid Before
+                    <div class="track-sublabel">New B: 10:40 - 11:40</div>
+                </div>
+                <!-- B Starts 10:40 (0px). Ends 11:40 (180px). Buffer until 12:00 (240px) -->
+                <div class="interval new-valid" style="left: 0px; width: 180px;">B: 10:40 - 11:40</div>
+                <div class="interval buffer" style="left: 180px; width: 60px;">Buf</div>
+
+                <div
+                    style="position:absolute; left: 200px; top: 50px; font-size: 0.7rem; color: #10b981; font-weight:bold;">
+                    ✅ Buffer ends at A's Start (12:00)
+                </div>
+            </div>
+
+            <!-- Scenario 4: Valid POST -->
+            <div class="track">
+                <div class="track-label">
+                    Scenario 4: Valid After
+                    <div class="track-sublabel">New B: 13:20 - 14:20</div>
+                </div>
+                <!-- B Starts 13:20 (480px). -->
+                <div class="interval new-valid" style="left: 480px; width: 180px;">B: 13:20 - 14:20</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="logic-card">
+        <div class="logic-title">Why Scenario 1 (11:00) is a Conflict</div>
+        <p style="margin-top:0; color:#555;">Even though the reservation B (11:00-12:00) ends exactly when A
+            (12:00-13:00) starts, <strong>there is no time to clean the table.</strong></p>
+        <div class="math">
+            Start_A = 12:00
+            End_B_Actual = 12:00
+            End_B_With_Buffer = 12:20
+
+            Check:
+            End_B_With_Buffer (12:20) > Start_A (12:00)
+            => TRUE => Conflict ❌
+        </div>
+    </div>
+
+</body>
+
+</html>

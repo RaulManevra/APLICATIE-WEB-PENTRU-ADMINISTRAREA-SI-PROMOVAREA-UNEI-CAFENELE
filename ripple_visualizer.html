@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ripple Effect Algorithm Visualizer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            max-width: 600px;
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .demo-area {
+            position: relative;
+            padding: 60px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            min-height: 400px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .ripple-btn {
+            position: relative;
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            overflow: hidden;
+            /* Critical for ripple */
+            font-family: inherit;
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .ripple-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* The Ripple Element */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple-anim 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-anim {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Visualization Overlays */
+        .marker {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .marker-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .marker-line {
+            position: absolute;
+            background: #cbd5e1;
+        }
+
+        .info-panel {
+            margin-top: 30px;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 800px;
+            font-family: 'Consolas', monospace;
+            display: none;
+            /* Hidden until click */
+        }
+
+        .info-row {
+            margin-bottom: 8px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 4px;
+        }
+
+        .info-row:last-child {
+            border: 0;
+        }
+
+        .highlight {
+            color: #818cf8;
+            font-weight: bold;
+        }
+
+        .var-name {
+            color: #f472b6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Ripple Effect Visualizer</h1>
+    <p class="description">
+        Click the button below to trigger the Ripple Effect.<br>
+        We will freeze the calculation to show you the exact math behind the wave.
+    </p>
+
+    <div class="demo-area" id="demoArena">
+        <button class="ripple-btn" id="demoBtn">Click Me for Ripple!</button>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <div class="info-row" style="color:#fbbf24; margin-bottom:15px; font-weight:bold;">1. Geometry Capture</div>
+        <div class="info-row">
+            Button Rect:
+            W=<span class="highlight" id="valW">0</span>,
+            H=<span class="highlight" id="valH">0</span> |
+            Left=<span class="highlight" id="valRectLeft">0</span>,
+            Top=<span class="highlight" id="valRectTop">0</span>
+        </div>
+        <div class="info-row">
+            Mouse (Global):
+            ClientX=<span class="highlight" id="valClientX">0</span>,
+            ClientY=<span class="highlight" id="valClientY">0</span>
+        </div>
+
+        <div class="info-row" style="color:#fbbf24; margin-top:15px; margin-bottom:15px; font-weight:bold;">2. Math
+            Logic</div>
+
+        <div class="info-row">
+            <span class="var-name">Diameter</span> = MAX(W, H) = <span class="highlight" id="valDia">0</span>px
+        </div>
+        <div class="info-row">
+            <span class="var-name">Radius</span> = Diameter / 2 = <span class="highlight" id="valRadius">0</span>px
+        </div>
+
+        <div class="info-row">
+            <span class="var-name">Relative X</span> = ClientX - RectBufferLeft =
+            <span id="calcX">0 - 0</span> = <span class="highlight" id="valRelX">0</span>px
+        </div>
+        <div class="info-row">
+            <span class="var-name">Relative Y</span> = ClientY - RectBufferTop =
+            <span id="calcY">0 - 0</span> = <span class="highlight" id="valRelY">0</span>px
+        </div>
+
+        <div class="info-row" style="color:#fbbf24; margin-top:15px; margin-bottom:15px; font-weight:bold;">3. Centering
+            the Circle</div>
+        <div class="info-row">
+            To center the circle at the click point, we shift it up/left by Radius:
+        </div>
+        <div class="info-row">
+            <span class="var-name">Circle.Left</span> = RelativeX - Radius = <span class="highlight"
+                id="valCircleLeft">0</span>px
+        </div>
+        <div class="info-row">
+            <span class="var-name">Circle.Top</span> = RelativeY - Radius = <span class="highlight"
+                id="valCircleTop">0</span>px
+        </div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('demoBtn');
+        const panel = document.getElementById('infoPanel');
+
+        btn.addEventListener('click', function (e) {
+            // 1. Get Geometry
+            const rect = btn.getBoundingClientRect();
+
+            // 2. Math
+            const width = rect.width;
+            const height = rect.height;
+            const diameter = Math.max(width, height);
+            const radius = diameter / 2;
+
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // 3. Create Ripple Element
+            const ripple = document.createElement('span');
+            ripple.style.width = ripple.style.height = \`\${diameter}px\`;
+            ripple.style.left = \`\${x - radius}px\`; // The visual centering logic
+            ripple.style.top = \`\${y - radius}px\`;
+            ripple.classList.add('ripple');
+
+            // Remove existing ripples
+            const existing = btn.getElementsByClassName('ripple')[0];
+            if (existing) existing.remove();
+
+            btn.appendChild(ripple);
+
+            // 4. Update UI Panel
+            panel.style.display = 'block';
+
+            // DOM Update Helper
+            const set = (id, val) => document.getElementById(id).innerText = typeof val === 'number' ? Math.round(val) : val;
+
+            set('valW', width);
+            set('valH', height);
+            set('valRectLeft', rect.left);
+            set('valRectTop', rect.top);
+            
+            set('valClientX', e.clientX);
+            set('valClientY', e.clientY);
+
+            set('valDia', diameter);
+            set('valRadius', radius);
+
+            set('valRelX', x);
+            set('calcX', \`\${Math.round(e.clientX)} - \${Math.round(rect.left)}\`);
+            
+            set('valRelY', y);
+            set('calcY', \`\${Math.round(e.clientY)} - \${Math.round(rect.top)}\`);
+
+            set('valCircleLeft', x - radius);
+            set('valCircleTop', y - radius);
+
+            // Optional: Draw visualization lines on screen? 
+            // Might be messy, the text panel is cleaner.
+        });
+    </script>
+</body>
+
+</html>

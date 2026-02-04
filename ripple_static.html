@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ripple Effect Geometry</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            background: white;
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .diagram {
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #444;
+        }
+
+        .legend {
+            margin-top: 20px;
+            font-size: 0.9em;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        code {
+            background: #eee;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 1.1em;
+            color: #d63384;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Ripple Effect Logic</h1>
+    <p>Visualizing the coordinate transformation and centering logic.</p>
+
+    <div class="container">
+
+        <!-- DIAGRAM 1: Global vs Relative -->
+        <div class="diagram" style="padding: 20px;">
+            <h3>1. Coordinate Transformation</h3>
+            <svg width="500" height="350" viewBox="0 0 500 350">
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"
+                        markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#666" />
+                    </marker>
+                </defs>
+
+                <!-- Screen Origin -->
+                <circle cx="20" cy="20" r="4" fill="black" />
+                <text x="25" y="35" font-size="12" fill="black">Screen (0,0)</text>
+
+                <!-- Button Object -->
+                <rect x="150" y="100" width="200" height="120" rx="10" fill="#e0e7ff" stroke="#4f46e5"
+                    stroke-width="2" />
+                <text x="160" y="120" font-size="12" fill="#4f46e5" font-weight="bold">Button (Rect)</text>
+
+                <!-- Click Point -->
+                <circle cx="280" cy="160" r="5" fill="#facc15" stroke="black" />
+                <text x="290" y="155" font-size="12" font-weight="bold">Click</text>
+
+                <!-- DIMENSIONS -->
+
+                <!-- Rect.left -->
+                <line x1="20" y1="100" x2="150" y2="100" stroke="#ef4444" stroke-width="1" stroke-dasharray="4" />
+                <text x="50" y="95" font-size="11" fill="#ef4444">Rect.Left</text>
+
+                <!-- Rect.top -->
+                <line x1="150" y1="20" x2="150" y2="100" stroke="#ef4444" stroke-width="1" stroke-dasharray="4" />
+                <text x="155" y="60" font-size="11" fill="#ef4444">Rect.Top</text>
+
+                <!-- Client X -->
+                <line x1="20" y1="160" x2="280" y2="160" stroke="#666" stroke-width="1" marker-end="url(#arrow)" />
+                <text x="100" y="175" font-size="11" fill="#666" font-weight="bold">Client X (Global)</text>
+
+                <!-- Calculated Relative X -->
+                <line x1="150" y1="190" x2="280" y2="190" stroke="#10b981" stroke-width="2" marker-end="url(#arrow)" />
+                <text x="180" y="210" font-size="12" fill="#10b981" font-weight="bold">Relative X</text>
+                <text x="160" y="225" font-size="10" fill="#10b981">(ClientX - Rect.Left)</text>
+
+            </svg>
+        </div>
+
+        <!-- DIAGRAM 2: Centering The Circle -->
+        <div class="diagram" style="padding: 20px;">
+            <h3>2. Centering the Ripple</h3>
+            <svg width="400" height="350" viewBox="0 0 400 350">
+                <!-- Button -->
+                <rect x="50" y="50" width="300" height="300" fill="none" stroke="#ddd" stroke-dasharray="4" />
+                <text x="60" y="70" font-size="12" fill="#999">Zoomed In View (Button)</text>
+
+                <!-- Click Point (Center of Circle) -->
+                <circle cx="200" cy="180" r="4" fill="#facc15" stroke="black" />
+                <text x="210" y="180" font-size="12" font-weight="bold">Click Point</text>
+
+                <!-- The Ripple Circle -->
+                <circle cx="200" cy="180" r="100" fill="rgba(99, 102, 241, 0.2)" stroke="#6366f1" stroke-width="2" />
+                <text x="220" y="250" font-size="12" fill="#6366f1" font-weight="bold">Ripple</text>
+
+                <!-- Top Left Calculation -->
+                <!-- Ideally HTML elements are positioned by Top-Left corner. -->
+                <!-- The Top-Left of the circle is (cx-r, cy-r) = (100, 80) -->
+                <circle cx="100" cy="80" r="4" fill="#ef4444" />
+                <text x="40" y="70" font-size="12" fill="#ef4444" font-weight="bold">HTML CSS Position</text>
+                <text x="40" y="95" font-size="10" fill="#ef4444">(Top, Left)</text>
+
+                <!-- Radius Vector -->
+                <line x1="200" y1="180" x2="100" y2="180" stroke="#666" stroke-width="1" marker-end="url(#arrow)" />
+                <text x="130" y="175" font-size="11" fill="#666">Radius</text>
+
+                <line x1="200" y1="180" x2="200" y2="80" stroke="#666" stroke-width="1" marker-end="url(#arrow)" />
+                <text x="205" y="130" font-size="11" fill="#666">Radius</text>
+
+                <!-- Connection -->
+                <path d="M 100 80 L 200 80 L 200 180" fill="none" stroke="#ef4444" stroke-width="1"
+                    stroke-dasharray="2" />
+            </svg>
+        </div>
+
+    </div>
+
+    <div class="legend">
+        <p>
+            <strong>Diagrama 1 (Stânga):</strong> Arată matematic cum transformăm coordonatele. Mouse-ul raportează
+            poziția față de Ecran (<code>ClientX</code>). Noi trebuie să găsim distanța față de marginea butonului
+            (<code>Rect.Left</code>).<br>
+            Formula: <code>RelativeX = ClientX - Rect.Left</code>
+        </p>
+        <p>
+            <strong>Diagrama 2 (Dreapta):</strong> Arată cum poziționăm cercul. În CSS, elementele se pun după colțul
+            Stânga-Sus (punctul roșu).<br>
+            Dacă am pune cercul la coordonatele Click-ului, colțul ar fi acolo, iar cercul ar fi deplasat în
+            dreapta-jos.
+            Pentru a <strong>centra</strong> cercul pe Click:
+        <ul>
+            <li>Scădem raza din poziția X: <code>Left = RelativeX - Radius</code></li>
+            <li>Scădem raza din poziția Y: <code>Top = RelativeY - Radius</code></li>
+        </ul>
+        </p>
+    </div>
+
+</body>
+
+</html>

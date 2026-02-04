@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ripple Logic Storyboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #ffffff;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+
+        h1 {
+            margin-bottom: 50px;
+        }
+
+        /* Layout */
+        .storyboard {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        h3 {
+            margin-top: 10px;
+            color: #1e40af;
+        }
+
+        p {
+            font-size: 0.95rem;
+            color: #64748b;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* Graphics */
+        .stage {
+            width: 250px;
+            height: 180px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            position: relative;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        /* Elements */
+        .screen-origin {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #333;
+        }
+
+        .screen-origin::before {
+            content: '•';
+            font-size: 1.5rem;
+            position: absolute;
+            top: -14px;
+            left: -4px;
+        }
+
+        .btn-rect {
+            position: absolute;
+            top: 60px;
+            left: 60px;
+            width: 140px;
+            height: 80px;
+            background: #e0e7ff;
+            border: 2px solid #4f46e5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4f46e5;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .cursor {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #facc15;
+            /* Yellow */
+            border: 2px solid #333;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .cursor::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: #333;
+            transform: rotate(-30deg);
+            transform-origin: top;
+        }
+
+        /* Step 1 Specifics */
+        .arrow-global {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            border-left: 2px dashed #9ca3af;
+            border-top: 2px dashed #9ca3af;
+            width: 100px;
+            height: 80px;
+            z-index: 0;
+        }
+
+        /* Step 2 Specifics */
+        .btn-origin {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            /* Red */
+            border-radius: 50%;
+        }
+
+        .arrow-local {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50px;
+            height: 35px;
+            border-left: 2px solid #ef4444;
+            border-top: 2px solid #ef4444;
+        }
+
+        /* Step 3 Specifics */
+        .ripple {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 140px;
+            height: 140px;
+            border: 2px dashed #6366f1;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .center-mark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .math-box {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #334155;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Ripple Algorithm: The "Sticker Analogy"</h1>
+
+    <div class="storyboard">
+
+        <!-- STEP 1 -->
+        <div class="card">
+            <div class="step-number">1</div>
+            <h3>The Global Setup</h3>
+            <div class="stage">
+                <div class="screen-origin">Wall Origin (0,0)</div>
+                <div class="arrow-global"></div>
+                <div class="btn-rect">
+                    Button
+                    <!-- Ghost cursor inside -->
+                    <div class="cursor" style="top: 30px; left: 50px;"></div>
+                </div>
+            </div>
+
+            <div class="math-box">
+                Pos = Global (ClientX, ClientY)
+            </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="card">
+            <div class="step-number">2</div>
+            <h3>Changing Origin</h3>
+            <div class="stage" style="display:flex; align-items:center; justify-content:center;">
+                <!-- Just the button focused -->
+                <div class="btn-rect" style="position:relative; top:0; left:0; transform:scale(1.2);">
+                    <div class="btn-origin"></div>
+                    <div class="arrow-local"></div>
+                    <div class="cursor" style="top: 35px; left: 50px;"></div>
+                    <span
+                        style="position: absolute; top: -20px; left: 0; color: #ef4444; font-size: 0.7rem; font-weight:bold;">New
+                        Origin (0,0)</span>
+                </div>
+            </div>
+
+            <div class="math-box">
+                Relative X = Global X - Button Left
+            </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="card">
+            <div class="step-number">3</div>
+            <h3>Centering the Impact</h3>
+            <div class="stage" style="display:flex; align-items:center; justify-content:center;">
+                <div class="btn-rect" style="position:relative; top:0; left:0; transform:scale(1.2);">
+                    <!-- The Click Point -->
+                    <div class="center-mark" style="top: 35px; left: 50px;"></div>
+
+                    <!-- The Ripple centered on it -->
+                    <div class="ripple" style="top: 35px; left: 50px;"></div>
+                </div>
+            </div>
+
+            <div class="math-box">
+                Circle Left = X - Radius<br>
+                Circle Top = Y - Radius
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

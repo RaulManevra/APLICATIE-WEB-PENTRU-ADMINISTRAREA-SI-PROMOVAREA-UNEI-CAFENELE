@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimization Impact Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #ffffff;
+            padding: 40px;
+            color: #1e293b;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 50px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            border-top: 5px solid #ccc;
+            position: relative;
+        }
+
+        .card.old {
+            border-color: #ef4444;
+        }
+
+        .card.new {
+            border-color: #10b981;
+        }
+
+        .card-header {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 15px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bg-old {
+            background: #ef4444;
+        }
+
+        .bg-new {
+            background: #10b981;
+        }
+
+        /* Scenario Tags */
+        .scenario-tag {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #334155;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Gauge */
+        .gauge-box {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .gauge-circle {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--c);
+            border: 10px solid #f1f5f9;
+            border-top-color: var(--c);
+            border-right-color: var(--c);
+            transform: rotate(-45deg);
+            position: relative;
+        }
+
+        .gauge-circle span {
+            transform: rotate(45deg);
+            line-height: 1;
+        }
+
+        .gauge-label {
+            transform: rotate(45deg);
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: normal;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* Key Metrics List */
+        .key-metrics {
+            margin-bottom: 25px;
+        }
+
+        .km-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 4px;
+        }
+
+        .km-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .km-val {
+            font-weight: bold;
+            color: #334155;
+        }
+
+        .km-val.bad {
+            color: #ef4444;
+        }
+
+        .km-val.good {
+            color: #10b981;
+        }
+
+        /* Slow 4G Highlight */
+        .network-stat {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .ns-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .ns-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .ns-item {
+            text-align: center;
+        }
+
+        .ns-val {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .ns-page {
+            display: block;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        /* Waterfall Bar */
+        .wf-container {
+            margin-top: 25px;
+            margin-bottom: 20px;
+        }
+
+        .wf-bar-bg {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .wf-seg {
+            height: 100%;
+        }
+
+        .wf-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        /* Detailed Lists */
+        .details-box {
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .details-box.bad {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .details-box.good {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .db-title {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.7rem;
+        }
+
+        .details-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .details-list li {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Performance Evolution</h1>
+    <p class="subtitle">
+        Impactul optimizării resurselor asupra timpilor de încărcare.<br>
+        <strong style="color:#ef4444">Problema Majoră:</strong> Background Pattern Image (24MB).<br>
+        <strong style="color:#10b981">Rezultat:</strong> Reducere totală dimensiune cu ~60%.
+    </p>
+
+    <div class="comparison-grid">
+
+        <!-- BEFORE -->
+        <div class="card old">
+            <span class="scenario-tag">Slow 4G Network</span>
+            <div class="card-header">
+                Stare Inițială
+                <span class="badge bg-old">Heavy Load</span>
+            </div>
+
+            <div class="gauge-box">
+                <!-- Low Score -->
+                <div class="gauge-circle"
+                    style="--c: #ef4444; border-right-color: #f1f5f9; border-bottom-color: #f1f5f9;">
+                    <span>12</span>
+                    <span class="gauge-label">Performance</span>
+                </div>
+            </div>
+
+            <div class="key-metrics">
+                <div class="km-row">
+                    <span class="km-label">Total Page Size</span>
+                    <span class="km-val bad">~28.5 MB</span>
+                </div>
+                <div class="km-row">
+                    <span class="km-label">Background Image</span>
+                    <span class="km-val bad">24.0 MB</span>
+                </div>
+            </div>
+
+            <div class="network-stat">
+                <span class="ns-title">⏳ Timp Încărcare (Slow 4G)</span>
+                <div class="ns-grid">
+                    <div class="ns-item">
+                        <span class="ns-val" style="color:#b91c1c">2 min</span>
+                        <span class="ns-page">Page: Menu</span>
+                    </div>
+                    <div class="ns-item">
+                        <span class="ns-val" style="color:#b91c1c">30 sec</span>
+                        <span class="ns-page">Page: Home</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wf-container">
+                <div class="ns-title">Resource Distribution</div>
+                <div class="wf-bar-bg">
+                    <div class="wf-seg" style="width: 85%; background: #f87171;" title="Images (85%)"></div>
+                    <div class="wf-seg" style="width: 15%; background: #94a3b8;" title="Code (15%)"></div>
+                </div>
+                <div class="wf-labels">
+                    <span>Images (Huge Bottleneck)</span>
+                    <span>Code</span>
+                </div>
+            </div>
+
+            <div class="details-box bad">
+                <span class="db-title">⚠️ Deficiențe Identificate:</span>
+                <ul class="details-list">
+                    <li><strong>Imagine Fundal (24MB):</strong> Încărcată complet la rezoluție brută, necomprimată.</li>
+                    <li><strong>Format Ineficient:</strong> Utilizare PNG/JPG în loc de formate next-gen.</li>
+                    <li><strong>Încărcare Sincronă:</strong> Blochează randarea paginii până la descărcare.</li>
+                    <li><strong>Lipsă Lazy Loading:</strong> Toate resursele cerute simultan la inițializare.</li>
+                    <li><strong>Saturare Bandă:</strong> Blocaj complet pe conexiuni lente (mobil).</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- AFTER -->
+        <div class="card new">
+            <span class="scenario-tag">Slow 4G Network</span>
+            <div class="card-header">
+                Stare Optimizată
+                <span class="badge bg-new">Streamlined</span>
+            </div>
+
+            <div class="gauge-box">
+                <!-- Improved Score -->
+                <div class="gauge-circle" style="--c: #10b981; border-color: #10b981; border-bottom-color: #f1f5f9;">
+                    <span>88</span>
+                    <span class="gauge-label">Performance</span>
+                </div>
+            </div>
+
+            <div class="key-metrics">
+                <div class="km-row">
+                    <span class="km-label">Total Page Size</span>
+                    <span class="km-val good">~11.2 MB</span>
+                    <span style="font-size:0.7em; color:#10b981; margin-left:5px;">(-60%)</span>
+                </div>
+                <div class="km-row">
+                    <span class="km-label">Background Image</span>
+                    <span class="km-val good">450 KB</span>
+                </div>
+            </div>
+
+            <div class="network-stat">
+                <span class="ns-title">⚡ Timp Încărcare (Slow 4G)</span>
+                <div class="ns-grid">
+                    <div class="ns-item">
+                        <span class="ns-val" style="color:#15803d">5 sec</span>
+                        <span class="ns-page">Page: Menu</span>
+                    </div>
+                    <div class="ns-item">
+                        <span class="ns-val" style="color:#15803d">&lt; 10 sec</span>
+                        <span class="ns-page">Page: Home</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wf-container">
+                <div class="ns-title">Resource Distribution</div>
+                <div class="wf-bar-bg">
+                    <div class="wf-seg" style="width: 40%; background: #4ade80;" title="Images"></div>
+                    <div class="wf-seg" style="width: 60%; background: #cbd5e1;" title="Code"></div>
+                </div>
+                <div class="wf-labels">
+                    <span>Optimized Images</span>
+                    <span>Code</span>
+                </div>
+            </div>
+
+            <div class="details-box good">
+                <span class="db-title">✅ Optimizări Aplicate:</span>
+                <ul class="details-list">
+                    <li><strong>Compresie WebP:</strong> Reducere dimensiune cu păstrarea calității vizuale.</li>
+                    <li><strong>Resize Inteligent:</strong> Livrare imagini la dimensiunea exactă necesară.</li>
+                    <li><strong>Lazy Loading:</strong> Încărcare resurse doar la scroll (economie bandă).</li>
+                    <li><strong>Cache Policy:</strong> Stocare locală pentru vizite repetate.</li>
+                    <li><strong>Minificare:</strong> Reducere cod HTML/CSS/JS pentru parsing rapid.</li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
