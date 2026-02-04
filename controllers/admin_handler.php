@@ -91,6 +91,9 @@ if ($entity === 'slider') {
 } elseif ($entity === 'order') {
     require_once __DIR__ . '/OrderController.php';
     $controller = new OrderController($conn);
+} elseif ($entity === 'ingredient') {
+    require_once __DIR__ . '/IngredientController.php';
+    $controller = new IngredientController($conn);
 } else {
     $controller = new ProductController($conn);
 }

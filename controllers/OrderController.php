@@ -228,20 +228,57 @@ class OrderController {
 
         if ($stmt->execute()) {
              // Logic: If Completed, check if table should be freed
-             if ($status === 'completed' && $tableId) {
-                 // Check if any other ACTIVE orders exist for this table
-                 $chk = $this->conn->prepare("SELECT COUNT(*) as cnt FROM orders WHERE table_id = ? AND status NOT IN ('completed', 'cancelled') AND id != ?");
-                 $chk->bind_param("ii", $tableId, $id);
-                 $chk->execute();
-                 $chkRes = $chk->get_result()->fetch_assoc();
-                 
-                 if ($chkRes['cnt'] == 0) {
-                     // Auto-free table (unless reserved? User said 'set to libera')
-                     // Let's check current status to be safe? User rule: "set table as libera exept... another order".
-                     // So we just set it to Libera.
-                     $updTable = $this->conn->prepare("UPDATE tables SET Status='Libera' WHERE ID=?");
-                     $updTable->bind_param("i", $tableId);
-                     $updTable->execute();
+             if ($status === 'completed') {
+                 // 1. FREE TABLE LOGIC
+                 if ($tableId) {
+                     $chk = $this->conn->prepare("SELECT COUNT(*) as cnt FROM orders WHERE table_id = ? AND status NOT IN ('completed', 'cancelled') AND id != ?");
+                     $chk->bind_param("ii", $tableId, $id);
+                     $chk->execute();
+                     $chkRes = $chk->get_result()->fetch_assoc();
+                     
+                     if ($chkRes['cnt'] == 0) {
+                         $updTable = $this->conn->prepare("UPDATE tables SET Status='Libera' WHERE ID=?");
+                         $updTable->bind_param("i", $tableId);
+                         $updTable->execute();
+                     }
+                 }
+
+                 // 2. STOCK DECREMENT LOGIC
+                 try {
+                     $itemsQ = $this->conn->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+                     $itemsQ->bind_param("i", $id);
+                     $itemsQ->execute();
+                     $itemsRes = $itemsQ->get_result();
+                     
+                     if ($itemsRes) {
+                         // Prepare update statement for ingredients
+                         // Since we normalized to base units in ProductController, we can subtract directly.
+                         $updStock = $this->conn->prepare("UPDATE ingredients SET stock_amount = stock_amount - ? WHERE id = ?");
+                         
+                         // Prepare link fetcher
+                         $linkQ = $this->conn->prepare("SELECT ingredient_id, quantity FROM product_ingredients WHERE product_id = ?");
+                         
+                         while ($item = $itemsRes->fetch_assoc()) {
+                             $pid = $item['product_id'];
+                             $orderQty = floatval($item['quantity']);
+                             
+                             $linkQ->bind_param("i", $pid);
+                             $linkQ->execute();
+                             $links = $linkQ->get_result();
+                             
+                             while ($link = $links->fetch_assoc()) {
+                                 $ingId = $link['ingredient_id'];
+                                 $requiredPerUnit = floatval($link['quantity']);
+                                 $totalDeduct = $orderQty * $requiredPerUnit;
+                                 
+                                 $updStock->bind_param("di", $totalDeduct, $ingId);
+                                 $updStock->execute();
+                             }
+                         }
+                     }
+                 } catch (Exception $e) {
+                     // Log error but don't fail the request?
+                     error_log("Stock Update Error: " . $e->getMessage());
                  }
              }
 

@@ -37,6 +37,9 @@ require_role(['admin', 'employer']);
             <a href="#" class="nav-link" data-section="menu">
                 <i class="fas fa-coffee"></i> Menu Management
             </a>
+            <a href="#" class="nav-link" data-section="stock">
+                <i class="fas fa-boxes"></i> Stock
+            </a>
             <a href="#" class="nav-link" data-section="tables">
                 <i class="fas fa-chair"></i> Floor Plan
             </a>
@@ -193,6 +196,33 @@ require_role(['admin', 'employer']);
                             <th>Category</th>
                             <th>Price (RON)</th>
                             <th>Discount (%)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Stock Management Section (NEW) -->
+        <section id="section-stock" class="admin-section" style="display: none;">
+            <div class="header-actions">
+                <h2>Stock / Ingredients</h2>
+                <button id="add-ingredient-btn" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i> Add Ingredient
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="stock-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Stock Level</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -531,76 +561,140 @@ require_role(['admin', 'employer']);
             <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
             <input type="hidden" name="action" id="form-action" value="add">
             
-            <div class="form-group">
-                <label for="prod-name">Name</label>
-                <input type="text" id="prod-name" name="name" required>
+            <div class="form-row" style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:2;">
+                    <label for="prod-name">Name</label>
+                    <input type="text" id="prod-name" name="name" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-category">Category</label>
+                    <select id="prod-category" name="category" class="form-control">
+                        <option value="coffee">Coffee</option>
+                        <option value="tea">Tea</option>
+                        <option value="chocolate">Chocolate</option>
+                        <option value="refreshment">Refreshment</option>
+                        <option value="signature">Signature</option>
+                        <option value="addon">Add-on</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="prod-price">Price (RON)</label>
-                <input type="number" id="prod-price" name="price" step="0.01" min="0" required>
+            <div class="form-row" style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-price">Price (RON)</label>
+                    <input type="number" id="prod-price" name="price" step="0.01" min="0" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-discount">Discount (%)</label>
+                    <input type="number" id="prod-discount" name="discount" step="1" min="0" max="100" value="0">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-tva-code">TVA Code</label>
+                    <select id="prod-tva-code" name="tva_code" class="form-control">
+                         <option value="A">A (Standard)</option>
+                         <option value="B">B (Reduced)</option>
+                         <option value="C">C (Super Reduced)</option>
+                         <option value="D">D (Zero/Exempt)</option>
+                    </select>
+                </div>
             </div>
 
-                <div class="form-row" style="display:flex; gap:10px;">
-                    <div class="form-group" style="flex:1;">
-                        <label for="prod-discount">Discount (%)</label>
-                        <input type="number" id="prod-discount" name="discount" step="1" min="0" max="100" value="0">
-                    </div>
-                    <div class="form-group" style="flex:1;">
-                        <label for="prod-tva-code">TVA Code</label>
-                        <select id="prod-tva-code" name="tva_code" class="form-control">
-                            <option value="A">A (Standard)</option>
-                            <option value="B">B (Reduced)</option>
-                            <option value="C">C (Super Reduced)</option>
-                            <option value="D">D (Zero/Exempt)</option>
-                        </select>
-                    </div>
+            <div class="form-row" style="display:flex; gap:10px;">
+                 <div class="form-group" style="flex:1;">
+                    <label for="prod-quantity">Quantity</label>
+                    <input type="text" id="prod-quantity" name="quantity" placeholder="e.g. 200ml">
+                </div>
+                 <div class="form-group" style="flex:1;">
+                    <label for="prod-tags">Tags</label>
+                    <input type="text" id="prod-tags" name="tags" placeholder="e.g. ice, chocolate">
+                </div>
+            </div>
+
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-desc">Description</label>
+                    <textarea id="prod-desc" name="description" rows="2" style="height:60px;"></textarea>
                 </div>
 
+
+            <div class="form-group" style="padding:10px; border:1px solid #eee; border-radius:6px; background:#fbfbfb; margin-bottom:10px;">
+                <label style="margin-bottom:5px; font-weight:600;">Linked Ingredients (Stock)</label>
+                <div style="display:flex; gap:5px; margin-bottom:5px; align-items:center;">
+                    <select id="prod-link-ing-select" class="form-control" style="flex:2; padding: 6px 12px; height: auto;">
+                        <option value="">Select Ingredient...</option>
+                    </select>
+                    <input type="number" id="prod-link-qty" placeholder="Qty" class="form-control" style="flex:1; min-width:60px; padding: 6px 12px; height: auto;" step="0.01">
+                    <span id="prod-link-unit" style="font-size:0.8rem; color:#666; width:30px; text-align:center;">-</span>
+                    <button type="button" id="btn-add-link-ing" class="btn btn-secondary" style="margin:0; width:40px; height:38px; padding:0; display:flex; align-items:center; justify-content:center;"><i class="fas fa-plus"></i></button>
+                </div>
+                <div id="product-linked-list" style="margin-top:5px; max-height:100px; overflow-y:auto; border-top:1px solid #eee; padding-top:5px;">
+                    <p style="color:#999; font-size:0.8rem; text-align:center; padding:5px;">No ingredients linked.</p>
+                </div>
+                <input type="hidden" name="linked_ingredients" id="linked-ingredients-json">
+            </div>
+            
+            <div class="form-group" style="margin-bottom:10px;">
+                 <label for="prod-image" style="display:inline-block; margin-right:10px;">Image</label>
+                 <input type="file" id="prod-image" name="image" accept="image/*" style="display:inline-block; width:auto;">
+                 <span id="current-image-preview" style="display:none; margin-left:10px; vertical-align:middle;">
+                    <img src="" id="preview-img" style="height: 30px; border-radius:4px; border:1px solid #ccc;">
+                 </span>
+            </div>
+
+            <div class="form-actions" style="margin-top:10px;">
+                <button type="submit" class="btn btn-success" style="width:100%;">Save Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Ingredient Modal -->
+<div id="ingredient-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" data-target="ingredient-modal">&times;</span>
+        <h3 id="ing-modal-title">Add Ingredient</h3>
+        <form id="ingredient-form" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <input type="hidden" name="action" id="ing-form-action" value="add">
+            <input type="hidden" name="entity" value="ingredient">
+            <input type="hidden" name="id" id="ing-id">
+            
             <div class="form-group">
-                <label for="prod-category">Category</label>
-                <select id="prod-category" name="category">
-                    <option value="coffee">Coffee</option>
-                    <option value="tea">Tea</option>
-                    <option value="chocolate">Chocolate</option>
-                    <option value="refreshment">Refreshment</option>
-                    <option value="signature">Signature</option>
-                    <option value="addon">Add-on</option>
-                    <option value="other">Other</option>
+                <label>Name</label>
+                <input type="text" name="name" id="ing-name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Type</label>
+                <select name="type" id="ing-type" class="form-control" onchange="updateIngUnits()">
+                    <option value="solid">Solid (Weight)</option>
+                    <option value="liquid">Liquid (Volume)</option>
                 </select>
             </div>
-
-            <div class="form-group">
-                <label for="prod-desc">Description</label>
-                <textarea id="prod-desc" name="description" rows="3"></textarea>
+            
+            <div class="form-group" style="display:flex; gap:10px;">
+                <div style="flex:1;">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity" id="ing-qty" step="0.01" min="0" required>
+                </div>
+                <div style="flex:1;">
+                    <label>Unit</label>
+                    <select name="unit" id="ing-unit" class="form-control">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="prod-ingredients">Ingredients</label>
-                <textarea id="prod-ingredients" name="ingredients" rows="2" placeholder="e.g. Espresso, Milk, Sugar"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="prod-quantity">Quantity</label>
-                <input type="text" id="prod-quantity" name="quantity" placeholder="e.g. 200ml">
-            </div>
-
-            <div class="form-group">
-                <label for="prod-tags">Tags</label>
-                <input type="text" id="prod-tags" name="tags" placeholder="e.g. ice, chocolate, sweet (comma separated)">
-            </div>
-
-            <div class="form-group">
-                <label for="prod-image">Image</label>
-                <input type="file" id="prod-image" name="image" accept="image/*">
-                <div id="current-image-preview" style="margin-top: 10px; display: none;">
-                    <p>Current:</p>
-                    <img src="" id="preview-img" style="max-height: 100px;">
+                <label>Image</label>
+                <input type="file" name="image" accept="image/*">
+                <div id="ing-current-image" style="display:none; margin-top:5px;">
+                     <img id="ing-img-preview" src="" style="height:50px;">
                 </div>
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-success">Save Product</button>
+                <button type="submit" class="btn btn-success">Save Ingredient</button>
             </div>
         </form>
     </div>

@@ -89,6 +89,7 @@ function initAdminPanel() {
   // ======== PRODUCT MODULE SETUP ============
   // ==========================================
   setupProductEvents();
+  setupLinkedIngredientsEvents(); // Init listeners for linked ingredients
 
   const addProdBtn = document.getElementById("add-product-btn");
   if (addProdBtn) {
@@ -98,6 +99,12 @@ function initAdminPanel() {
       document.getElementById("form-action").value = "add";
       document.getElementById("modal-title").innerText = "Add Product";
       document.getElementById("current-image-preview").style.display = "none";
+
+      // Reset Linked Ingredients
+      currentLinkedIngredients = [];
+      renderLinkedIngredientsList();
+      loadAllIngredientsForSelect(); // Ensure dropdown is populated
+
       document.getElementById("product-modal").style.display = "block";
     });
   }
@@ -147,6 +154,9 @@ function initAdminPanel() {
     uploadFloorPlanBtn.addEventListener("click", () => floorPlanInput.click());
     floorPlanInput.addEventListener("change", uploadFloorPlan);
   }
+
+  // Stock Module
+  setupStockEvents();
 
   // Table Props Form
   const tablePropsForm = document.getElementById("table-props-form");
@@ -230,6 +240,7 @@ function showSection(sectionId) {
     if (sectionId === "tables") loadTables();
     if (sectionId === "reservations") loadReservations();
     if (sectionId === "orders") loadRunningOrders();
+    if (sectionId === "stock") loadStock();
   }
 }
 
@@ -816,6 +827,109 @@ function setupEmailSettingsForm() {
 }
 
 // ==========================================
+// ======== LINKED INGREDIENTS LOGIC ========
+// ==========================================
+var allIngredientsCache = [];
+var currentLinkedIngredients = [];
+
+async function loadAllIngredientsForSelect() {
+  if (allIngredientsCache.length === 0) {
+    const res = await apiRequest("ingredient", "get_all");
+    if (res.success) {
+      allIngredientsCache = res.data;
+    }
+  }
+  const select = document.getElementById("prod-link-ing-select");
+  if (!select) return;
+
+  select.innerHTML = '<option value="">Select Ingredient...</option>' +
+    allIngredientsCache.map(i => `<option value="${i.id}" data-unit="${i.type === 'solid' ? 'g' : 'ml'}">${i.name} (${i.formatted_stock})</option>`).join("");
+}
+
+function setupLinkedIngredientsEvents() {
+  const select = document.getElementById("prod-link-ing-select");
+  const unitSpan = document.getElementById("prod-link-unit");
+  const addBtn = document.getElementById("btn-add-link-ing");
+
+  if (select) {
+    select.addEventListener("change", function () {
+      const opt = this.options[this.selectedIndex];
+      const unit = opt.getAttribute("data-unit") || "-";
+      unitSpan.innerText = unit;
+    });
+  }
+
+  if (addBtn) {
+    addBtn.addEventListener("click", function () {
+      const sel = document.getElementById("prod-link-ing-select");
+      const qtyInput = document.getElementById("prod-link-qty");
+
+      const ingId = sel.value;
+      const ingName = sel.options[sel.selectedIndex].text;
+      const qty = parseFloat(qtyInput.value);
+      const unit = document.getElementById("prod-link-unit").innerText;
+
+      if (!ingId || !qty || qty <= 0) {
+        alert("Please select an ingredient and enter a valid quantity.");
+        return;
+      }
+
+      // Check formatted unit for display
+      // Base unit is g or ml. If user wants to enter kg, we can allow conversion later.
+      // For now, assume input is in BASE UNIT (g/ml) as label implies (or we should specify).
+      // Let's stick to base unit for simplicity: "Qty (g/ml)" placeholder?
+
+      addLinkedIngredient(ingId, ingName, qty, unit);
+
+      // Reset
+      sel.value = "";
+      qtyInput.value = "";
+      document.getElementById("prod-link-unit").innerText = "-";
+    });
+  }
+}
+
+function addLinkedIngredient(id, name, qty, unit) {
+  // Check if exists
+  const existing = currentLinkedIngredients.find(i => i.id == id);
+  if (existing) {
+    existing.quantity += qty;
+  } else {
+    currentLinkedIngredients.push({ id: id, name: name, quantity: qty, unit: unit });
+  }
+  renderLinkedIngredientsList();
+}
+
+function removeLinkedIngredient(id) {
+  currentLinkedIngredients = currentLinkedIngredients.filter(i => i.id != id);
+  renderLinkedIngredientsList();
+}
+
+function renderLinkedIngredientsList() {
+  const list = document.getElementById("product-linked-list");
+  const input = document.getElementById("linked-ingredients-json");
+
+  if (currentLinkedIngredients.length === 0) {
+    list.innerHTML = '<p style="color:#999; font-size:0.85rem; text-align:center; padding:10px;">No ingredients linked.</p>';
+    input.value = "";
+    return;
+  }
+
+  list.innerHTML = currentLinkedIngredients.map(item => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 10px; background:#fff; border-bottom:1px solid #eee; font-size:0.9rem;">
+            <span>${item.name.split('(')[0]}</span>
+            <div>
+                <strong>${item.quantity} ${item.unit}</strong>
+                <button type="button" class="btn btn-sm btn-danger" style="padding:2px 6px; margin-left:10px;" onclick="removeLinkedIngredient(${item.id})">&times;</button>
+            </div>
+        </div>
+    `).join("");
+
+  input.value = JSON.stringify(currentLinkedIngredients);
+}
+
+// Ensure this is called on init
+// ==========================================
 // =============== PRODUCTS =================
 // ==========================================
 async function loadProducts() {
@@ -839,7 +953,6 @@ async function loadProducts() {
                         data-id="${p.id}"
                         data-name="${(p.name || '').replace(/"/g, '&quot;')}"
                         data-desc="${(p.description || '').replace(/"/g, '&quot;')}"
-                        data-ingredients="${(p.ingredients || '').replace(/"/g, '&quot;')}"
                         data-quantity="${(p.quantity || '').replace(/"/g, '&quot;')}"
                         data-tags="${(p.tags || '').replace(/"/g, '&quot;')}"
                         data-price="${p.price}"
@@ -860,14 +973,13 @@ async function loadProducts() {
   }
 }
 
-function editProduct(id, name, desc, ingredients, quantity, tags, price, discount, tvaCode, cat, img) {
+function editProduct(id, name, desc, quantity, tags, price, discount, tvaCode, cat, img) {
   document.getElementById("product-form").reset();
   document.getElementById("prod-id").value = id;
   document.getElementById("form-action").value = "update";
   document.getElementById("modal-title").innerText = "Edit Product";
   document.getElementById("prod-name").value = name;
   document.getElementById("prod-desc").value = desc;
-  document.getElementById("prod-ingredients").value = ingredients;
   document.getElementById("prod-quantity").value = quantity;
   document.getElementById("prod-tags").value = tags;
   document.getElementById("prod-price").value = price;
@@ -881,6 +993,27 @@ function editProduct(id, name, desc, ingredients, quantity, tags, price, discoun
     document.getElementById("current-image-preview").style.display = "none";
   }
   document.getElementById("product-modal").style.display = "block";
+
+  // Load Linked Ingredients
+  currentLinkedIngredients = [];
+  renderLinkedIngredientsList(); // Clear list visually
+  loadAllIngredientsForSelect(); // Ensure dropdown is populated
+
+  // Fetch from backend
+  // Fetch from backend
+  if (id) {
+    apiRequest("product", "get_linked_ingredients", { product_id: id }).then(res => {
+      if (res.success) {
+        currentLinkedIngredients = res.data.map(i => ({
+          id: i.ingredient_id,
+          name: i.name, // We might want to append formatted stock? i.current_stock
+          quantity: parseFloat(i.quantity),
+          unit: i.unit
+        }));
+        renderLinkedIngredientsList();
+      }
+    });
+  }
 }
 
 async function handleProductSubmit(e) {
@@ -1830,8 +1963,9 @@ function setupProductEvents() {
 
       if (editBtn) {
         // Updated destructing with camelCase conversion for data-tva-code
-        const { id, name, desc, ingredients, quantity, price, discount, tvaCode, category, img } = editBtn.dataset;
-        editProduct(id, name, desc, ingredients, quantity, price, discount, tvaCode, category, img);
+        // Note: Dataset attributes are accessible via camelCase (data-tva-code -> tvaCode)
+        const { id, name, desc, quantity, tags, price, discount, tvaCode, category, img } = editBtn.dataset;
+        editProduct(id, name, desc, quantity, tags, price, discount, tvaCode, category, img);
       }
 
       if (deleteBtn) {
@@ -1839,5 +1973,123 @@ function setupProductEvents() {
         deleteProduct(id);
       }
     });
+  }
+}
+
+// ==========================================
+// ======== STOCK MODULE SETUP =============
+// ==========================================
+function setupStockEvents() {
+  const addIngBtn = document.getElementById("add-ingredient-btn");
+  if (addIngBtn) {
+    addIngBtn.addEventListener("click", () => {
+      document.getElementById("ingredient-form").reset();
+      document.getElementById("ing-id").value = "";
+      document.getElementById("ing-form-action").value = "add";
+      document.getElementById("ing-modal-title").innerText = "Add Ingredient";
+      document.getElementById("ing-current-image").style.display = "none";
+      updateIngUnits(); // Reset units
+      document.getElementById("ingredient-modal").style.display = "block";
+    });
+  }
+
+  const ingForm = document.getElementById("ingredient-form");
+  if (ingForm) {
+    ingForm.addEventListener("submit", handleIngredientSubmit);
+  }
+}
+
+function updateIngUnits() {
+  const type = document.getElementById("ing-type").value;
+  const unitSelect = document.getElementById("ing-unit");
+  unitSelect.innerHTML = "";
+
+  if (type === "solid") {
+    unitSelect.innerHTML = `
+            <option value="kg">Kg (Kilograms)</option>
+            <option value="g" selected>g (Grams)</option>
+            <option value="mg">Mg (Milligrams)</option>
+        `;
+  } else {
+    unitSelect.innerHTML = `
+            <option value="l">L (Liters)</option>
+            <option value="ml" selected>Ml (Milliliters)</option>
+        `;
+  }
+}
+
+async function loadStock() {
+  const res = await apiRequest("ingredient", "get_all");
+  const tb = document.querySelector("#stock-table tbody");
+  if (res.success && tb) {
+    if (res.data.length === 0) {
+      tb.innerHTML = '<tr><td colspan="5" style="text-align:center;">No ingredients found.</td></tr>';
+      return;
+    }
+    tb.innerHTML = res.data.map(ing => `
+            <tr>
+                <td><img src="${ing.image_path || 'assets/img/default-ing.png'}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;"></td>
+                <td>${ing.name}</td>
+                <td><span class="badge ${ing.type === 'solid' ? 'badge-primary' : 'badge-info'}">${ing.type}</span></td>
+                <td><strong>${ing.formatted_stock}</strong></td>
+                <td>
+                    <button class="btn btn-sm btn-edit" onclick='editIngredient(${JSON.stringify(ing).replace(/'/g, "&apos;")})'><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteIngredient(${ing.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join("");
+  }
+}
+
+async function handleIngredientSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const res = await apiRequest("ingredient", formData.get("action"), formData);
+  if (res.success) {
+    showToast(res.message, 'success');
+    document.getElementById("ingredient-modal").style.display = "none";
+    loadStock();
+  } else {
+    showToast(res.error, 'error');
+  }
+}
+
+function editIngredient(ing) {
+  document.getElementById("ingredient-form").reset();
+  document.getElementById("ing-id").value = ing.id;
+  document.getElementById("ing-form-action").value = "update";
+  document.getElementById("ing-modal-title").innerText = "Edit Ingredient";
+
+  document.getElementById("ing-name").value = ing.name;
+  document.getElementById("ing-type").value = ing.type;
+  updateIngUnits(); // Refresh options
+
+  // For unit/qty, we receive formatted string or raw. 
+  // Ideally we should have raw stock amount. Controller sends `stock_amount` (base unit).
+  // Let's set default unit to base (g/ml) and qty to amount.
+  // User can change it if they want.
+  document.getElementById("ing-unit").value = ing.type === 'solid' ? 'g' : 'ml';
+  document.getElementById("ing-qty").value = parseFloat(ing.stock_amount);
+
+  if (ing.image_path) {
+    document.getElementById("ing-current-image").style.display = "block";
+    document.getElementById("ing-img-preview").src = ing.image_path;
+  } else {
+    document.getElementById("ing-current-image").style.display = "none";
+  }
+
+  document.getElementById("ingredient-modal").style.display = "block";
+}
+
+async function deleteIngredient(id) {
+  if (!confirm("Are you sure you want to delete this ingredient?")) return;
+  const res = await apiRequest("ingredient", "delete", { id: id });
+  if (res.success) {
+    showToast(res.message, 'success');
+    loadStock();
+  } else {
+    showToast(res.error, 'error');
   }
 }

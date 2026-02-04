@@ -27,6 +27,9 @@ class ProductController {
             case 'delete':
                 $this->delete();
                 break;
+            case 'get_linked_ingredients':
+                $this->getLinkedIngredients();
+                break;
             default:
                 sendError("Invalid action for product: " . $action);
         }
@@ -45,7 +48,6 @@ class ProductController {
     private function add() {
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $ingredients = trim($_POST['ingredients'] ?? '');
         $quantity = trim($_POST['quantity'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
         $discount = intval($_POST['discount'] ?? 0);
@@ -65,14 +67,19 @@ class ProductController {
         
         $tags = trim($_POST['tags'] ?? '');
 
-        $sql = "INSERT INTO products (name, description, ingredients, quantity, price, discount, tva_code, category, image_path, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO products (name, description, quantity, price, discount, tva_code, category, image_path, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
              sendError("Prepare failed (Add): " . $this->conn->error);
         }
-        $stmt->bind_param("ssssidssss", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags);
+        $stmt->bind_param("sssdissss", $name, $description, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags);
 
         if ($stmt->execute()) {
+            $lastId = $this->conn->insert_id; // Get inserted ID
+            // Handle Linked Ingredients
+            if (isset($_POST['linked_ingredients'])) {
+                $this->saveLinkedIngredients($lastId, $_POST['linked_ingredients']);
+            }
             sendSuccess(['message' => 'Product added successfully.']);
         } else {
             sendError("Failed to add product: " . $stmt->error);
@@ -85,7 +92,6 @@ class ProductController {
 
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $ingredients = trim($_POST['ingredients'] ?? '');
         $quantity = trim($_POST['quantity'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
         $discount = intval($_POST['discount'] ?? 0); // New field
@@ -107,22 +113,26 @@ class ProductController {
         $tags = trim($_POST['tags'] ?? '');
         
         if ($imagePath) {
-             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, discount=?, tva_code=?, category=?, image_path=?, tags=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, quantity=?, price=?, discount=?, tva_code=?, category=?, image_path=?, tags=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update Img): " . $this->conn->error);
              }
-             $stmt->bind_param("ssssidssssi", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags, $id);
+             $stmt->bind_param("sssdissssi", $name, $description, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags, $id);
         } else {
-             $sql = "UPDATE products SET name=?, description=?, ingredients=?, quantity=?, price=?, discount=?, tva_code=?, category=?, tags=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, quantity=?, price=?, discount=?, tva_code=?, category=?, tags=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update NoImg): " . $this->conn->error);
              }
-             $stmt->bind_param("ssssidsssi", $name, $description, $ingredients, $quantity, $price, $discount, $tvaCode, $category, $tags, $id);
+             $stmt->bind_param("sssdisssi", $name, $description, $quantity, $price, $discount, $tvaCode, $category, $tags, $id);
         }
 
         if ($stmt->execute()) {
+             // Handle Linked Ingredients
+            if (isset($_POST['linked_ingredients'])) {
+                $this->saveLinkedIngredients($id, $_POST['linked_ingredients']);
+            }
             sendSuccess(['message' => 'Product updated successfully.']);
         } else {
             sendError("Failed to update product: " . $stmt->error);
@@ -144,6 +154,76 @@ class ProductController {
             sendSuccess(['message' => 'Product deleted successfully.']);
         } else {
             sendError("Failed to delete product.");
+        }
+    }
+
+    private function getLinkedIngredients() {
+        $pid = intval($_POST['product_id'] ?? 0);
+        if ($pid <= 0) sendError("Invalid Product ID");
+
+        $sql = "SELECT pi.*, i.name, i.type, i.stock_amount as current_stock 
+                FROM product_ingredients pi 
+                JOIN ingredients i ON pi.ingredient_id = i.id 
+                WHERE pi.product_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $pid);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $data = [];
+        while ($row = $res->fetch_assoc()) {
+            $data[] = $row;
+        }
+        sendSuccess(['data' => $data]);
+    }
+
+    private function saveLinkedIngredients($productId, $json) {
+        $items = json_decode($json, true);
+        if (!is_array($items)) return;
+
+        // Clear existing
+        $del = $this->conn->prepare("DELETE FROM product_ingredients WHERE product_id = ?");
+        $del->bind_param("i", $productId);
+        $del->execute();
+
+        if (empty($items)) return;
+
+        $sql = "INSERT INTO product_ingredients (product_id, ingredient_id, quantity, unit) VALUES (?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+
+        foreach ($items as $item) {
+            $ingId = intval($item['id']);
+            $rawQty = floatval($item['quantity']);
+            $unit = trim($item['unit'] ?? '');
+            
+            // Convert to base unit (g/ml)
+            // Note: We blindly convert assuming standard prefixes. 
+            // If unit is just 'g' or 'ml' or 'kg' or 'l'.
+            $baseQty = $this->convertToBase($rawQty, $unit);
+            // We store the BASE unit as the unit text? Or keep original?
+            // Better store the base unit symbol so we know it's normalized.
+            // Ingredients table stores 'solid' -> g, 'liquid' -> ml implied.
+            // But let's look at stored unit. 'g' or 'ml'.
+            $baseUnit = (in_array(strtolower($unit), ['l', 'ml'])) ? 'ml' : 'g'; 
+            
+            // Actually, conversion depends:
+            // if solid: kg -> *1000 -> g.
+            // if liquid: l -> *1000 -> ml.
+            
+            if ($ingId > 0 && $baseQty > 0) {
+               $stmt->bind_param("iids", $productId, $ingId, $baseQty, $baseUnit);
+               $stmt->execute(); 
+            }
+        }
+    }
+
+    private function convertToBase($qty, $unit) {
+        switch (strtolower($unit)) {
+            case 'kg': return $qty * 1000;
+            case 'mg': return $qty / 1000;
+            case 'g': return $qty;
+            case 'l': return $qty * 1000;
+            case 'ml': return $qty;
+            default: return $qty;
         }
     }
 
