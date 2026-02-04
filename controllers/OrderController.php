@@ -54,7 +54,7 @@ class OrderController {
 
     private function getUserOrders() {
         $userId = $_SESSION['user_id'];
-        $sql = "SELECT o.id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at 
+        $sql = "SELECT o.id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at, o.points_spent, o.points_earned 
                 FROM orders o 
                 WHERE o.user_id = ?
                 ORDER BY o.created_at DESC, o.id DESC"; 
@@ -95,7 +95,7 @@ class OrderController {
     }
 
     private function getAllOrders() {
-        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at, u.username, u.email 
+        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at, o.points_spent, o.points_earned, u.username, u.email 
                 FROM orders o 
                 JOIN users u ON o.user_id = u.id 
                 ORDER BY o.pickup_time ASC"; 
@@ -103,7 +103,7 @@ class OrderController {
     }
 
     private function getRunningOrders() {
-        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at, u.username, u.email 
+        $sql = "SELECT o.id, o.user_id, o.table_id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at, o.points_spent, o.points_earned, u.username, u.email 
                 FROM orders o 
                 JOIN users u ON o.user_id = u.id 
                 WHERE o.status NOT IN ('completed', 'cancelled')
@@ -172,6 +172,54 @@ class OrderController {
             // If completed, update both status and completed_at
             $stmt = $this->conn->prepare("UPDATE orders SET status = ?, completed_at = ? WHERE id = ?");
             $stmt->bind_param("ssi", $status, $completedAt, $id);
+            
+            // --- LOYALTY POINTS LOGIC ---
+            // Only award if not already completed (simple check: completed_at was null)
+            // But here we are updating it. Let's rely on previous state check if possible, or just proceed.
+            // Better: Check if points_earned is 0 to avoid double counting? 
+            // Or check $currentOrder status? We didn't fetch status before, only table_id.
+            
+            // Start Transaction for Points
+            // $this->conn->begin_transaction(); // Optional but safer
+            
+            // Get Order Total and User ID
+            $stmtOrd = $this->conn->prepare("SELECT user_id, total_price, points_earned FROM orders WHERE id = ?");
+            $stmtOrd->bind_param("i", $id);
+            $stmtOrd->execute();
+            $ordData = $stmtOrd->get_result()->fetch_assoc();
+            
+            if ($ordData && $ordData['user_id'] && $ordData['points_earned'] == 0) {
+                 $uId = $ordData['user_id'];
+                 $total = floatval($ordData['total_price']);
+                 
+                 // Fetch Settings
+                 $settings = [];
+                 $resSet = $this->conn->query("SELECT key_name, value FROM global_settings WHERE key_name LIKE 'loyalty_%'");
+                 while ($row = $resSet->fetch_assoc()) $settings[$row['key_name']] = $row['value'];
+                 
+                 $threshold = intval($settings['loyalty_earn_threshold'] ?? 25);
+                 $reward = intval($settings['loyalty_earn_reward'] ?? 5);
+                 
+                 if ($threshold > 0 && $total >= $threshold) {
+                     $points = floor($total / $threshold) * $reward;
+                     
+                     if ($points > 0) {
+                         // Award Points to User
+                         $updU = $this->conn->prepare("UPDATE users SET PuncteFidelitate = COALESCE(PuncteFidelitate, 0) + ? WHERE id = ?");
+                         $updU->bind_param("ii", $points, $uId);
+                         $updU->execute();
+                         
+                         // Record in Order (so we don't award again)
+                         // We do this in the main UPDATE or separate? Separate is fine for now but main UPDATE is already prepared above.
+                         // Actually, I can just execute the main update first, then this.
+                         
+                         $updOrd = $this->conn->prepare("UPDATE orders SET points_earned = ? WHERE id = ?");
+                         $updOrd->bind_param("ii", $points, $id);
+                         $updOrd->execute();
+                     }
+                 }
+            }
+            // $this->conn->commit();
         } else {
             // Just status
             $stmt = $this->conn->prepare("UPDATE orders SET status = ? WHERE id = ?");

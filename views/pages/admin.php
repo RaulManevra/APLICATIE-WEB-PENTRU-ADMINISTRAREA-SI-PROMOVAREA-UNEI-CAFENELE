@@ -468,6 +468,53 @@ require_role(['admin', 'employer']);
                     <button type="submit" class="btn btn-success" style="margin-top: 10px;">Save Emails</button>
                 </form>
             </div>
+
+            <!-- Loyalty Settings -->
+            <div class="settings-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-top: 20px; border-left: 5px solid #d4af37;">
+                <h3><i class="fas fa-crown" style="color: #d4af37;"></i> Loyalty Program Settings</h3>
+                <p>Configure how users earn and spend loyalty points.</p>
+                <form id="loyalty-settings-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4><i class="fas fa-plus-circle"></i> Earning Rules</h4>
+                            <div class="form-group">
+                                <label>Threshold Amount (RON)</label>
+                                <input type="number" name="loyalty_earn_threshold" id="loy-earn-thresh" class="form-control" placeholder="25" min="1">
+                                <small style="color:#888;">Spend this amount to earn points</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Reward Points</label>
+                                <input type="number" name="loyalty_earn_reward" id="loy-earn-reward" class="form-control" placeholder="5" min="1">
+                                <small style="color:#888;">Points awarded per threshold</small>
+                            </div>
+                        </div>
+                        <div>
+                            <h4><i class="fas fa-minus-circle"></i> Spending Rules</h4>
+                            <div class="form-group">
+                                <label>Points Unit</label>
+                                <input type="number" name="loyalty_spend_unit_points" id="loy-spend-points" class="form-control" placeholder="10" min="1">
+                                <small style="color:#888;">Points needed for discount</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Discount Value (RON)</label>
+                                <input type="number" name="loyalty_spend_unit_value" id="loy-spend-val" class="form-control" placeholder="1" min="1">
+                                <small style="color:#888;">Discount value per unit</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Max Points Usage Per Order</label>
+                        <input type="number" name="loyalty_max_spend_points" id="loy-max-spend" class="form-control" placeholder="100" min="0" style="max-width: 200px;">
+                        <small style="color:#888;">Limit how many points can be used at once</small>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="margin-top: 10px;">Save Loyalty Rules</button>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+                        <strong>Current Logic:</strong>
+                        <span id="loyalty-preview-text">Spend 25 RON -> Get 5 Points. Use 10 Points -> Get 1 RON Discount.</span>
+                    </div>
+                </form>
+            </div>
         </section>
 
     </main>

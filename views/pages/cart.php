@@ -120,6 +120,128 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                 `;
             });
 
+        // Calculate Totals Display
+        const subtotalStr = parseFloat(subtotal).toFixed(2);
+        const discountStr = parseFloat(discount_total).toFixed(2);
+        const loyaltyDiscStr = (data.loyalty_discount || 0).toFixed(2);
+        const totalStr = parseFloat(total).toFixed(2);
+        
+        // Loyalty UI
+        let loyaltyHtml = '';
+        const userPoints = data.user_points || 0;
+        const ptsApplied = data.loyalty_points_applied || 0;
+        
+        if (userPoints > 0) {
+            const config = data.loyalty_config || {loyalty_spend_unit_points: 10, loyalty_spend_unit_value: 1};
+            const unitP = config.loyalty_spend_unit_points;
+            const unitV = config.loyalty_spend_unit_value;
+            const maxP = config.loyalty_max_spend_points;
+            
+            const maxAllowed = Math.min(userPoints, maxP);
+            const currentVal = ptsApplied > 0 ? ptsApplied : 0;
+            
+            loyaltyHtml = `
+                <div class="loyalty-card-container" style="
+                    margin-top: 25px; 
+                    margin-bottom: 15px;
+                    padding: 20px; 
+                    background: linear-gradient(135deg, #2c1810 0%, #3e2723 100%); 
+                    border-radius: 12px; 
+                    color: #fff;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 8px 25px rgba(44, 24, 16, 0.25);
+                    border: 1px solid rgba(212, 175, 55, 0.2);
+                ">
+                    <!-- Decorative Crown BG -->
+                    <i class="fas fa-crown" style="
+                        position: absolute; 
+                        top: -15px; 
+                        right: -15px; 
+                        font-size: 100px; 
+                        color: rgba(255, 215, 0, 0.05); 
+                        transform: rotate(20deg);
+                        pointer-events: none;
+                    "></i>
+
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px; position:relative; z-index:2;">
+                        <div>
+                            <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:1.5px; opacity:0.8; color:#d4af37; font-weight:600;">Loyalty Balance</div>
+                            <div style="font-size:1.8rem; font-weight:800; color:#fff; line-height:1.1; margin-top:5px;">${userPoints} <span style="font-size:0.9rem; font-weight:400; opacity:0.8;">pts</span></div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="background:rgba(212, 175, 55, 0.1); padding:4px 10px; border-radius:20px; font-size:0.8rem; color:#d4af37; border:1px solid rgba(212, 175, 55, 0.2);">
+                                ${unitP} pts = ${unitV} RON
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="position:relative; z-index:2;">
+                        <label style="font-size:0.85rem; display:flex; justify-content:space-between; margin-bottom:8px; color:#e0e0e0;">
+                            <span>Redeem Points</span>
+                            <span style="font-size:0.75rem; color:#aaa;">Max: ${maxAllowed} pts</span>
+                        </label>
+                        <div style="display:flex; gap:10px; align-items:stretch;">
+                            <input type="number" id="points-input" class="form-control" 
+                                value="${currentVal > 0 ? currentVal : ''}" 
+                                placeholder="0"
+                                min="0" max="${maxAllowed}" step="${unitP}"
+                                style="
+                                    background: rgba(255,255,255,0.08); 
+                                    border: 1px solid rgba(255,255,255,0.15); 
+                                    color: #fff; 
+                                    text-align: center;
+                                    font-weight: 700;
+                                    padding: 12px;
+                                    width: 100px;
+                                    border-radius: 8px;
+                                    font-size: 1.1rem;
+                                "
+                                oninput="const val = this.value; const disc = (val * ${unitV} / ${unitP}).toFixed(2); const btn = document.getElementById('loyalty-btn'); btn.innerHTML = val > 0 ? 'Apply Discount <span style=\'background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px; margin-left:5px;\'>-' + disc + ' RON</span>' : 'Apply Points';"
+                            >
+                            <button id="loyalty-btn" class="btn" onclick="applyLoyaltyPoints()" style="
+                                background: linear-gradient(135deg, #d4af37 0%, #c5a028 100%); 
+                                color: #2c1810; 
+                                font-weight: 700; 
+                                border: none;
+                                flex: 1;
+                                border-radius: 8px;
+                                transition: all 0.2s;
+                                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                                font-size: 0.9rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                            ">
+                                ${currentVal > 0 ? `Apply Discount <span style='background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px; margin-left:5px;'>-${(currentVal * unitV / unitP).toFixed(2)} RON</span>` : 'Apply Points'}
+                            </button>
+                        </div>
+                    </div>
+
+                    ${ptsApplied > 0 ? `
+                    <div style="
+                        margin-top: 15px; 
+                        background: rgba(46, 125, 50, 0.15); 
+                        border: 1px solid rgba(46, 125, 50, 0.4); 
+                        padding: 10px; 
+                        border-radius: 8px; 
+                        text-align: center; 
+                        font-size: 0.95rem; 
+                        color: #81c784;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                        animation: fadeIn 0.5s ease;
+                    ">
+                        <i class="fas fa-check-circle"></i> <span>Discount Active: <b>-${loyaltyDiscStr} RON</b></span>
+                    </div>` : ''}
+                </div>
+            `;
+        }
+
             html += `
                         </tbody>
                     </table>
@@ -127,16 +249,19 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                 <div class="cart-summary">
                     <div class="cart-row">
                          <span>Subtotal (Net):</span>
-                         <span>${parseFloat(subtotal).toFixed(2)} RON</span>
+                         <span>${subtotalStr} RON</span>
                     </div>
                     ${discount_total > 0 ? `
                     <div class="cart-row" style="color: #d32f2f;">
                          <span>Discount:</span>
-                         <span>-${parseFloat(discount_total).toFixed(2)} RON</span>
+                         <span>-${discountStr} RON</span>
                     </div>` : ''}
+                    
+                    ${loyaltyHtml}
+                    
                      <div class="cart-total" style="border-top: 2px dashed #ddd; margin-top: 10px; padding-top: 10px;">
                         <span>Total:</span>
-                        <span class="total-price">${parseFloat(total).toFixed(2)} RON</span>
+                        <span class="total-price">${totalStr} RON</span>
                     </div>
                     ${tva_amount > 0 ? `
                     <div class="cart-row" style="font-size: 0.85rem; color: #666; margin-top: 5px; flex-direction: column; align-items: flex-end;">
@@ -167,9 +292,29 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                  `;
                  document.head.appendChild(sty);
              }
-
+ 
             cartContent.innerHTML = html;
             attachCartListeners();
+        }
+
+        window.applyLoyaltyPoints = async function() {
+            const pts = document.getElementById('points-input').value;
+            const formData = new FormData();
+            formData.append('action', 'apply_points');
+            formData.append('points', pts);
+            
+            const res = await fetch('?page=cart_handler&action=apply_points', {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest'},
+                body: formData
+            });
+            
+            const d = await res.json();
+            if (d.success) {
+                loadCart(); // Reload cart to update totals
+            } else {
+                showMessageModal("Loyalty Point Error", d.error || d.message);
+            }
         }
 
         function attachCartListeners() {

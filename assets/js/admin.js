@@ -736,6 +736,29 @@ async function loadSettings() {
     if (document.getElementById("setting-tva-c")) document.getElementById("setting-tva-c").value = res3.data.tva_c || 5;
     if (document.getElementById("setting-tva-d")) document.getElementById("setting-tva-d").value = res3.data.tva_d || 0;
   }
+
+  // Load Loyalty Settings
+  const resLoy = await apiRequest("settings", "get_loyalty");
+  if (resLoy.success) {
+    const d = resLoy.data;
+    if (document.getElementById("loy-earn-thresh")) document.getElementById("loy-earn-thresh").value = d.loyalty_earn_threshold;
+    if (document.getElementById("loy-earn-reward")) document.getElementById("loy-earn-reward").value = d.loyalty_earn_reward;
+    if (document.getElementById("loy-spend-points")) document.getElementById("loy-spend-points").value = d.loyalty_spend_unit_points;
+    if (document.getElementById("loy-spend-val")) document.getElementById("loy-spend-val").value = d.loyalty_spend_unit_value;
+    if (document.getElementById("loy-max-spend")) document.getElementById("loy-max-spend").value = d.loyalty_max_spend_points;
+    updateLoyaltyPreview();
+  }
+}
+
+function updateLoyaltyPreview() {
+  const th = document.getElementById("loy-earn-thresh").value;
+  const rew = document.getElementById("loy-earn-reward").value;
+  const unitP = document.getElementById("loy-spend-points").value;
+  const unitV = document.getElementById("loy-spend-val").value;
+  const max = document.getElementById("loy-max-spend").value;
+
+  const txt = `Spend ${th} RON -> Get ${rew} Points. Use ${unitP} Points -> Get ${unitV} RON Discount. (Max ${max} pts/order)`;
+  document.getElementById("loyalty-preview-text").innerText = txt;
 }
 
 function setupScheduleForm() {
@@ -759,6 +782,17 @@ function setupScheduleForm() {
       const res = await apiRequest("settings", "update_general", new FormData(fFin));
       alert(res.success ? res.message : res.message || res.error);
     });
+  }
+
+  // Loyalty Form
+  const fLoy = document.getElementById("loyalty-settings-form");
+  if (fLoy) {
+    fLoy.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const res = await apiRequest("settings", "update_loyalty", new FormData(fLoy));
+      alert(res.success ? res.message : res.message || res.error);
+    });
+    fLoy.addEventListener("input", updateLoyaltyPreview);
   }
 }
 
@@ -1644,7 +1678,12 @@ function renderOrderCard(order) {
       : '<span>Table Order</span>'
     }
              </div>
-             <div style="margin-top:5px; font-weight:bold;">Total: ${parseFloat(order.total_price).toFixed(2)} RON</div>
+             
+             ${parseInt(order.points_spent) > 0 ? `<div style="color:#2e7d32; margin-top:5px;"><i class="fas fa-tag"></i> Loyalty Discount: <b>-${(parseInt(order.points_spent) / 10).toFixed(2)} RON</b></div>` : ''}
+             
+             <div style="margin-top:5px; font-weight:bold; font-size:1.1em;">Total: ${parseFloat(order.total_price).toFixed(2)} RON 
+                ${parseInt(order.points_earned) > 0 ? `<div style="font-weight:normal; color:#d4af37; font-size:0.8em; display:inline-block; margin-left:5px;"><i class="fas fa-star"></i> +${order.points_earned} pts</div>` : ''}
+             </div>
         </div>
 
         <div style="display:flex; gap:5px; margin-top:5px;">

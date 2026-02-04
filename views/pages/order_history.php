@@ -195,8 +195,10 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                         <div class="order-items">
                             ${itemsHtml}
                         </div>
-                        <div class="order-footer">
-                            <div class="total-price">Total: ${parseFloat(order.total_price).toFixed(2)} RON</div>
+                        <div class="order-footer" style="display:flex; flex-direction:column; align-items:flex-end; padding-top:10px;">
+                            ${parseInt(order.points_spent) > 0 ? `<div style="font-size:0.95em; color:#2e7d32; margin-bottom:2px;"><i class="fas fa-tag"></i> Loyalty Discount: <b>-${(parseInt(order.points_spent)/10).toFixed(2)} RON</b> (${order.points_spent} pts)</div>` : ''}
+                            ${parseInt(order.points_earned) > 0 ? `<div style="font-size:0.9em; color:#d4af37; margin-bottom:5px;"><i class="fas fa-star"></i> Earned: +${order.points_earned} pts</div>` : ''}
+                            <div class="total-price" style="font-size:1.3em;">Total: ${parseFloat(order.total_price).toFixed(2)} RON</div>
                         </div>
                     </div>
                 `;

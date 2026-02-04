@@ -36,6 +36,12 @@ class SettingsController {
             case 'update_emails':
                 $this->updateEmailSettings();
                 break;
+            case 'get_loyalty':
+                $this->getLoyaltySettings();
+                break;
+            case 'update_loyalty':
+                $this->updateLoyaltySettings();
+                break;
             default:
                 sendError("Invalid settings action");
         }
@@ -137,6 +143,42 @@ class SettingsController {
             }
         }
         sendSuccess(['data' => $settings]);
+    }
+
+    private function getLoyaltySettings() {
+        $defaults = [
+            'loyalty_earn_threshold' => '25',
+            'loyalty_earn_reward' => '5',
+            'loyalty_spend_unit_points' => '10',
+            'loyalty_spend_unit_value' => '1',
+            'loyalty_max_spend_points' => '100'
+        ];
+        
+        $res = $this->conn->query("SELECT key_name, value FROM global_settings WHERE key_name LIKE 'loyalty_%'");
+        if ($res) {
+            while ($row = $res->fetch_assoc()) {
+                $defaults[$row['key_name']] = $row['value'];
+            }
+        }
+        sendSuccess(['data' => $defaults]);
+    }
+
+    private function updateLoyaltySettings() {
+        $keys = [
+            'loyalty_earn_threshold', 
+            'loyalty_earn_reward', 
+            'loyalty_spend_unit_points', 
+            'loyalty_spend_unit_value', 
+            'loyalty_max_spend_points'
+        ];
+
+        foreach ($keys as $key) {
+             if (isset($_POST[$key])) {
+                 $val = intval($_POST[$key]); // Ensure integer
+                 $this->saveGlobalSetting($key, (string)$val);
+             }
+        }
+        sendSuccess(['message' => 'Loyalty settings updated']);
     }
 
     private function updateEmailSettings() {
