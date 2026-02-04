@@ -10,11 +10,17 @@ class OrderController {
     }
 
     public function handleRequest() {
-        if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-             sendError("Unauthorized access.");
+        $action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+        // Public or User actions
+        if ($action === 'get_my_orders') {
+            $this->checkUserAuth();
+            $this->getUserOrders();
+            return;
         }
 
-        $action = $_GET['action'] ?? $_POST['action'] ?? '';
+        // Admin only actions
+        $this->checkAdminAuth();
 
         switch ($action) {
             case 'get_running':
@@ -32,6 +38,60 @@ class OrderController {
             default:
                 sendError("Invalid order action: $action");
         }
+    }
+
+    private function checkUserAuth() {
+        if (!isset($_SESSION['user_id'])) {
+            sendError("Unauthorized access.");
+        }
+    }
+
+    private function checkAdminAuth() {
+        if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+             sendError("Unauthorized access.");
+        }
+    }
+
+    private function getUserOrders() {
+        $userId = $_SESSION['user_id'];
+        $sql = "SELECT o.id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at 
+                FROM orders o 
+                WHERE o.user_id = ?
+                ORDER BY o.created_at DESC, o.id DESC"; 
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if (!$result) {
+            sendError("DB Error (Orders): " . $this->conn->error);
+            return;
+        }
+
+        $orders = [];
+        while ($row = $result->fetch_assoc()) {
+            $orderId = $row['id'];
+            // Fetch items for each order
+            $sqlItems = "SELECT oi.quantity, oi.price_at_time, p.name, p.image_path
+                         FROM order_items oi
+                         JOIN products p ON oi.product_id = p.id
+                         WHERE oi.order_id = ?";
+            $stmtItems = $this->conn->prepare($sqlItems);
+            $stmtItems->bind_param("i", $orderId);
+            $stmtItems->execute();
+            $resItems = $stmtItems->get_result();
+            
+            $items = [];
+            if ($resItems) {
+                while ($item = $resItems->fetch_assoc()) {
+                    $items[] = $item;
+                }
+            }
+            $row['items'] = $items;
+            $orders[] = $row;
+        }
+        sendSuccess(['orders' => $orders]);
     }
 
     private function getAllOrders() {

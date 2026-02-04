@@ -60,8 +60,12 @@ class CartController {
                 "digest_alg" => "sha256",
                 "private_key_bits" => 2048,
                 "private_key_type" => OPENSSL_KEYTYPE_RSA,
-                "config" => "d:\\Apps\\Ampps\\apache\\conf\\openssl.cnf"
             );
+            
+            // Only add specific config path for Windows, rely on defaults for others (tested on macOS)
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                $config["config"] = "d:\\Apps\\Ampps\\apache\\conf\\openssl.cnf";
+            }
             
             // Create the private and public key
             $res = openssl_pkey_new($config);
