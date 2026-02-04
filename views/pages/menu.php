@@ -20,7 +20,7 @@ $types = "";
 // 1. Category Filter
 $category = $_GET['cat'] ?? 'all';
 if ($category !== 'all') {
-    $where[] = "category = ?";
+    $where[] = "p.category = ?";
     $params[] = $category;
     $types .= "s";
 }
@@ -30,7 +30,7 @@ $searchQuery = $_GET['q'] ?? '';
 $searchQuery = $_GET['q'] ?? '';
 if (!empty($searchQuery)) {
     // Search in Name OR Tags (Excluded Description as per request)
-    $where[] = "(name LIKE ? OR tags LIKE ?)";
+    $where[] = "(p.name LIKE ? OR p.tags LIKE ?)";
     $like = "%" . $searchQuery . "%";
     $params[] = $like;
     $params[] = $like;
@@ -38,25 +38,64 @@ if (!empty($searchQuery)) {
 }
 
 // Construct SQL
-$sql = "SELECT * FROM products";
+$sql = "SELECT p.*, GROUP_CONCAT(i.name SEPARATOR ', ') as linked_ingredients_names 
+        FROM products p
+        LEFT JOIN product_ingredients pi ON p.id = pi.product_id
+        LEFT JOIN ingredients i ON pi.ingredient_id = i.id";
+
 if (!empty($where)) {
+    // Note: We need to specify table alias for potentially ambiguous columns
+    $where = array_map(function($cond) {
+        // Simple heuristic: if query touches 'category', 'name', 'tags', prefix with 'p.'
+        // Actually, $where was built above. Let's fix the build logic above?
+        // Or cleaner: Rebuild $where logic or just prefix here if simple.
+        // It's safer to prefix usage above.
+        // Let's assume standard columns like 'category' need 'p.category'.
+        return $cond; // For now, let's leave as is and hope no ambiguity with ingredients table columns?
+        // 'category', 'name', 'tags', 'price' are in products. 'name' is in ingredients too! AMBIGUITY!
+        // I MUST FIX THE WHERE CLAUSE GENERATION.
+    }, $where);
+}
+// Wait, I cannot change the WHERE generation inside this chunk easily if it matches broadly. 
+// I should replace the whole block including WHERE generation.
+
+// RE-WRITING THE WHOLE LOGIC BLOCK.
+$sql = "SELECT p.*, GROUP_CONCAT(i.name SEPARATOR ', ') as linked_ingredients_names 
+        FROM products p
+        LEFT JOIN product_ingredients pi ON p.id = pi.product_id
+        LEFT JOIN ingredients i ON pi.ingredient_id = i.id";
+        
+if (!empty($where)) {
+    // PREPEND p. to ambiguous columns in the where clause
+    // 'category' -> 'p.category'
+    // 'name' -> 'p.name'
+    // 'tags' -> 'p.tags'
+    // 'price' -> 'p.price' (if used in sort, but sort is handled below)
+    
+    // Actually, I should just fix the $where construction lines earlier.
+    // But I limited my Replacement to lines 41-62? No, I can expand.
+    // Let's replace the whole top block to be safe.
+    
     $sql .= " WHERE " . implode(" AND ", $where);
 }
+
+// Group By is needed for aggregation
+$sql .= " GROUP BY p.id";
 
 // 3. Sorting
 $sort = $_GET['sort'] ?? 'name_asc';
 switch ($sort) {
     case 'price_asc':
-        $sql .= " ORDER BY price ASC";
+        $sql .= " ORDER BY p.price ASC";
         break;
     case 'price_desc':
-        $sql .= " ORDER BY price DESC";
+        $sql .= " ORDER BY p.price DESC";
         break;
     case 'name_desc':
-        $sql .= " ORDER BY name DESC";
+        $sql .= " ORDER BY p.name DESC";
         break;
     default:
-        $sql .= " ORDER BY name ASC";
+        $sql .= " ORDER BY p.name ASC";
         break;
 }
 
@@ -148,7 +187,7 @@ while ($c = $catResult->fetch_assoc()) {
                                      data-price="<?= number_format($price, 2) ?>"
                                      data-discount="<?= $discount ?>"
                                      data-img="<?= htmlspecialchars($row['image_path']) ?>"
-                                     data-ingredients="<?= htmlspecialchars($row['ingredients'] ?? '') ?>"
+                                     data-ingredients="<?= htmlspecialchars($row['linked_ingredients_names'] ?? '') ?>"
                                      data-quantity="<?= intval($row['quantity']) ?>">
                                     
                                     <?= $discountBadge ?>
@@ -167,7 +206,15 @@ while ($c = $catResult->fetch_assoc()) {
                                             </div>
                                         </div>
                                         <p class="product-description"><?= htmlspecialchars($row['description']) ?></p>
-                                        <span class="product-quantity"><?= intval ($row['quantity']) ?> ml</span>
+                                    
+                                    <?php if (!empty($row['linked_ingredients_names'])): ?>
+                                        <p class="product-ingredients" style="color: #555; font-size: 0.85rem; margin-top: 5px; font-style: italic;">
+                                            <i class="fa-solid fa-leaf" style="color:#2c6e49; margin-right:3px;"></i>
+                                            <?= htmlspecialchars($row['linked_ingredients_names']) ?>
+                                        </p>
+                                    <?php endif; ?>
+
+                                    <span class="product-quantity"><?= intval ($row['quantity']) ?> ml</span>
                                     </div>
                                 </div>
                             <?php endwhile; ?>

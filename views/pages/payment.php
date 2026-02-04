@@ -554,8 +554,16 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                              // Add Discount Row if exists
                              if (d.discount_total > 0) {
                                   html += `<div class="receipt-row" style="color: #d32f2f; margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 5px;">
-                                        <span>Savings</span>
+                                        <span>Product Savings</span>
                                         <span>-${parseFloat(d.discount_total).toFixed(2)}</span>
+                                     </div>`;
+                             }
+                             
+                             if (d.loyalty_discount > 0) {
+                                  const borderStyle = d.discount_total > 0 ? '' : 'border-top: 1px dashed #ddd; padding-top: 5px;';
+                                  html += `<div class="receipt-row" style="color: #2e7d32; margin-top: 5px; ${borderStyle}">
+                                        <span><i class="fas fa-crown"></i> Loyalty Discount</span>
+                                        <span>-${parseFloat(d.loyalty_discount).toFixed(2)}</span>
                                      </div>`;
                              }
 
