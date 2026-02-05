@@ -54,6 +54,8 @@ class ProductController {
         $tvaCode = $_POST['tva_code'] ?? 'A';
         if (!in_array($tvaCode, ['A', 'B', 'C', 'D'])) $tvaCode = 'A';
 
+        $preparationTime = intval($_POST['preparation_time'] ?? 0); // New field
+
         $category = trim($_POST['category'] ?? 'coffee');
 
         if (empty($name) || $price < 0) {
@@ -67,12 +69,12 @@ class ProductController {
         
         $tags = trim($_POST['tags'] ?? '');
 
-        $sql = "INSERT INTO products (name, description, quantity, price, discount, tva_code, category, image_path, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO products (name, description, quantity, price, discount, tva_code, category, image_path, tags, preparation_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
              sendError("Prepare failed (Add): " . $this->conn->error);
         }
-        $stmt->bind_param("sssdissss", $name, $description, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags);
+        $stmt->bind_param("sssdissssi", $name, $description, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags, $preparationTime);
 
         if ($stmt->execute()) {
             $lastId = $this->conn->insert_id; // Get inserted ID
@@ -95,6 +97,7 @@ class ProductController {
         $quantity = trim($_POST['quantity'] ?? '');
         $price = floatval($_POST['price'] ?? 0);
         $discount = intval($_POST['discount'] ?? 0); // New field
+        $preparationTime = intval($_POST['preparation_time'] ?? 0); // New field
         $category = trim($_POST['category'] ?? 'coffee');
 
         if (empty($name) || $price < 0) {
@@ -113,19 +116,19 @@ class ProductController {
         $tags = trim($_POST['tags'] ?? '');
         
         if ($imagePath) {
-             $sql = "UPDATE products SET name=?, description=?, quantity=?, price=?, discount=?, tva_code=?, category=?, image_path=?, tags=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, quantity=?, price=?, discount=?, tva_code=?, category=?, image_path=?, tags=?, preparation_time=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update Img): " . $this->conn->error);
              }
-             $stmt->bind_param("sssdissssi", $name, $description, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags, $id);
+             $stmt->bind_param("sssdissssii", $name, $description, $quantity, $price, $discount, $tvaCode, $category, $imagePath, $tags, $preparationTime, $id);
         } else {
-             $sql = "UPDATE products SET name=?, description=?, quantity=?, price=?, discount=?, tva_code=?, category=?, tags=? WHERE id=?";
+             $sql = "UPDATE products SET name=?, description=?, quantity=?, price=?, discount=?, tva_code=?, category=?, tags=?, preparation_time=? WHERE id=?";
              $stmt = $this->conn->prepare($sql);
              if (!$stmt) {
                 sendError("Prepare failed (Update NoImg): " . $this->conn->error);
              }
-             $stmt->bind_param("sssdisssi", $name, $description, $quantity, $price, $discount, $tvaCode, $category, $tags, $id);
+             $stmt->bind_param("sssdisssii", $name, $description, $quantity, $price, $discount, $tvaCode, $category, $tags, $preparationTime, $id);
         }
 
         if ($stmt->execute()) {

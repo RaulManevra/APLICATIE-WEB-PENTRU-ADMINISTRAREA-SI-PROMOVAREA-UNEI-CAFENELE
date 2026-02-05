@@ -959,6 +959,7 @@ async function loadProducts() {
                         data-discount="${p.discount || 0}"
                         data-tva-code="${p.tva_code || 'A'}"
                         data-category="${p.category}"
+                        data-preparation-time="${p.preparation_time || 0}"
                         data-img="${p.image_path || ''}">
                         <i class="fas fa-edit"></i>
                     </button>
@@ -973,7 +974,7 @@ async function loadProducts() {
   }
 }
 
-function editProduct(id, name, desc, quantity, tags, price, discount, tvaCode, cat, img) {
+function editProduct(id, name, desc, quantity, tags, price, discount, tvaCode, cat, img, prepTime) {
   document.getElementById("product-form").reset();
   document.getElementById("prod-id").value = id;
   document.getElementById("form-action").value = "update";
@@ -986,6 +987,7 @@ function editProduct(id, name, desc, quantity, tags, price, discount, tvaCode, c
   document.getElementById("prod-discount").value = discount;
   document.getElementById("prod-tva-code").value = tvaCode || 'A';
   document.getElementById("prod-category").value = cat;
+  document.getElementById("prod-prep-time").value = prepTime || 0;
   if (img) {
     document.getElementById("current-image-preview").style.display = "block";
     document.getElementById("preview-img").src = img;
@@ -1826,6 +1828,12 @@ function renderOrderCard(order) {
         <div style="font-size: 0.85rem; color: #555;">
              <div style="display:flex; justify-content:space-between;">
                  <span>Created: ${new Date(order.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                 ${(order.status === 'pending' || order.status === 'preparing') && order.estimated_wait > 0
+      ? `<span style="color:#d35400; font-weight:bold;">Est. Wait: ${order.estimated_wait} min</span>`
+      : `<span>Pickup: ${new Date(order.pickup_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`
+    }
+             </div>
+        <div style="margin-top:5px;">
                  ${!order.table_id ?
       `<span>Pickup: ${new Date(order.pickup_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`
       : '<span>Table Order</span>'
@@ -1964,8 +1972,8 @@ function setupProductEvents() {
       if (editBtn) {
         // Updated destructing with camelCase conversion for data-tva-code
         // Note: Dataset attributes are accessible via camelCase (data-tva-code -> tvaCode)
-        const { id, name, desc, quantity, tags, price, discount, tvaCode, category, img } = editBtn.dataset;
-        editProduct(id, name, desc, quantity, tags, price, discount, tvaCode, category, img);
+        const { id, name, desc, quantity, tags, price, discount, tvaCode, category, img, preparationTime } = editBtn.dataset;
+        editProduct(id, name, desc, quantity, tags, price, discount, tvaCode, category, img, preparationTime);
       }
 
       if (deleteBtn) {

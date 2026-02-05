@@ -404,7 +404,7 @@ class CartController {
 
         $idsString = implode(',', array_map('intval', $ids));
         
-        $sql = "SELECT id, name, price, discount, image_path, tva_code FROM products WHERE id IN ($idsString)";
+        $sql = "SELECT id, name, price, discount, image_path, tva_code, preparation_time FROM products WHERE id IN ($idsString)";
         $result = $this->conn->query($sql);
 
         $items = [];
@@ -483,6 +483,34 @@ class CartController {
         
         $finalTotal = max(0, $itemsTotal - $loyaltyDiscount);
 
+        // --- QUEUE TIME ESTIMATION ---
+        // 1. Calculate Global Queue (sum of all active orders)
+        $globalQueueTime = 0;
+        $activeSql = "SELECT SUM(p.preparation_time * oi.quantity) as total_prep 
+                      FROM orders o
+                      JOIN order_items oi ON o.id = oi.order_id
+                      JOIN products p ON oi.product_id = p.id
+                      WHERE o.status IN ('pending', 'preparing')";
+        $qRes = $this->conn->query($activeSql);
+        if ($qRes && $r = $qRes->fetch_assoc()) {
+            $globalQueueTime = intval($r['total_prep'] ?? 0);
+        }
+
+        // 2. Calculate Current Cart Prep Time
+        $cartPrepTime = 0;
+        // We already have products in $items loop, but let's recalculate or sum it up there
+        // Optimized: Let's fetch prep time in the main items query
+        // Re-run items logic?? No, let's just add prep_time to the select above.
+        // Wait, I can't modify the select in this chunk easily without changing lines 407.
+        
+        // Let's modify the select query first in another chunk.
+        // Assuming $row has preparation_time now.
+        foreach($items as $it) {
+             $cartPrepTime += (intval($it['preparation_time'] ?? 0) * intval($it['quantity']));
+        }
+        
+        $estimatedWaitTime = $globalQueueTime + $cartPrepTime;
+
         sendSuccess([
             'items' => $items,
             'subtotal' => $originalSubtotal, 
@@ -494,7 +522,8 @@ class CartController {
             'total' => $finalTotal,
             'tva_amount' => number_format($tvaTotal, 2),
             'tva_rate' => 0, 
-            'tax_breakdown' => $taxBreakdown
+            'tax_breakdown' => $taxBreakdown,
+            'estimated_wait_time' => $estimatedWaitTime
         ]);
     }
     private function getOrCreateGuestUser() {

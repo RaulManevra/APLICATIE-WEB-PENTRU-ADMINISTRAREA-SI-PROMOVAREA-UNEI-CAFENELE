@@ -53,45 +53,20 @@ class OrderController {
     }
 
     private function getUserOrders() {
-        $userId = $_SESSION['user_id'];
+        // Use fetchAndSendOrders to reuse logic logic (items + estimate)
+        // Adjust headers selection to match fetchAndSendOrders expectations if needed? 
+        // Actually fetchAndSendOrders expects slightly different columns? 
+        // No, let's just use the query logic inside getUserOrders or refactor deeply.
+        // Refactoring getUserOrders to use similar logic for consistency.
+        
         $sql = "SELECT o.id, o.pickup_time, o.status, o.total_price, o.payment_method, o.created_at, o.completed_at, o.points_spent, o.points_earned 
                 FROM orders o 
                 WHERE o.user_id = ?
                 ORDER BY o.created_at DESC, o.id DESC"; 
         
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if (!$result) {
-            sendError("DB Error (Orders): " . $this->conn->error);
-            return;
-        }
-
-        $orders = [];
-        while ($row = $result->fetch_assoc()) {
-            $orderId = $row['id'];
-            // Fetch items for each order
-            $sqlItems = "SELECT oi.quantity, oi.price_at_time, p.name, p.image_path
-                         FROM order_items oi
-                         JOIN products p ON oi.product_id = p.id
-                         WHERE oi.order_id = ?";
-            $stmtItems = $this->conn->prepare($sqlItems);
-            $stmtItems->bind_param("i", $orderId);
-            $stmtItems->execute();
-            $resItems = $stmtItems->get_result();
-            
-            $items = [];
-            if ($resItems) {
-                while ($item = $resItems->fetch_assoc()) {
-                    $items[] = $item;
-                }
-            }
-            $row['items'] = $items;
-            $orders[] = $row;
-        }
-        sendSuccess(['orders' => $orders]);
+        // We can reuse fetchAndSendOrders if we make it support params
+        $userId = $_SESSION['user_id'];
+        $this->fetchAndSendOrders($sql, [$userId], "i");
     }
 
     private function getAllOrders() {
@@ -111,38 +86,106 @@ class OrderController {
         $this->fetchAndSendOrders($sql);
     }
 
-    private function fetchAndSendOrders($sql) {
-        $result = $this->conn->query($sql);
+    private function fetchAndSendOrders($sql, $params = null, $types = "") {
+        if ($params) {
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param($types, ...$params);
+            $stmt->execute();
+            $result = $stmt->get_result();
+        } else {
+            $result = $this->conn->query($sql);
+        }
+
         if (!$result) {
             sendError("DB Error (Orders): " . $this->conn->error);
             return;
         }
 
         $orders = [];
+        // First pass: Collect all orders
         while ($row = $result->fetch_assoc()) {
-            $orderId = $row['id'];
-            $sqlItems = "SELECT oi.quantity, oi.price_at_time, p.name 
-                         FROM order_items oi
-                         JOIN products p ON oi.product_id = p.id
-                         WHERE oi.order_id = ?";
-            $stmtItems = $this->conn->prepare($sqlItems);
-            $stmtItems->bind_param("i", $orderId);
-            $stmtItems->execute();
-            $resItems = $stmtItems->get_result();
-            
-            $items = [];
-            if ($resItems) {
-                while ($item = $resItems->fetch_assoc()) {
-                    $items[] = $item;
-                }
-            } else {
-                 // Log error or just ignore items?
-                 // Let's add an error indicator for debug
-                 $items[] = ['name' => 'Error loading items: ' . $this->conn->error, 'quantity' => 0];
-            }
-            $row['items'] = $items;
             $orders[] = $row;
         }
+
+        // Get Global Queue for Estimation
+        // We need the prep time of ALL active orders to calculate the queue correctly.
+        // Optimization: Fetch all active item prep times in one query.
+        $queueMap = [];
+        $activeSql = "SELECT o.id, SUM(p.preparation_time * oi.quantity) as total_prep 
+                      FROM orders o
+                      JOIN order_items oi ON o.id = oi.order_id
+                      JOIN products p ON oi.product_id = p.id
+                      WHERE o.status IN ('pending', 'preparing')
+                      GROUP BY o.id
+                      ORDER BY o.id ASC"; // FIFO logic
+        $qRes = $this->conn->query($activeSql);
+        if ($qRes) {
+            while ($r = $qRes->fetch_assoc()) {
+                $queueMap[$r['id']] = intval($r['total_prep']);
+            }
+        }
+
+        // Second pass: Enrich orders with items and Estimate
+        foreach ($orders as &$row) {
+             $orderId = $row['id'];
+             // Items
+             $sqlItems = "SELECT oi.quantity, oi.price_at_time, p.name 
+                          FROM order_items oi
+                          JOIN products p ON oi.product_id = p.id
+                          WHERE oi.order_id = ?";
+             $stmtItems = $this->conn->prepare($sqlItems);
+             $stmtItems->bind_param("i", $orderId);
+             $stmtItems->execute();
+             $resItems = $stmtItems->get_result();
+             
+             $items = [];
+             if ($resItems) {
+                 while ($item = $resItems->fetch_assoc()) {
+                     $items[] = $item;
+                 }
+             }
+             $row['items'] = $items;
+
+             // Calculate Potential Points if not yet earned
+             if ($row['points_earned'] == 0 && floatval($row['total_price']) > 0) {
+                 // Fetch settings if not already fetched (optimization: fetch once outside loop)
+                 if (!isset($loyaltySettings)) {
+                     $loyaltySettings = [];
+                     $resSet = $this->conn->query("SELECT key_name, value FROM global_settings WHERE key_name LIKE 'loyalty_%'");
+                     if ($resSet) {
+                        while ($sRow = $resSet->fetch_assoc()) $loyaltySettings[$sRow['key_name']] = $sRow['value'];
+                     }
+                 }
+                 
+                 $threshold = intval($loyaltySettings['loyalty_earn_threshold'] ?? 25);
+                 $reward = intval($loyaltySettings['loyalty_earn_reward'] ?? 5);
+                 
+                 if ($threshold > 0) {
+                     $row['potential_points'] = floor(floatval($row['total_price']) / $threshold) * $reward;
+                 } else {
+                     $row['potential_points'] = 0;
+                 }
+             } else {
+                 $row['potential_points'] = 0;
+             }
+
+             // Calculate Estimate
+             // Logic: Sum of prep_time of ALL active orders with ID <= current ID
+             // Only if current order is active. If completed/cancelled, estimate is 0 (or actual time taken? Let's stick to 0 or null).
+             if (in_array($row['status'], ['pending', 'preparing'])) {
+                 $estimated = 0;
+                 foreach ($queueMap as $qId => $prepTime) {
+                     if ($qId <= $orderId) {
+                         $estimated += $prepTime;
+                     }
+                 }
+                 $row['estimated_wait'] = $estimated;
+             } else {
+                 $row['estimated_wait'] = 0;
+             }
+        }
+        unset($row); // break ref
+
         sendSuccess(['orders' => $orders]);
     }
 

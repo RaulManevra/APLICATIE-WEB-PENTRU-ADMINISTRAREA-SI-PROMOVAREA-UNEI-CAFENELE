@@ -189,6 +189,13 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                             <div>
                                 <div class="order-id">Comanda #${orderNumber}</div>
                                 <div class="order-date"><i class="fa-regular fa-clock"></i> ${date}</div>
+                                ${
+                                    (order.status === 'pending' || order.status === 'preparing') && order.estimated_wait > 0
+                                    ? `<div style="color: #d35400; font-weight: bold; font-size: 0.9em; margin-top: 5px;">
+                                         <i class="fas fa-hourglass-half"></i> Timp Estimat: ${order.estimated_wait} min
+                                       </div>`
+                                    : ''
+                                }
                             </div>
                             <span class="order-status ${statusClass}">${statusText}</span>
                         </div>
@@ -197,7 +204,10 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                         </div>
                         <div class="order-footer" style="display:flex; flex-direction:column; align-items:flex-end; padding-top:10px;">
                             ${parseInt(order.points_spent) > 0 ? `<div style="font-size:0.95em; color:#2e7d32; margin-bottom:2px;"><i class="fas fa-tag"></i> Loyalty Discount: <b>-${(parseInt(order.points_spent)/10).toFixed(2)} RON</b> (${order.points_spent} pts)</div>` : ''}
-                            ${parseInt(order.points_earned) > 0 ? `<div style="font-size:0.9em; color:#d4af37; margin-bottom:5px;"><i class="fas fa-star"></i> Earned: +${order.points_earned} pts</div>` : ''}
+                            ${parseInt(order.points_earned) > 0 
+                                ? `<div style="font-size:0.9em; color:#d4af37; margin-bottom:5px;"><i class="fas fa-star"></i> Earned: +${order.points_earned} pts</div>` 
+                                : (parseInt(order.potential_points) > 0 ? `<div style="font-size:0.9em; color:#f39c12; margin-bottom:5px; opacity: 0.8;"><i class="far fa-star"></i> Pending: +${order.potential_points} pts</div>` : '')
+                            }
                             <div class="total-price" style="font-size:1.3em;">Total: ${parseFloat(order.total_price).toFixed(2)} RON</div>
                         </div>
                     </div>

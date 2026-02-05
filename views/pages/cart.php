@@ -263,6 +263,10 @@ if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQU
                         <span>Total:</span>
                         <span class="total-price">${totalStr} RON</span>
                     </div>
+                    ${data.estimated_wait_time > 0 ? `
+                    <div style="font-size: 0.9rem; color: #e67e22; margin-top: 5px; text-align: right; font-weight: 600;">
+                         <i class="fas fa-stopwatch"></i> Estimated Prep Time: ~${data.estimated_wait_time} min
+                    </div>` : ''}
                     ${tva_amount > 0 ? `
                     <div class="cart-row" style="font-size: 0.85rem; color: #666; margin-top: 5px; flex-direction: column; align-items: flex-end;">
                          ${data.tax_breakdown ? 

@@ -606,6 +606,10 @@ require_role(['admin', 'employer']);
                     <input type="text" id="prod-quantity" name="quantity" placeholder="e.g. 200ml">
                 </div>
                  <div class="form-group" style="flex:1;">
+                    <label for="prod-prep-time">Prep Time (min)</label>
+                    <input type="number" id="prod-prep-time" name="preparation_time" min="0" placeholder="e.g. 5">
+                </div>
+                 <div class="form-group" style="flex:1;">
                     <label for="prod-tags">Tags</label>
                     <input type="text" id="prod-tags" name="tags" placeholder="e.g. ice, chocolate">
                 </div>
