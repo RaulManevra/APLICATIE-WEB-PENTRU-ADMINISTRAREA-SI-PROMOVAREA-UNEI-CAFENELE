@@ -996,3 +996,18 @@
 [2026-02-05 01:54:41] [INFO] Backing up existing SQL file...
 [2026-02-05 01:54:41] [INFO] Exporting database to SQL file...
 [2026-02-05 01:54:42] [INFO] Database exported successfully!
+ 
+====================================================================== 
+  SESSION START: Fri 02/06/2026 17:33:08.03 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 02/06/2026 17:33:26.43 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 

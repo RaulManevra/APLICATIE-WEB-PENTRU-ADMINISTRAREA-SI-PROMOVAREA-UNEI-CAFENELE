@@ -37,18 +37,26 @@ class UserController {
         $sql = "SELECT id, username, email, role, PuncteFidelitate, PPicture, is_blacklisted FROM users";
         
         if (!empty($search)) {
-            // Secure search
-            $search = "%" . $this->conn->real_escape_string($search) . "%";
-            $sql .= " WHERE username LIKE '$search' OR email LIKE '$search'";
+            $sql .= " WHERE username LIKE ? OR email LIKE ?";
         }
         
         $sql .= " ORDER BY id DESC LIMIT 50";
         
-        $res = $this->conn->query($sql);
+        $stmt = $this->conn->prepare($sql);
+        
+        if (!empty($search)) {
+            $searchTerm = "%" . $search . "%";
+            $stmt->bind_param("ss", $searchTerm, $searchTerm);
+        }
+        
+        $stmt->execute();
+        $res = $stmt->get_result();
+        
         $users = [];
         while($row = $res->fetch_assoc()) {
             $users[] = $row;
         }
+        $stmt->close();
         sendSuccess(['data' => $users]);
     }
 

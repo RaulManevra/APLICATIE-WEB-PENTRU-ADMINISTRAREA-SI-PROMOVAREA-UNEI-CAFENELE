@@ -43,18 +43,28 @@ class IngredientController {
     private function getAll() {
         $search = $_GET['search'] ?? '';
         $sql = "SELECT * FROM ingredients";
+        
+        $params = [];
+        $types = "";
+        
         if (!empty($search)) {
-            $sql .= " WHERE name LIKE '%" . $this->conn->real_escape_string($search) . "%'";
+            $sql .= " WHERE name LIKE ?";
+            $params[] = "%" . $search . "%";
+            $types .= "s";
         }
         $sql .= " ORDER BY name ASC";
         
-        $res = $this->conn->query($sql);
+        $stmt = $this->conn->prepare($sql);
+        if (!empty($params)) {
+             $stmt->bind_param($types, ...$params);
+        }
+        $stmt->execute();
+        $res = $stmt->get_result();
+        
         $data = [];
         if ($res) {
             while ($row = $res->fetch_assoc()) {
                 // Format stock amount for display
-                // If solid: stored in g. If > 1000g, show kg.
-                // If liquid: stored in ml. If > 1000ml, show l.
                 $amount = (float)$row['stock_amount'];
                 $type = $row['type'];
                 $formatted = "";
@@ -63,16 +73,7 @@ class IngredientController {
                     if ($amount >= 1000) {
                         $formatted = round($amount / 1000, 2) . " Kg";
                     } else {
-                        $formatted = $amount . " g"; // User didn't specify 'G' but 'Kg, Mg'. Keeping 'g' lowercase or check? 'L, Ml, Kg, Mg'. Let's do 'g' as 'g' or 'G'? User list: L, Ml, Kg, Mg. I'll stick to their exact list for those, and 'g' for grams? Or maybe they want 'G'? 'Mg' implies they like capital first. I'll use 'G' for consistency if they asked for 'Mg'. Actually standard is 'g'. Let's use 'g' but 'Kg'. 
-                        // Wait, user asked for "L, Ml, Kg, Mg". They want Capitalized.
-                        // I will assume they want 'G' also? No, standard is g. 
-                        // Let's use what they explicitly asked + best effort.
-                        // They showed 'Ml' (milli), 'Mg' (milli), 'Kg' (kilo). 
-                        // I will output 'Kg' and 'Mg' as requested. 'g' -> 'g'.
-                        // Wait, if I have < 1000mg that's small.
-                        // Let's just follow the logic: 
-                        // >= 1000g -> Kg. 
-                        // < 1000g -> g.
+                        $formatted = $amount . " g";
                     }
                 } else {
                     if ($amount >= 1000) {
