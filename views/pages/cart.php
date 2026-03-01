@@ -1,0 +1,698 @@
+<?php
+// views/pages/cart.php
+if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
+    http_response_code(403);
+    exit('Direct access denied.');
+}
+?>
+
+<section class="cart-section">
+    <div class="cart-container">
+        <h2 class="section-title">Your Cart</h2>
+        
+        <div id="cart-content" class="cart-content">
+            <div class="loading-cart">Loading cart...</div>
+        </div>
+    </div>
+</section>
+
+<script>
+    (function() {
+        const cartContent = document.getElementById('cart-content');
+
+        // --- TOKEN LOGIC ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlToken = urlParams.get('token');
+        if (urlToken) {
+            sessionStorage.setItem('orderToken', urlToken);
+            window.history.replaceState({}, document.title, window.location.pathname + '?page=cart');
+        }
+
+        async function loadCart() {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'get_cart');
+                
+                const res = await fetch('?page=cart_handler&action=get_cart', { 
+                    method: 'POST', 
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error("JSON Parse Error:", e, "Response:", text);
+                    cartContent.innerHTML = `<p class="error-msg">Server Error: Invalid JSON response.</p>`;
+                    return;
+                }
+
+                if (data.success) {
+                    renderCart(data); 
+                } else {
+                    cartContent.innerHTML = `<p class="error-msg">${data.message}</p>`;
+                }
+            } catch (err) {
+                console.error(err);
+                cartContent.innerHTML = `<p class="error-msg">Failed to load cart: ${err.message}</p>`;
+            }
+        }
+
+        function renderCart(data) {
+            const { items, total, subtotal, discount_total, tva_amount, tva_rate } = data;
+
+            if (!items || items.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fa-solid fa-cart-arrow-down"></i>
+                        <p class="empty">Your cart is empty.</p>
+                        <a href="?page=menu" class="nav-link btn-third" data-page="menu">Browse Menu</a>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="cart-table-wrapper">
+                    <table class="cart-table">
+                        <thead>
+                            <tr class="tr">
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            items.forEach(item => {
+                const originalPrice = parseFloat(item.original_price || item.price);
+                const effectivePrice = parseFloat(item.effective_price || item.price);
+                const hasDiscount = originalPrice > effectivePrice;
+
+                const priceDisplay = hasDiscount 
+                    ? `<span style="text-decoration: line-through; color: #999; font-size: 0.9em;">${originalPrice.toFixed(2)}</span> <br> <span style="color: #d32f2f; font-weight: bold;">${effectivePrice.toFixed(2)} RON</span>`
+                    : `${effectivePrice.toFixed(2)} RON`;
+
+                html += `
+                    <tr>
+                        <td class="cart-product-info">
+                            <img src="${item.image_path}" alt="${item.name}" class="cart-thumb">
+                            <span>${item.name}</span>
+                        </td>
+                        <td>${priceDisplay}</td>
+                        <td>
+                            <div class="qty-control">
+                                <button class="qty-btn minus" data-id="${item.id}">-</button>
+                                <span class="qty-val">${item.quantity}</span>
+                                <button class="qty-btn plus" data-id="${item.id}">+</button>
+                            </div>
+                        </td>
+                        <td>${parseFloat(item.line_total || item.subtotal).toFixed(2)} RON</td>
+                        <td>
+                            <button class="remove-btn" data-id="${item.id}"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+        // Calculate Totals Display
+        const subtotalStr = parseFloat(subtotal).toFixed(2);
+        const discountStr = parseFloat(discount_total).toFixed(2);
+        const loyaltyDiscStr = (data.loyalty_discount || 0).toFixed(2);
+        const totalStr = parseFloat(total).toFixed(2);
+        
+        // Loyalty UI
+        let loyaltyHtml = '';
+        const userPoints = data.user_points || 0;
+        const ptsApplied = data.loyalty_points_applied || 0;
+        
+        if (userPoints > 0) {
+            const config = data.loyalty_config || {loyalty_spend_unit_points: 10, loyalty_spend_unit_value: 1};
+            const unitP = config.loyalty_spend_unit_points;
+            const unitV = config.loyalty_spend_unit_value;
+            const maxP = config.loyalty_max_spend_points;
+            
+            const maxAllowed = Math.min(userPoints, maxP);
+            const currentVal = ptsApplied > 0 ? ptsApplied : 0;
+            
+            loyaltyHtml = `
+                <div class="loyalty-card-container" style="
+                    margin-top: 25px; 
+                    margin-bottom: 15px;
+                    padding: 20px; 
+                    background: linear-gradient(135deg, #2c1810 0%, #3e2723 100%); 
+                    border-radius: 12px; 
+                    color: #fff;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 8px 25px rgba(44, 24, 16, 0.25);
+                    border: 1px solid rgba(212, 175, 55, 0.2);
+                ">
+                    <!-- Decorative Crown BG -->
+                    <i class="fas fa-crown" style="
+                        position: absolute; 
+                        top: -15px; 
+                        right: -15px; 
+                        font-size: 100px; 
+                        color: rgba(255, 215, 0, 0.05); 
+                        transform: rotate(20deg);
+                        pointer-events: none;
+                    "></i>
+
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px; position:relative; z-index:2;">
+                        <div>
+                            <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:1.5px; opacity:0.8; color:#d4af37; font-weight:600;">Loyalty Balance</div>
+                            <div style="font-size:1.8rem; font-weight:800; color:#fff; line-height:1.1; margin-top:5px;">${userPoints} <span style="font-size:0.9rem; font-weight:400; opacity:0.8;">pts</span></div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="background:rgba(212, 175, 55, 0.1); padding:4px 10px; border-radius:20px; font-size:0.8rem; color:#d4af37; border:1px solid rgba(212, 175, 55, 0.2);">
+                                ${unitP} pts = ${unitV} RON
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="position:relative; z-index:2;">
+                        <label style="font-size:0.85rem; display:flex; justify-content:space-between; margin-bottom:8px; color:#e0e0e0;">
+                            <span>Redeem Points</span>
+                            <span style="font-size:0.75rem; color:#aaa;">Max: ${maxAllowed} pts</span>
+                        </label>
+                        <div style="display:flex; gap:10px; align-items:stretch;">
+                            <input type="number" id="points-input" class="form-control" 
+                                value="${currentVal > 0 ? currentVal : ''}" 
+                                placeholder="0"
+                                min="0" max="${maxAllowed}" step="${unitP}"
+                                style="
+                                    background: rgba(255,255,255,0.08); 
+                                    border: 1px solid rgba(255,255,255,0.15); 
+                                    color: #fff; 
+                                    text-align: center;
+                                    font-weight: 700;
+                                    padding: 12px;
+                                    width: 100px;
+                                    border-radius: 8px;
+                                    font-size: 1.1rem;
+                                "
+                                oninput="const val = this.value; const disc = (val * ${unitV} / ${unitP}).toFixed(2); const btn = document.getElementById('loyalty-btn'); btn.innerHTML = val > 0 ? 'Apply Discount <span style=\'background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px; margin-left:5px;\'>-' + disc + ' RON</span>' : 'Apply Points';"
+                            >
+                            <button id="loyalty-btn" class="btn" onclick="applyLoyaltyPoints()" style="
+                                background: linear-gradient(135deg, #d4af37 0%, #c5a028 100%); 
+                                color: #2c1810; 
+                                font-weight: 700; 
+                                border: none;
+                                flex: 1;
+                                border-radius: 8px;
+                                transition: all 0.2s;
+                                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                                font-size: 0.9rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                            ">
+                                ${currentVal > 0 ? `Apply Discount <span style='background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px; margin-left:5px;'>-${(currentVal * unitV / unitP).toFixed(2)} RON</span>` : 'Apply Points'}
+                            </button>
+                        </div>
+                    </div>
+
+                    ${ptsApplied > 0 ? `
+                    <div style="
+                        margin-top: 15px; 
+                        background: rgba(46, 125, 50, 0.15); 
+                        border: 1px solid rgba(46, 125, 50, 0.4); 
+                        padding: 10px; 
+                        border-radius: 8px; 
+                        text-align: center; 
+                        font-size: 0.95rem; 
+                        color: #81c784;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                        animation: fadeIn 0.5s ease;
+                    ">
+                        <i class="fas fa-check-circle"></i> <span>Discount Active: <b>-${loyaltyDiscStr} RON</b></span>
+                    </div>` : ''}
+                </div>
+            `;
+        }
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                <div class="cart-summary">
+                    <div class="cart-row">
+                         <span>Subtotal (Net):</span>
+                         <span>${subtotalStr} RON</span>
+                    </div>
+                    ${discount_total > 0 ? `
+                    <div class="cart-row" style="color: #d32f2f;">
+                         <span>Discount:</span>
+                         <span>-${discountStr} RON</span>
+                    </div>` : ''}
+                    
+                    ${loyaltyHtml}
+                    
+                     <div class="cart-total" style="border-top: 2px dashed #ddd; margin-top: 10px; padding-top: 10px;">
+                        <span>Total:</span>
+                        <span class="total-price">${totalStr} RON</span>
+                    </div>
+                    ${data.estimated_wait_time > 0 ? `
+                    <div style="font-size: 0.9rem; color: #e67e22; margin-top: 5px; text-align: right; font-weight: 600;">
+                         <i class="fas fa-stopwatch"></i> Estimated Prep Time: ~${data.estimated_wait_time} min
+                    </div>` : ''}
+                    ${tva_amount > 0 ? `
+                    <div class="cart-row" style="font-size: 0.85rem; color: #666; margin-top: 5px; flex-direction: column; align-items: flex-end;">
+                         ${data.tax_breakdown ? 
+                            Object.keys(data.tax_breakdown).map(k => {
+                                const t = data.tax_breakdown[k];
+                                if(t.amount > 0) return `<span>TVA ${k} (${t.rate}%): ${parseFloat(t.amount).toFixed(2)} RON</span>`;
+                                return '';
+                            }).join('')
+                            : `<span>(Includes TVA: ${tva_amount} RON)</span>`
+                         }
+                    </div>` : ''}
+                   
+                    <div class="cart-actions" style="margin-top: 20px;">
+                        <a href="?page=menu" class="nav-link btn-third" data-page="menu">Continue Shopping</a>
+                        <button class="btn-primary checkout-btn">Checkout</button>
+                    </div>
+                </div>
+            `;
+            
+            // Add style for cart-row if not exists
+             const styleCheck = document.getElementById('cart-dynamic-styles');
+             if(!styleCheck) {
+                 const sty = document.createElement('style');
+                 sty.id = 'cart-dynamic-styles';
+                 sty.textContent = `
+                    .cart-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 1rem; }
+                 `;
+                 document.head.appendChild(sty);
+             }
+ 
+            cartContent.innerHTML = html;
+            attachCartListeners();
+        }
+
+        window.applyLoyaltyPoints = async function() {
+            const pts = document.getElementById('points-input').value;
+            const formData = new FormData();
+            formData.append('action', 'apply_points');
+            formData.append('points', pts);
+            
+            const res = await fetch('?page=cart_handler&action=apply_points', {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest'},
+                body: formData
+            });
+            
+            const d = await res.json();
+            if (d.success) {
+                loadCart(); // Reload cart to update totals
+            } else {
+                showMessageModal("Loyalty Point Error", d.error || d.message);
+            }
+        }
+
+        function attachCartListeners() {
+            cartContent.querySelectorAll('.qty-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    const isPlus = e.target.classList.contains('plus');
+                    const currentQty = parseInt(e.target.parentElement.querySelector('.qty-val').innerText);
+                    const newQty = isPlus ? currentQty + 1 : currentQty - 1;
+                    if (newQty < 1) return; 
+                    await updateCartItem(id, newQty);
+                });
+            });
+
+            cartContent.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.closest('button').dataset.id;
+                    await removeCartItem(id);
+                });
+            });
+            
+             cartContent.querySelectorAll('.checkout-btn').forEach(btn => {
+                btn.addEventListener('click', handleCheckoutClick);
+            });
+        }
+        
+        async function updateCartItem(id, qty) {
+            const formData = new FormData();
+            formData.append('action', 'update_quantity');
+            formData.append('product_id', id);
+            formData.append('quantity', qty);
+
+            const res = await fetch('?page=cart_handler&action=update_quantity', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                loadCart(); 
+                updateCartBadge(data.data.total_items);
+            }
+        }
+
+        async function removeCartItem(id) {
+             const formData = new FormData();
+            formData.append('action', 'remove');
+            formData.append('product_id', id);
+            
+            const res = await fetch('?page=cart_handler&action=remove', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                loadCart();
+                updateCartBadge(data.data.total_items);
+            }
+        }
+        
+        function updateCartBadge(count) {
+             const badge = document.querySelector('.cart-badge'); 
+             if(badge) {
+                 badge.innerText = count;
+                 badge.style.display = count > 0 ? 'flex' : 'none';
+             }
+        }
+        
+        // --- MODAL HANDLING ---
+        const pickupModal = document.getElementById('checkout-modal');
+        const paymentModal = document.getElementById('payment-modal');
+        const msgModal = document.getElementById('message-modal');
+        const mockPaymentOverlay = document.getElementById('mock-payment-overlay');
+        
+        // Close handlers
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.onclick = function() {
+                this.closest('.modal').style.display = 'none';
+            }
+        });
+
+        window.onclick = (event) => {
+            if (event.target == pickupModal) pickupModal.style.display = 'none';
+            if (event.target == paymentModal) paymentModal.style.display = 'none';
+            if (event.target == msgModal) msgModal.style.display = 'none';
+        }
+
+        function showMessageModal(title, text, callback = null) {
+            document.getElementById('msg-modal-title').innerText = title;
+            document.getElementById('msg-modal-text').innerText = text;
+            const btn = document.getElementById('msg-modal-btn');
+            
+            btn.onclick = () => {
+                msgModal.style.display = 'none';
+                if (callback) callback();
+            };
+            msgModal.style.display = 'flex';
+        }
+
+        // --- CHECKOUT LOGIC ---
+
+        async function handleCheckoutClick() {
+            const token = sessionStorage.getItem('orderToken');
+            let isTable = false;
+            
+            if (token) {
+                try {
+                    const decoded = atob(token); 
+                    if (decoded.startsWith('Table ')) {
+                        isTable = true;
+                    }
+                } catch(e) { console.warn(e); }
+            }
+            
+            if (isTable) {
+                // Show Payment Method Modal for Table Orders
+                paymentModal.style.display = 'flex';
+            } else {
+                // Check Login for Website Orders
+                const currentUser = window.APP_CONFIG ? window.APP_CONFIG.currentUser : null;
+                if (!currentUser) {
+                    showMessageModal("Login Required", "You must be logged in to place an order.");
+                    return;
+                }
+                // Show Pickup Time Modal
+                pickupModal.style.display = 'flex';
+            }
+        }
+
+        // --- PAYMENT SELECTION ---
+        document.getElementById('pay-cash-btn').addEventListener('click', () => {
+            const token = sessionStorage.getItem('orderToken');
+            paymentModal.style.display = 'none';
+            performCheckout(token, null, 'cash');
+        });
+
+        document.getElementById('pay-card-btn').addEventListener('click', () => {
+            const token = sessionStorage.getItem('orderToken');
+            paymentModal.style.display = 'none';
+            // Redirect to Payment Page
+            goToPaymentPage(token, null, 'card');
+        });
+
+        // --- PICKUP SUBMIT ---
+        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pickupTime = document.getElementById('pickup-time').value;
+            
+            if(!pickupTime) {
+                showMessageModal("Required", "Please select a pickup time.");
+                return;
+            }
+            
+            pickupModal.style.display = 'none';
+            
+            // Standard Web Checkout -> Redirect to "Payment"
+            goToPaymentPage(null, pickupTime, 'card');
+        });
+
+        async function goToPaymentPage(token, pickupTime, paymentMethod) {
+            // Validate first before redirecting to Payment Page
+            const formData = new FormData();
+            formData.append('action', 'validate_checkout');
+            if (token) formData.append('token', token);
+            if (pickupTime) formData.append('pickup_time', pickupTime);
+            
+            try {
+                const res = await fetch('?page=cart_handler&action=validate_checkout', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                
+                let data;
+                try {
+                     data = await res.json();
+                } catch(e) {
+                     console.error("Validation Parse Error", e);
+                     showMessageModal("Error", "Server validation error.");
+                     return;
+                }
+                
+                if (!data.success) {
+                    showMessageModal("Cannot Proceed", data.message);
+                    return; // Stop redirection
+                }
+
+                // Save checkout details to SessionStorage for the Payment Page to read
+                const orderData = {
+                    token: token,
+                    pickupTime: pickupTime,
+                    paymentMethod: paymentMethod
+                };
+                sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
+                
+                // Navigate to Payment Page
+                import('./assets/js/modules/router.js')
+                    .then(module => {
+                        module.loadPage('payment');
+                    })
+                    .catch(err => {
+                        console.error("Router load failed, falling back to reload", err);
+                        window.location.href = '?page=payment';
+                    });
+            } catch (err) {
+                 console.error(err);
+                 showMessageModal("Error", "Network error during validation.");
+            }
+        }
+
+        async function performCheckout(token, pickupTime, paymentMethod = 'card') {
+            const formData = new FormData();
+            formData.append('action', 'checkout');
+            if (token) formData.append('token', token);
+            if (pickupTime) formData.append('pickup_time', pickupTime);
+            formData.append('payment_method', paymentMethod);
+            
+            try {
+                const res = await fetch('?page=cart_handler&action=checkout', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                     console.error("Server Error:", text);
+                     showMessageModal("Error", "Server error. Please check console.");
+                     return;
+                }
+
+                if (data.success) {
+                    let msg = data.message;
+                    if(paymentMethod === 'cash') msg += " Please wait for the waiter to collect the cash.";
+                    showMessageModal("Order Placed", msg, () => location.reload());
+                } else {
+                    showMessageModal("Failed", data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                showMessageModal("Error", "Network error.");
+            }
+        }
+
+        loadCart();
+    })();
+</script>
+
+<!-- Checkout Modal (Pickup Time) -->
+<div id="checkout-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Checkout - Pickup Time</h2>
+        <p>Please select when you would like to pick up your order.</p>
+        <form id="checkout-form">
+            <div class="form-group">
+                <label for="pickup-time">Pickup Time:</label>
+                <input type="datetime-local" id="pickup-time" name="pickup_time" required class="form-control">
+                <small>Must be at least 15 minutes from now.</small>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Continue to Payment</button>
+        </form>
+    </div>
+</div>
+
+<!-- Payment Method Modal -->
+<div id="payment-modal" class="modal">
+    <div class="modal-content" style="max-width: 500px; text-align: center;">
+        <span class="close-modal">&times;</span>
+        <h2 style="color: #2a0e02;">Payment Method</h2>
+        <p style="margin-bottom: 20px;">How would you like to pay?</p>
+        <div class="payment-options" style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+             <button id="pay-cash-btn" class="btn-third" style="padding: 20px; flex: 1; min-width: 140px; border-radius: 12px; transition: transform 0.2s; background-color: #2a0e02; color: #ffffff; border: 2px solid #2a0e02;">
+                <i class="fas fa-money-bill-wave" style="font-size: 2.5rem; display: block; margin-bottom: 10px; color: #4CAF50;"></i>
+                <span style="font-weight: bold; font-size: 1.1rem;">Cash</span>
+             </button>
+             <button id="pay-card-btn" class="btn-primary" style="padding: 20px; flex: 1; min-width: 140px; border-radius: 12px; transition: transform 0.2s;">
+                <i class="fas fa-credit-card" style="font-size: 2.5rem; display: block; margin-bottom: 10px; color: #fff;"></i>
+                <span style="font-weight: bold; font-size: 1.1rem;">Card (Online)</span>
+             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Message Modal -->
+<div id="message-modal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+        <span class="close-modal">&times;</span>
+        <h2 id="msg-modal-title" style="color: #2a0e02;">Message</h2>
+        <p id="msg-modal-text" style="margin: 20px 0; font-size: 1.1rem;">...</p>
+        <button id="msg-modal-btn" class="btn-primary" style="width: 100px;">OK</button>
+    </div>
+</div>
+
+<!-- Mock Payment Overlay -->
+<div id="mock-payment-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+    <h1><i class="fas fa-lock" style="color:green;"></i> Secure Payment</h1>
+    <p>Simulating external payment gateway...</p>
+    <div class="spinner" style="border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-top: 20px;"></div>
+    <style>
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</div>
+
+<style>
+/* Modal Styles */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.6); 
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: 0.6s ease;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: red;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.modal-content h2 {
+    color: #2a0e02;
+    margin-bottom: 1rem;
+}
+</style>

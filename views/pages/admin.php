@@ -1,11 +1,822 @@
 <?php 
+if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
+    http_response_code(403);
+    exit('Direct access denied.');
+}
 
 require_once __DIR__ . '/../../core/auth.php';
-require_admin();
-
+require_once __DIR__ . '/../../core/csrf.php';
+require_role(['admin', 'employer']);
 ?>
-<script src="../../assets/js/admin.js"></script>
+<script>
+    window.currentUserRole = <?= json_encode(SessionManager::getCurrentUserData()['roles']) ?>;
+</script>
+<input type="hidden" id="csrf-token-global" value="<?= csrf_token() ?>">
+<link rel="stylesheet" href="assets/css/admin.css?v=<?= time(); ?>">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<h2>Admin Dashboard</h2>
-<p>Only admins can see this.</p>
+<div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="assets/img/Logo Modificat.png" alt="Mazi Admin" style="max-width: 150px; margin-bottom: 10px;">
+            <h3>Mazi Admin</h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-link active" data-section="dashboard">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="#" class="nav-link" data-section="orders">
+                <i class="fas fa-receipt"></i> Running Orders
+                <span id="sidebar-orders-count" class="badge" style="display:none; margin-left: auto; background: #ff4757; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem;">0</span>
+            </a>
+            <a href="#" class="nav-link" data-section="reservations">
+                <i class="fas fa-calendar-alt"></i> Reservations
+            </a>
+            <a href="#" class="nav-link" data-section="menu">
+                <i class="fas fa-coffee"></i> Menu Management
+            </a>
+            <a href="#" class="nav-link" data-section="stock">
+                <i class="fas fa-boxes"></i> Stock
+            </a>
+            <a href="#" class="nav-link" data-section="tables">
+                <i class="fas fa-chair"></i> Floor Plan
+            </a>
+             <a href="#" class="nav-link" data-section="users">
+                <i class="fas fa-users"></i> Users
+            </a>
+            <a href="#" class="nav-link" data-section="slider">
+                <i class="fas fa-images"></i> Slider
+            </a>
+            <a href="#" class="nav-link" data-section="settings">
+                <i class="fas fa-cogs"></i> Settings
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="?page=home" class="nav-link return-tosite" data-page="home">
+                <i class="fas fa-home"></i> Back to Site
+            </a>
+        </div>
+    </aside>
 
+    <!-- Main Content -->
+    <main class="admin-content">
+        <!-- Dashboard Section -->
+        <section id="section-dashboard" class="admin-section">
+            <div class="dashboard-header">
+                <h2>Dashboard Overview</h2>
+                <div class="cafe-status-toggle">
+                    <span>Cafe Status:</span>
+                    <select id="global-cafe-status" onchange="updateCafeStatus(this.value)">
+                        <option value="open">Open</option>
+                        <option value="busy">Busy</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon calendar"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Reservations (Today)</span>
+                        <h3 id="stat-res-today">-</h3>
+                        <small id="stat-res-total">Upcoming: -</small>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon tables"><i class="fas fa-chair"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Active Tables</span>
+                        <h3 id="stat-active-tables">-</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon info"><i class="fas fa-coffee"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Menu Items</span>
+                        <h3 id="stat-menu-items">-</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                     <!-- Quick Action for Walk-in -->
+                     <button class="btn btn-secondary" onclick="openQuickReserve()" style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                        <i class="fas fa-user-plus" style="font-size: 1.5rem; margin-bottom: 5px;"></i>
+                        Walk-In Reservation
+                     </button>
+                </div>
+            </div>
+
+            <div class="dashboard-split" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <!-- Main Chart -->
+                <div class="chart-container" style="flex: 2; min-width: 300px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; height: 400px; position: relative;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h4 style="margin:0;">Top Selling Products (Last 7 Days)</h4>
+                        <button class="btn btn-sm btn-secondary" onclick="exportData('sales')"><i class="fas fa-download"></i> Export Sales CSV</button>
+                    </div>
+                    <canvas id="TopSellingChart"></canvas>
+                </div>
+
+                <!-- Notes Board -->
+                <div class="notes-container" style="flex: 1; min-width: 250px; background: #fffaf0; padding: 20px; border-radius: 12px; border: 1px solid #fae5ba;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <h4 style="margin:0; color: #795548;"><i class="fas fa-sticky-note"></i> Staff Notes</h4>
+                        <small id="notes-status" style="color: green; display:none;">Saved</small>
+                    </div>
+                    <textarea id="admin-notes" style="width: 100%; height: 200px; border: none; background: transparent; resize: none; font-family: 'Courier New', monospace;" placeholder="Type notes here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Recent Activity & Quick Tools -->
+            <div class="recent-section" style="margin-top: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items:center; margin-bottom: 15px;flex-direction:row;">
+                    <h3>Recent Reservations</h3>
+                    <div class="export">
+                        <button class="btn btn-sm btn-secondary" onclick="exportData('reservations')"><i class="fas fa-file-csv"></i> Export Reservations</button>
+                        <button class="btn btn-sm btn-secondary" onclick="exportData('users')"><i class="fas fa-file-csv"></i> Export Users</button>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Name</th>
+                            <th>Create Time</th>
+                            <th>Reservation Date</th>
+                            <th>ID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-activity-list">
+                        <!-- Populated JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Newsletter Widget -->
+             <div class="newsletter-widget" style="margin-top: 30px; background: rgb(203, 204, 207); padding: 20px; border-radius: 12px;">
+                <details>
+                    <summary style="font-weight: bold; cursor: pointer; color: rgb(40, 43, 47);">Send Newsletter / Announcement</summary>
+                    <div style="margin-top: 15px;">
+                        <input type="text" id="news-subject" class="form-control" placeholder="Subject" style="margin-bottom: 10px;">
+                        <textarea id="news-body" class="form-control" placeholder="Message to all users..." style="margin-bottom: 10px;"></textarea>
+                        <button class="btn btn-success" onclick="sendNewsletter()">Send Email</button>
+                    </div>
+                </details>
+             </div>
+        </section>
+
+        <!-- Running Orders Section -->
+        <section id="section-orders" class="admin-section" style="display: none;">
+            <div class="header-actions">
+                <h2>Running Orders <span id="header-orders-count" style="font-size: 0.8em; color: #666; display:none;">(0)</span></h2>
+                <button class="btn btn-sm btn-secondary" onclick="loadRunningOrders()"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+            <div id="running-orders-container" style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+                <p>Loading orders...</p>
+            </div>
+        </section>
+
+        <!-- Menu Management Section -->
+        <section id="section-menu" class="admin-section" style="display: none;">
+            <div class="header-actions">
+                <h2>Menu Management</h2>
+                <button id="add-product-btn" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i> Add New Coffee
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="products-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price (RON)</th>
+                            <th>Discount (%)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Stock Management Section (NEW) -->
+        <section id="section-stock" class="admin-section" style="display: none;">
+            <div class="header-actions">
+                <h2>Stock / Ingredients</h2>
+                <button id="add-ingredient-btn" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i> Add Ingredient
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="stock-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Stock Level</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Slider Settings Section -->
+        <section id="section-slider" class="admin-section" style="display: none;">
+            <div class="header-actions">
+                <h2>Slider Settings</h2>
+                <button id="add-slide-btn" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i> Add New Slide
+                </button>
+            </div>
+            <div class="slider-list" id="slider-list">
+                <!-- Populated by JS -->
+                 <p>Loading slider settings...</p>
+            </div>
+        </section>
+
+        <!-- Table Management Section -->
+        <section id="section-tables" class="admin-section" style="display: none;">
+        <div class="header-actions">
+                <h2>Floor Plan & Tables</h2>
+                <div class="table-controls" style="display: flex; align-items: center; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px; border-radius: 8px; border: 1px solid #ddd;">
+                        <button id="remove-table-btn" class="btn btn-danger btn-sm" style="padding: 5px 12px; margin: 0;"><i class="fas fa-minus"></i></button>
+                        <span id="table-count-display" style="font-size: 1.2rem; font-weight: bold; min-width: 30px; text-align: center;">-</span>
+                        <button id="add-table-btn" class="btn btn-secondary btn-sm" style="padding: 5px 12px; margin: 0;width: 40px;"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 10px;">
+                    <button id="upload-floor-plan-btn" class="btn btn-3 btn-sm"><i class="fas fa-image"></i> Upload Floor Plan</button>
+                    <input type="file" id="floor-plan-upload" style="display: none;" accept="image/*">
+                </div>
+            </div>
+            
+            <div id="floor-plan-container" class="floor-plan" style="position: relative; width: 100%; max-width: 800px; height: 600px; margin: 0 auto 20px auto; background: #e0e0e0; border: 2px solid #ccc; border-radius: 8px; overflow: hidden; background-image: radial-gradient(#ccc 1px, transparent 1px); background-repeat: no-repeat; background-position: center;">
+                <!-- Draggable Tables will be here -->
+                <p style="position: absolute; top: 10px; left: 10px; z-index:0; color: #888; pointer-events: none;">Floor Plan Area</p>
+            </div>
+
+            <!-- Table Properties Modal -->
+            <div id="table-props-modal" class="modal">
+                <div class="modal-content" style="max-width: 400px;">
+                    <span class="close-modal" data-target="table-props-modal">&times;</span>
+                    <h2>Table Properties</h2>
+                    <form id="table-props-form">
+                        <input type="hidden" id="prop-table-id">
+                        <div class="form-group">
+                            <label>Shape</label>
+                            <select id="prop-shape" class="form-control">
+                                <option value="circle">Circle (Round)</option>
+                                <option value="square">Square</option>
+                                <option value="rectangle">Rectangle</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="display: flex; gap: 10px;">
+                            <div style="flex:1">
+                                <label>Width (%)</label>
+                                <input type="number" id="prop-width" name="width" class="form-control" min="1" max="100" step="0.1">
+                            </div>
+                            <div style="flex:1">
+                                <label>Height (%)</label>
+                                <input type="number" id="prop-height" name="height" class="form-control" min="1" max="100" step="0.1">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">Update Table</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Crop Modal -->
+            <div id="crop-modal" class="modal">
+                <div class="modal-content" style="max-width: 95%; max-height: 95%; width: auto; height: auto; display:flex; flex-direction:column; align-items:center;">
+                    <span class="close-modal" data-target="crop-modal">&times;</span>
+                    <h2>Crop & Resize Floor Plan</h2>
+                    <p>Drag to move, Scroll or Slider to Zoom. The visible area inside the box will be saved.</p>
+                    
+                    <div id="crop-container-wrapper" style="position: relative; overflow: hidden; border: 2px solid #333; margin: 10px 0;">
+                        <!-- Image will be injected here via JS -->
+                        <img id="crop-target-img" style="position: absolute; transform-origin: 0 0; cursor: grab; max-width: none;">
+                        <!-- Guide Lines -->
+                        <div class="crop-guides"></div>
+                    </div>
+
+                    <div class="controls" style="display: flex; align-items: center; gap: 15px; margin-top: 10px; width: 100%; justify-content: center;">
+                        <button type="button" class="zoom-btn" id="zoom-out-btn"><i class="fas fa-search-minus"></i></button>
+                        <input type="range" id="crop-zoom-slider" min="0.1" max="3" step="0.01" value="1" style="width: 300px;">
+                        <button type="button" class="zoom-btn" id="zoom-in-btn"><i class="fas fa-search-plus"></i></button>
+                        <span id="zoom-level">100%</span>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button id="btn-save-crop" class="btn btn-success"><i class="fas fa-check"></i> Save & Upload</button>
+                        <button class="btn btn-danger close-modal" data-target="crop-modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tables-grid" class="tables-grid" style="display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid #ddd; padding-top: 20px;">
+                <p>Detailed List:</p>
+            </div>
+        </section>
+
+        <!-- Reservations Section -->
+        <section id="section-reservations" class="admin-section" style="display: none;">
+            <div class="header-actions">
+                <h2>Reservations</h2>
+            </div>
+            <div class="table-container">
+                <h3 class="section-subtitle">Active & Upcoming</h3>
+                <table class="data-table" id="reservations-table">
+                    <thead>
+                        <tr>
+                            <th>DateTime</th>
+                            <th>Table</th>
+                            <th>Name</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservations-list">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="history-section" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                <details>
+                    <summary style="font-size: 1.2rem; font-weight: bold; cursor: pointer; color: #7f8c8d;">
+                        View Reservation History (Past) <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 5px;"></i>
+                    </summary>
+                    <div class="table-container" style="margin-top: 15px;">
+                        <table class="data-table" id="history-reservations-table" style="opacity: 0.8;">
+                            <thead>
+                                <tr>
+                                    <th>DateTime</th>
+                                    <th>Table</th>
+                                    <th>Name</th>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-reservations-list">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+            </div>
+
+            <div class="deleted-section" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 20px;">
+                <details>
+                    <summary style="font-size: 1.2rem; font-weight: bold; cursor: pointer; color: #c0392b;">
+                        View Deleted Reservations <i class="fas fa-trash" style="font-size: 0.8rem; margin-left: 5px;"></i>
+                    </summary>
+                    <div class="table-container" style="margin-top: 15px;">
+                        <table class="data-table" id="deleted-reservations-table" style="background: #fff0f0;">
+                            <thead>
+                                <tr>
+                                    <th>DateTime</th>
+                                    <th>Table</th>
+                                    <th>Name</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deleted-reservations-list">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Users Section (NEW) -->
+        <section id="section-users" class="admin-section" style="display: none;">
+             <div class="header-actions">
+                <h2>User Management</h2>
+                <input type="text" id="user-search" placeholder="Search by name or email..." class="form-control" style="width: 300px;">
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Points</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Settings Section (NEW) -->
+        <section id="section-settings" class="admin-section" style="display: none;">
+            <div class="header-actions">
+                <h2>Business Settings</h2>
+            </div>
+            
+            <div class="settings-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
+                <h3>Financial Settings</h3>
+                <form id="financial-settings-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>TVA Code A (%)</label>
+                            <input type="number" name="tva_a" id="setting-tva-a" class="form-control" placeholder="19" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>TVA Code B (%)</label>
+                            <input type="number" name="tva_b" id="setting-tva-b" class="form-control" placeholder="9" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>TVA Code C (%)</label>
+                            <input type="number" name="tva_c" id="setting-tva-c" class="form-control" placeholder="5" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>TVA Code D (%)</label>
+                            <input type="number" name="tva_d" id="setting-tva-d" class="form-control" placeholder="0" step="0.1" min="0" max="100">
+                        </div>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Configure TVA rates for each code. Usually A=19%, B=9%, C=5%, D=0%.</p>
+                    <button type="submit" class="btn btn-success" style="margin-top: 10px;">Save Financials</button>
+                </form>
+            </div>
+            
+            <div class="settings-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee;">
+                <h3>Working Hours Schedule</h3>
+                <p>Configure when the cafe is open. Reservations and Orders will only be allowed during these times.</p>
+                <form id="schedule-form">
+                    <table class="data-table" style="width: 100%; max-width: 600px;">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Open Time</th>
+                                <th>Close Time</th>
+                                <th>Closed?</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-list">
+                            <!-- Populated JS -->
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-success" style="margin-top: 20px;">Save Schedule</button>
+                </form>
+            </div>
+
+            <div class="settings-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-top: 20px;">
+                <h3>Email Configuration</h3>
+                <p>Configure sender emails for system notifications.</p>
+                <form id="email-settings-form">
+                    <div class="form-group">
+                        <label>Newsletter Sender Email</label>
+                        <input type="email" name="newsletter_email" id="newsletter-email" class="form-control" placeholder="newsletter@mazicoffee.com" style="max-width:300px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Support / Password Reset Email</label>
+                        <input type="email" name="support_email" id="support-email" class="form-control" placeholder="support@mazicoffee.com" style="max-width:300px;">
+                    </div>
+                    <button type="submit" class="btn btn-success" style="margin-top: 10px;">Save Emails</button>
+                </form>
+            </div>
+
+            <!-- Loyalty Settings -->
+            <div class="settings-card" style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-top: 20px; border-left: 5px solid #d4af37;">
+                <h3><i class="fas fa-crown" style="color: #d4af37;"></i> Loyalty Program Settings</h3>
+                <p>Configure how users earn and spend loyalty points.</p>
+                <form id="loyalty-settings-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4><i class="fas fa-plus-circle"></i> Earning Rules</h4>
+                            <div class="form-group">
+                                <label>Threshold Amount (RON)</label>
+                                <input type="number" name="loyalty_earn_threshold" id="loy-earn-thresh" class="form-control" placeholder="25" min="1">
+                                <small style="color:#888;">Spend this amount to earn points</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Reward Points</label>
+                                <input type="number" name="loyalty_earn_reward" id="loy-earn-reward" class="form-control" placeholder="5" min="1">
+                                <small style="color:#888;">Points awarded per threshold</small>
+                            </div>
+                        </div>
+                        <div>
+                            <h4><i class="fas fa-minus-circle"></i> Spending Rules</h4>
+                            <div class="form-group">
+                                <label>Points Unit</label>
+                                <input type="number" name="loyalty_spend_unit_points" id="loy-spend-points" class="form-control" placeholder="10" min="1">
+                                <small style="color:#888;">Points needed for discount</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Discount Value (RON)</label>
+                                <input type="number" name="loyalty_spend_unit_value" id="loy-spend-val" class="form-control" placeholder="1" min="1">
+                                <small style="color:#888;">Discount value per unit</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Max Points Usage Per Order</label>
+                        <input type="number" name="loyalty_max_spend_points" id="loy-max-spend" class="form-control" placeholder="100" min="0" style="max-width: 200px;">
+                        <small style="color:#888;">Limit how many points can be used at once</small>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="margin-top: 10px;">Save Loyalty Rules</button>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+                        <strong>Current Logic:</strong>
+                        <span id="loyalty-preview-text">Spend 25 RON -> Get 5 Points. Use 10 Points -> Get 1 RON Discount.</span>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- Add/Edit Product Modal -->
+<div id="product-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" data-target="product-modal">&times;</span>
+        <h3 id="modal-title">Add Product</h3>
+        <form id="product-form" enctype="multipart/form-data">
+            <input type="hidden" name="id" id="prod-id">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <input type="hidden" name="action" id="form-action" value="add">
+            
+            <div class="form-row" style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:2;">
+                    <label for="prod-name">Name</label>
+                    <input type="text" id="prod-name" name="name" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-category">Category</label>
+                    <select id="prod-category" name="category" class="form-control">
+                        <option value="coffee">Coffee</option>
+                        <option value="tea">Tea</option>
+                        <option value="chocolate">Chocolate</option>
+                        <option value="refreshment">Refreshment</option>
+                        <option value="signature">Signature</option>
+                        <option value="addon">Add-on</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row" style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-price">Price (RON)</label>
+                    <input type="number" id="prod-price" name="price" step="0.01" min="0" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-discount">Discount (%)</label>
+                    <input type="number" id="prod-discount" name="discount" step="1" min="0" max="100" value="0">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-tva-code">TVA Code</label>
+                    <select id="prod-tva-code" name="tva_code" class="form-control">
+                         <option value="A">A (Standard)</option>
+                         <option value="B">B (Reduced)</option>
+                         <option value="C">C (Super Reduced)</option>
+                         <option value="D">D (Zero/Exempt)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row" style="display:flex; gap:10px;">
+                 <div class="form-group" style="flex:1;">
+                    <label for="prod-quantity">Quantity</label>
+                    <input type="text" id="prod-quantity" name="quantity" placeholder="e.g. 200ml">
+                </div>
+                 <div class="form-group" style="flex:1;">
+                    <label for="prod-prep-time">Prep Time (min)</label>
+                    <input type="number" id="prod-prep-time" name="preparation_time" min="0" placeholder="e.g. 5">
+                </div>
+                 <div class="form-group" style="flex:1;">
+                    <label for="prod-tags">Tags</label>
+                    <input type="text" id="prod-tags" name="tags" placeholder="e.g. ice, chocolate">
+                </div>
+            </div>
+
+                <div class="form-group" style="flex:1;">
+                    <label for="prod-desc">Description</label>
+                    <textarea id="prod-desc" name="description" rows="2" style="height:60px;"></textarea>
+                </div>
+
+
+            <div class="form-group" style="padding:10px; border:1px solid #eee; border-radius:6px; background:#fbfbfb; margin-bottom:10px;">
+                <label style="margin-bottom:5px; font-weight:600;">Linked Ingredients (Stock)</label>
+                <div style="display:flex; gap:5px; margin-bottom:5px; align-items:center;">
+                    <select id="prod-link-ing-select" class="form-control" style="flex:2; padding: 6px 12px; height: auto;">
+                        <option value="">Select Ingredient...</option>
+                    </select>
+                    <input type="number" id="prod-link-qty" placeholder="Qty" class="form-control" style="flex:1; min-width:60px; padding: 6px 12px; height: auto;" step="0.01">
+                    <span id="prod-link-unit" style="font-size:0.8rem; color:#666; width:30px; text-align:center;">-</span>
+                    <button type="button" id="btn-add-link-ing" class="btn btn-secondary" style="margin:0; width:40px; height:38px; padding:0; display:flex; align-items:center; justify-content:center;"><i class="fas fa-plus"></i></button>
+                </div>
+                <div id="product-linked-list" style="margin-top:5px; max-height:100px; overflow-y:auto; border-top:1px solid #eee; padding-top:5px;">
+                    <p style="color:#999; font-size:0.8rem; text-align:center; padding:5px;">No ingredients linked.</p>
+                </div>
+                <input type="hidden" name="linked_ingredients" id="linked-ingredients-json">
+            </div>
+            
+            <div class="form-group" style="margin-bottom:10px;">
+                 <label for="prod-image" style="display:inline-block; margin-right:10px;">Image</label>
+                 <input type="file" id="prod-image" name="image" accept="image/*" style="display:inline-block; width:auto;">
+                 <span id="current-image-preview" style="display:none; margin-left:10px; vertical-align:middle;">
+                    <img src="" id="preview-img" style="height: 30px; border-radius:4px; border:1px solid #ccc;">
+                 </span>
+            </div>
+
+            <div class="form-actions" style="margin-top:10px;">
+                <button type="submit" class="btn btn-success" style="width:100%;">Save Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Ingredient Modal -->
+<div id="ingredient-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" data-target="ingredient-modal">&times;</span>
+        <h3 id="ing-modal-title">Add Ingredient</h3>
+        <form id="ingredient-form" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <input type="hidden" name="action" id="ing-form-action" value="add">
+            <input type="hidden" name="entity" value="ingredient">
+            <input type="hidden" name="id" id="ing-id">
+            
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" name="name" id="ing-name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Type</label>
+                <select name="type" id="ing-type" class="form-control" onchange="updateIngUnits()">
+                    <option value="solid">Solid (Weight)</option>
+                    <option value="liquid">Liquid (Volume)</option>
+                </select>
+            </div>
+            
+            <div class="form-group" style="display:flex; gap:10px;">
+                <div style="flex:1;">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity" id="ing-qty" step="0.01" min="0" required>
+                </div>
+                <div style="flex:1;">
+                    <label>Unit</label>
+                    <select name="unit" id="ing-unit" class="form-control">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Image</label>
+                <input type="file" name="image" accept="image/*">
+                <div id="ing-current-image" style="display:none; margin-top:5px;">
+                     <img id="ing-img-preview" src="" style="height:50px;">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Save Ingredient</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Slider Modal -->
+<div id="slider-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" data-target="slider-modal">&times;</span>
+        <h3 id="slider-modal-title">Add New Slide</h3>
+        <form id="slider-form" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <input type="hidden" name="action" id="slider-form-action" value="add">
+            <input type="hidden" name="entity" value="slider">
+            <input type="hidden" name="id" id="slide-id">
+            
+            <div class="form-group">
+                <label for="slide-title">Title (Optional)</label>
+                <input type="text" id="slide-title" name="title" placeholder="e.g. Welcome to Mazi">
+            </div>
+
+            <div class="form-group">
+                <label for="slide-subtitle">Subtitle (Optional)</label>
+                <input type="text" id="slide-subtitle" name="subtitle" placeholder="e.g. Best Coffee in Town">
+            </div>
+
+            <div class="form-group">
+                <label for="slide-description">Description (Optional)</label>
+                <textarea id="slide-description" name="description" rows="3" placeholder="Additional text..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="slide-image">Image</label>
+                <div id="slide-current-image" style="display:none; margin-bottom:5px;">
+                    <img id="slide-img-preview" src="" style="height:50px;">
+                    <small>Leave empty to keep current image</small>
+                </div>
+                <input type="file" id="slide-image" name="image" accept="image/*">
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                <input type="checkbox" id="slide-btn-visible" name="is_button_visible" value="1" checked onchange="document.getElementById('slide-btn-options').style.display = this.checked ? 'block' : 'none'">
+                <label for="slide-btn-visible" style="margin: 0;">Show Call-to-Action Button</label>
+            </div>
+
+            <div id="slide-btn-options">
+                <div class="form-group">
+                    <label for="slide-btn-text">Button Text</label>
+                    <input type="text" id="slide-btn-text" name="button_text" value="View Menu" placeholder="e.g. Order Now">
+                </div>
+                <div class="form-group">
+                    <label for="slide-btn-link">Button Link</label>
+                    <input type="text" id="slide-btn-link" name="button_link" value="?page=menu" placeholder="e.g. ?page=tables">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Add Slide</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div id="user-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" data-target="user-modal">&times;</span>
+        <h3>User Details</h3>
+        <div id="user-details-content">
+            <!-- Populated via JS -->
+             <p>Loading...</p>
+        </div>
+        <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+             <h4>Actions</h4>
+             <button id="blacklist-btn" class="btn btn-danger" style="width: 100%;">Toggle Blacklist</button>
+             <textarea id="blacklist-reason" placeholder="Reason for blacklisting (required)" style="width:100%; margin-top: 10px; display:none;"></textarea>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Reservation Modal -->
+<div id="quick-reserve-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" data-target="quick-reserve-modal">&times;</span>
+        <h3>Walk-In / Quick Reservation</h3>
+        <form id="quick-reserve-form">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <input type="hidden" name="action" value="create">
+            <input type="hidden" name="entity" value="reservation">
+            <input type="hidden" name="is_admin_walkin" value="1">
+            
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" name="name" required placeholder="Guest Name">
+            </div>
+            
+             <div class="form-group">
+                 <label>Table</label>
+                 <!-- Ideally populated dynamically, but simple input for now or select -->
+                 <input type="number" name="table_id" required placeholder="Table ID" min="1">
+             </div>
+
+            <div class="form-group">
+                <label>Date & Time</label>
+                <input type="datetime-local" name="reservation_time" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Email (Optional)</label>
+                <input type="email" name="email" placeholder="For confirmation">
+            </div>
+
+            <button type="submit" class="btn btn-secondary" style="width: 100%;">Create Reservation</button>
+        </form>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast-notification" class="toast"></div>
+
+<script src="assets/js/admin.js?v=<?= time(); ?>"></script>

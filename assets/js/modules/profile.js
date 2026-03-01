@@ -1,6 +1,7 @@
 /**
  * Profile Popup Logic
  */
+import { safeFetch } from './api.js';
 
 let scrollCompApplied = false;
 let previousBodyPaddingRight = '';
@@ -14,20 +15,31 @@ export function closeProfilePopup() {
     const backdrop = document.getElementById('profile-backdrop');
     const btn = document.getElementById('profile-btn');
 
-    if (popup && !popup.hasAttribute('hidden')) {
-        popup.setAttribute('hidden', '');
-        if (backdrop) backdrop.classList.remove('active');
-        if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (!popup || popup.hasAttribute('hidden') || popup.classList.contains('closing')) return;
 
-        // Remove scroll compensation
-        if (scrollCompApplied) {
-            document.body.style.paddingRight = previousBodyPaddingRight;
-            scrollCompApplied = false;
-            previousBodyPaddingRight = '';
-        }
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-    }
+    popup.classList.add('closing');
+
+    if (backdrop) backdrop.classList.remove('active');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+
+    popup.addEventListener(
+        'animationend',
+        () => {
+            popup.classList.remove('closing');
+            popup.setAttribute('hidden', '');
+
+            // Restore scroll compensation
+            if (scrollCompApplied) {
+                document.body.style.paddingRight = previousBodyPaddingRight;
+                scrollCompApplied = false;
+                previousBodyPaddingRight = '';
+            }
+
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+        },
+        { once: true }
+    );
 }
 
 /**
@@ -64,12 +76,113 @@ export function initProfilePopup() {
         document.body.style.overflow = 'hidden';
     }
 
-    function openPopup() {
-        popup.removeAttribute('hidden');
-        backdrop.classList.add('active');
-        btn.setAttribute('aria-expanded', 'true');
-        applyScrollComp();
+    async function updateReservationDisplay() {
+        try {
+            const container = document.getElementById('upcoming-res-container');
+            if (!container) return;
+
+            const res = await safeFetch('?page=reservation&action=get_upcoming');
+            const data = await res.json();
+
+            if (data.success && data.data) {
+                const r = data.data;
+
+                const nameEl = document.getElementById('upcoming-res-name');
+                const tableEl = document.getElementById('upcoming-res-table');
+                const timeEl = document.getElementById('upcoming-res-time');
+
+                if (nameEl) nameEl.textContent = r.reservation_name || 'Guest';
+                if (tableEl) tableEl.textContent = r.table_name || r.table_id;
+
+                if (timeEl && r.reservation_time) {
+                    const d = new Date(r.reservation_time);
+                    // Format: "10 Jan, 15:30"
+                    const day = d.getDate();
+                    const month = d.toLocaleString('en-US', { month: 'short' });
+                    const time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    timeEl.textContent = `${day} ${month}, ${time}`;
+                }
+
+                // Check-in Logic
+                let actionContainer = document.getElementById('res-action-container');
+                if (!actionContainer) {
+                    actionContainer = document.createElement('div');
+                    actionContainer.id = 'res-action-container';
+                    actionContainer.style.marginTop = '10px';
+                    actionContainer.style.textAlign = 'center';
+                    container.querySelector('.reservation-details').appendChild(actionContainer);
+                }
+                actionContainer.innerHTML = ''; // Clear previous
+
+                if (r.checked_in == 1) {
+                    actionContainer.innerHTML = '<span style="color:#27ae60; font-weight:bold;"><i class="fa-solid fa-check-circle"></i> Checked In</span>';
+                } else {
+                    const resTime = new Date(r.reservation_time);
+                    const now = new Date();
+                    const diffMs = resTime - now;
+                    const diffHours = diffMs / (1000 * 60 * 60);
+
+                    if (diffHours <= 36 && diffHours >= 12) {
+                        // Show Button
+                        const checkInBtn = document.createElement('button');
+                        checkInBtn.className = 'res-btn-small'; // New class or inline
+                        checkInBtn.textContent = 'Check In';
+                        checkInBtn.style.cssText = 'background:#27ae60; color:white; border:none; padding:5px 15px; border-radius:15px; cursor:pointer; font-size:14px;';
+
+                        checkInBtn.onclick = async () => {
+                            checkInBtn.textContent = '...';
+                            checkInBtn.disabled = true;
+                            try {
+                                const formData = new FormData();
+                                formData.append('action', 'check_in');
+                                formData.append('id', r.id);
+
+                                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                                if (csrfMeta) {
+                                    formData.append('csrf_token', csrfMeta.content);
+                                }
+
+                                const ciRes = await safeFetch('controllers/reservation_handler.php', { method: 'POST', body: formData });
+                                const ciData = await ciRes.json();
+                                if (ciData.success) {
+                                    updateReservationDisplay(); // Refresh
+                                } else {
+                                    alert(ciData.message || 'Check-in failed');
+                                    checkInBtn.textContent = 'Check In';
+                                    checkInBtn.disabled = false;
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                alert('Error during check-in');
+                                checkInBtn.textContent = 'Check In';
+                                checkInBtn.disabled = false;
+                            }
+                        };
+                        actionContainer.appendChild(checkInBtn);
+                    } else if (diffHours > 36) {
+                        actionContainer.innerHTML = `<span style="font-size:12px; color:#555;">Check-in opens in ${Math.round(diffHours - 36)}h</span>`;
+                    } else if (diffHours < 12) {
+                        actionContainer.innerHTML = '<span style="color:#e74c3c; font-weight:bold;">Check-in Missed</span>';
+                    }
+                }
+
+                container.hidden = false;
+            } else {
+                container.hidden = true;
+            }
+        } catch (e) {
+            console.error('Failed to update reservation display', e);
+        }
     }
+
+    function openPopup() {
+    popup.classList.remove('closing');
+    popup.removeAttribute('hidden');
+    backdrop.classList.add('active');
+    btn.setAttribute('aria-expanded', 'true');
+    applyScrollComp();
+    updateReservationDisplay();
+}
 
     // Toggle wrapper
     function togglePopup(e) {
@@ -106,6 +219,19 @@ export function initProfilePopup() {
                 closeProfilePopup();
             });
         }
+
+        // Close popup when user switches tab or minimizes
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        closeProfilePopup();
+    }
+});
+
+// Optional: also catch window losing focus
+window.addEventListener('blur', () => {
+    closeProfilePopup();
+});
+
 
         btn._profileInit = true;
     }

@@ -1,6 +1,6 @@
 .register-wrapper {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     height: 100vh;
     width: 100%;
@@ -11,23 +11,41 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    color:white;
+    color: white;
 
 }
-.register-box p{
-    font-weight:bold;
+
+.register-box p {
+    font-weight: bold;
 }
-.register-box p a{
+
+.register-box p a {
     text-decoration: none;
-    color: rgb(195, 106, 43)
+    color: rgba(223, 151, 44, 0.911)
 }
+
 .register-box a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    color: rgb(255, 173, 50)
+}
+
+.register-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.register-box .bottom-text {
+    margin-top: auto;
+    /* pushes it to the bottom */
+    padding-top: 20px;
+    font-weight: bold;
+    color: #eaeaea;
 }
 
 .register-wrapper::before {
     content: '';
-    position: fixed;       /* fixed so overlay covers the viewport even when page scrolls */
+    position: fixed;
+    /* fixed so overlay covers the viewport even when page scrolls */
     top: 0;
     left: 0;
     width: 100vw;
@@ -46,7 +64,7 @@
 
 .register-box a {
     text-decoration: none;
-    color: rgb(255, 204, 168)
+    color: rgba(223, 151, 44, 0.911)
 }
 
 .register-wrapper .register-box {
@@ -54,25 +72,31 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 670px;
+    width: 750px;
+    height: calc(100% - 85px);
     max-width: 90%;
     padding: 60px 45px;
-    margin-top:60px;
-    border: 2px solid rgba(255,255,255,0.2);
+    margin-top: 60px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(20px);
-    border-radius: 40px;
     background: transparent;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     font-size: 20px;
     letter-spacing: 1px;
     z-index: 1;
     position: relative;
+    margin: 0;
+    margin-top:85px;
+    animation: slideInFromRight 1s ease-out forwards;
 }
+
 .register-wrapper .register-box h3 {
     color: White;
     font-size: 40px;
     letter-spacing: 1px;
     margin-top: 0;
+    padding-bottom: 40px;
+    padding-top: 40px;
 }
 
 #app .register-box label {
@@ -86,9 +110,9 @@
 #app .register-box input[type=text] {
     width: 100%;
     padding: 12px 15px;
-    margin-bottom: 25px;
+    margin-bottom: 10px;
     border-radius: 40px;
-    border: 2px solid rgba(255,255,255,0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     outline: none;
     background: transparent;
     color: #ededed;
@@ -107,6 +131,7 @@
 
 #app .register-box button {
     width: 100%;
+    height:45px;
     background-color: #dbdddb;
     color: rgb(30, 29, 35);
     font-size: 20px;
@@ -118,10 +143,13 @@
     border-radius: 40px;
     cursor: pointer;
     transition: background-color 0.3s;
+    overflow:visible;
 }
 
 #app .register-box button:hover {
-    background-color: #ffdbb5;
+    background-color: #d9a60d;
+    color: black;
+    transition: 0.8s ease;
 }
 
 @media screen and (max-width: 400px) {
@@ -129,4 +157,75 @@
         margin: 20px;
         padding: 20px;
     }
+}
+
+@keyframes slideInFromRight {
+    0% {
+        opacity: 0;
+        transform: translateX(120px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* OAuth Styling */
+.oauth-section {
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.oauth-section p {
+    margin: 5px 0 10px;
+    font-size: 14px;
+    color: #ccc;
+    padding-top: 0 !important;
+    /* Override .register-box p padding */
+}
+
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 45px;
+    background-color: #ffffffe6;
+    color: rgb(66, 66, 66) !important;
+    /* Override anchor color */
+    border-radius: 40px;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 600;
+    border:3px solid #5a5454;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: 0.3s ease;
+}
+
+.btn-google i {
+    margin-right: 10px;
+    font-size: 22px;
+    background: conic-gradient(
+    from 0deg at 40% 48%,
+    #EA4335 0deg 65deg,
+    #4285F4 65deg 144deg,
+    #34A853 144deg 234deg,
+    #FBBC05 234deg 306deg,
+    #EA4335 306deg 360deg
+  );
+
+  display: inline-block;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.btn-google:hover {
+    background-color: #ffffff;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(213, 213, 213, 0.4);
 }

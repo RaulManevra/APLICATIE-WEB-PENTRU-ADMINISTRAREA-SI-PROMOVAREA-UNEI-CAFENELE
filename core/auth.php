@@ -8,13 +8,27 @@ function require_login() {
     }
 }
 
-function require_admin() {
+function require_role(array $allowedRoles) {
     require_login();
     $userData = SessionManager::getCurrentUserData();
-    $roles = $userData['roles'] ?? [];
+    $userRoles = $userData['roles'] ?? [];
 
-    if (!in_array("admin", $roles)) {
-        http_response_code(403);
-        exit("Forbidden");
+    // Check if user has at least one of the allowed roles
+    $hasAccess = false;
+    foreach ($allowedRoles as $role) {
+        if (in_array($role, $userRoles)) {
+            $hasAccess = true;
+            break;
+        }
     }
+
+    if (!$hasAccess) {
+        http_response_code(403);
+        // Debug info for pair programming context
+        exit("Forbidden. Required role not found. Your roles: " . json_encode($userRoles));
+    }
+}
+
+function require_admin() {
+    require_role(['admin']);
 }

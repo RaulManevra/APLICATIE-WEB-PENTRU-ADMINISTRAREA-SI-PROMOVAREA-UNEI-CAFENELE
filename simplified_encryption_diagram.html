@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Encryption Digram</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg-pan-zoom/3.6.1/svg-pan-zoom.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 10px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .controls button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #diagram-container {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h2 style="margin:0">Mazi Coffee - Secure Data Flow</h2>
+        <div class="controls">
+            <button onclick="exportPNG()">Download PNG</button>
+        </div>
+    </header>
+
+    <div id="diagram-container">
+        <pre class="mermaid">
+        graph LR
+            %% Styling
+            classDef client fill:#e3f2fd,stroke:#2196f3,stroke-width:2px;
+            classDef server fill:#e8f5e9,stroke:#4caf50,stroke-width:2px;
+            classDef data fill:#fff3e0,stroke:#ff9800,stroke-dasharray: 5 5;
+            classDef secret fill:#ffebee,stroke:#f44336;
+
+            subgraph Browser["🌐 CLIENT (Browser)"]
+                Card["💳 Card Data"]:::data
+                AES["🔑 AES Key"]:::secret
+                RSA_PUB["🔓 RSA Public Key"]
+                
+                Card -->|1. Locked with AES| EncData["📦 Encrypted Data"]
+                AES -->|2. Locked with RSA| EncKey["🔐 Encrypted Key"]
+            end
+
+            EncData -.->|3. Internet Transmission| Server
+            EncKey -.->|3. Internet Transmission| Server
+
+            subgraph ServerSide["🔒 SERVER (Secure)"]
+                Server["⚙️ Backend Processing"]:::server
+                RSA_PRIV["🗝️ RSA Private Key"]:::secret
+                
+                RSA_PRIV -->|4. Unlocks| EncKey
+                EncKey -->|Retrieves| AES_Recovered["🔑 AES Key"]
+                AES_Recovered -->|5. Unlocks| EncData
+                EncData -->|Retrieves| RealData["💳 Card Data"]:::data
+            end
+
+            class Browser client;
+            class ServerSide server;
+        </pre>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+
+        // Simple Pan Zoom
+        setTimeout(() => {
+            const svg = document.querySelector('svg');
+            if (svg) {
+                svg.style.height = '100%';
+                svg.style.width = '100%';
+                svgPanZoom(svg, { zoomEnabled: true, controlIconsEnabled: true, center: true, fit: true });
+            }
+        }, 500);
+
+        function exportPNG() {
+            const svg = document.querySelector('svg');
+            if (!svg) return;
+
+            const serializer = new XMLSerializer();
+            const source = serializer.serializeToString(svg);
+            const img = new Image();
+            const url = URL.createObjectURL(new Blob([source], { type: "image/svg+xml;charset=utf-8" }));
+
+            img.onload = function () {
+                const canvas = document.createElement("canvas");
+                const scale = 2; // High res
+                const bbox = svg.getBoundingClientRect();
+                canvas.width = bbox.width * scale;
+                canvas.height = bbox.height * scale;
+                const ctx = canvas.getContext("2d");
+                ctx.fillStyle = "white";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL("image/png");
+                a.download = 'simple_encryption_flow.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        }
+    </script>
+</body>
+
+</html>

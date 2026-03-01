@@ -12,10 +12,12 @@ function csrf_token(): string {
 
 function verify_csrf(): bool {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (empty($_POST['csrf_token'])) {
+        $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+        
+        if (empty($token)) {
             return false;
         }
-        return hash_equals($_SESSION['csrf_token'], (string)$_POST['csrf_token']);
+        return hash_equals($_SESSION['csrf_token'], (string)$token);
     }
     return false;
 }

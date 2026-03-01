@@ -187,6 +187,21 @@
 ====================================================================== 
   SESSION START: Sun 12/07/2025 23:34:53.15 
   DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+[2025-12-07 21:52:49] [INFO] Checking MySQL server status...
+[2025-12-07 21:52:49] [INFO] MySQL is already running.
+[2025-12-07 21:52:52] [ACTION] IMPORT SELECTED
+[2025-12-07 21:52:52] [INFO] Dropping and recreating database...
+[2025-12-07 21:52:52] [INFO] Importing data from SQL file...
+[2025-12-07 21:52:52] [INFO] Database imported successfully!
+[2025-12-07 21:52:53] [ACTION] EXPORT SELECTED
+[2025-12-07 21:52:53] [INFO] Backing up existing SQL file...
+[2025-12-07 21:52:53] [INFO] Exporting database to SQL file...
+[2025-12-07 21:52:54] [INFO] Database exported successfully!
+[2025-12-07 21:52:56] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Sun 12/07/2025 22:28:57.31 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
 ====================================================================== 
 [INFO] Checking MySQL server status... 
 [INFO] MySQL is already running. 
@@ -195,6 +210,804 @@
 [INFO] Importing data from SQL file... 
 ====================================== 
   IMPORT SUCCESS  |  Sun 12/07/2025 23:34:59.05 
+  IMPORT SUCCESS  |  Sun 12/07/2025 22:29:03.52 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Mon 12/08/2025 18:54:08.37 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Mon 12/08/2025 18:54:13.26 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+[2025-12-08 19:28:08] [INFO] Checking MySQL server status...
+[2025-12-08 19:28:08] [INFO] MySQL is already running.
+[2025-12-08 19:29:00] [ACTION] EXPORT SELECTED
+[2025-12-08 19:29:00] [INFO] Backing up existing SQL file...
+[2025-12-08 19:29:00] [INFO] Exporting database to SQL file...
+[2025-12-08 19:29:01] [INFO] Database exported successfully!
+[2025-12-08 19:29:06] [INFO] Listed backups.
+[2025-12-08 19:29:10] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Mon 12/08/2025 19:31:37.63 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Mon 12/08/2025 19:31:40.31 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+[2025-12-25 18:28:19] [INFO] Checking MySQL server status...
+[2025-12-25 18:28:19] [INFO] MySQL is already running.
+[2025-12-25 18:28:27] [ACTION] IMPORT SELECTED
+[2025-12-25 18:28:27] [INFO] Dropping and recreating database...
+[2025-12-25 18:28:28] [INFO] Importing data from SQL file...
+[2025-12-25 18:28:28] [INFO] Database imported successfully!
+[2025-12-25 18:28:31] [ACTION] EXPORT SELECTED
+[2025-12-25 18:28:31] [INFO] Backing up existing SQL file...
+[2025-12-25 18:28:31] [INFO] Exporting database to SQL file...
+[2025-12-25 18:28:31] [INFO] Database exported successfully!
+[2025-12-25 18:28:34] [INFO] User exited menu.
+[2025-12-25 18:30:40] [INFO] Checking MySQL server status...
+[2025-12-25 18:30:40] [INFO] MySQL is already running.
+[2025-12-25 18:30:43] [ACTION] EXPORT SELECTED
+[2025-12-25 18:30:43] [INFO] Backing up existing SQL file...
+[2025-12-25 18:30:43] [INFO] Exporting database to SQL file...
+[2025-12-25 18:30:44] [INFO] Database exported successfully!
+[2025-12-25 18:30:46] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Sat 12/27/2025 17:09:00.42 
+  DATABASE: mazi_coffee  |  COMPUTER: HEY 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sat 12/27/2025 17:09:04.56 
+====================================== 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sat 12/27/2025 17:15:24.48 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: 27.12.2025  7:31:14,00 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-91K5HLR 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  27.12.2025  7:31:27,07 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: 27.12.2025  7:38:45,53 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-91K5HLR 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  27.12.2025  7:38:52,45 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: 27.12.2025  7:57:10,51 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-91K5HLR 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  27.12.2025  7:57:13,28 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 12/27/2025 17:58:49.22 
+  DATABASE: mazi_coffee  |  COMPUTER: HEY 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sat 12/27/2025 17:58:53.65 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 12/27/2025 18:56:08.02 
+  DATABASE: mazi_coffee  |  COMPUTER: HEY 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sat 12/27/2025 18:56:11.61 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sun 12/28/2025 16:41:59.30 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sun 12/28/2025 16:42:07.74 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sun 12/28/2025 19:21:00.41 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sun 12/28/2025 19:21:05.95 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sun 12/28/2025 21:48:08.70 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sun 12/28/2025 21:48:11.25 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Mon 12/29/2025 13:24:30.31 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Mon 12/29/2025 13:24:33.61 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Mon 12/29/2025 20:06:54.04 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Mon 12/29/2025 20:06:57.64 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 12/30/2025 21:02:37.40 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 12/30/2025 21:02:40.00 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 12/30/2025 22:31:07.41 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 12/30/2025 22:31:09.50 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Fri 01/02/2026 11:25:33.57 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Fri 01/02/2026 11:25:38.96 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Fri 01/02/2026 21:58:25.70 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 01/02/2026 21:58:28.72 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 01/03/2026 14:40:18.04 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sat 01/03/2026 14:40:23.04 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 01/03/2026 16:05:08.59 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sat 01/03/2026 16:05:11.51 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sun 01/04/2026 11:05:53.25 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sun 01/04/2026 11:05:56.78 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sun 01/04/2026 11:34:30.31 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sun 01/04/2026 11:34:35.69 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+[2026-01-06 18:12:06] [INFO] Checking MySQL server status...
+[2026-01-06 18:12:06] [INFO] MySQL is already running.
+[2026-01-06 18:12:08] [ACTION] IMPORT SELECTED
+[2026-01-06 18:12:08] [INFO] Dropping and recreating database...
+[2026-01-06 18:12:09] [INFO] Importing data from SQL file...
+[2026-01-06 18:12:09] [INFO] Database imported successfully!
+[2026-01-06 18:12:11] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Thu 01/08/2026 13:08:33.83 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/08/2026 13:08:37.30 
+====================================== 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/08/2026 13:08:38.15 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Thu 01/08/2026 13:43:49.61 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/08/2026 13:43:52.14 
+====================================== 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/08/2026 13:43:54.18 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Thu 01/08/2026 15:23:56.35 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Thu 01/08/2026 15:24:01.87 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Thu 01/08/2026 19:53:19.89 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/08/2026 19:53:23.99 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+[2026-01-09 03:23:37] [INFO] Checking MySQL server status...
+[2026-01-09 03:23:37] [INFO] MySQL is already running.
+[2026-01-09 03:23:39] [ACTION] IMPORT SELECTED
+[2026-01-09 03:23:39] [INFO] Dropping and recreating database...
+[2026-01-09 03:23:39] [INFO] Importing data from SQL file...
+[2026-01-09 03:23:40] [INFO] Database imported successfully!
+[2026-01-09 04:30:28] [ACTION] EXPORT SELECTED
+[2026-01-09 04:30:28] [INFO] Backing up existing SQL file...
+[2026-01-09 04:30:28] [INFO] Exporting database to SQL file...
+[2026-01-09 04:30:29] [INFO] Database exported successfully!
+[2026-01-09 04:30:33] [INFO] User exited menu.
+ 
+====================================================================== 
+  SESSION START: Fri 01/09/2026 18:13:02.46 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 01/09/2026 18:13:08.24 
+====================================== 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 01/09/2026 18:13:10.44 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Fri 01/09/2026 22:10:11.03 
+  DATABASE: mazi_coffee  |  COMPUTER: HEY 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 01/09/2026 22:10:17.37 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 01/10/2026 16:43:14.19 
+  DATABASE: mazi_coffee  |  COMPUTER: LAPTOP-RAUL 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Sat 01/10/2026 16:43:17.36 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Sat 01/10/2026 20:34:07.94 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Sat 01/10/2026 20:34:12.63 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Thu 01/22/2026 15:36:05.84 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Thu 01/22/2026 15:36:18.79 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Thu 01/22/2026 18:52:08.10 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/22/2026 18:52:10.89 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Thu 01/22/2026 19:29:55.27 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/22/2026 19:29:58.77 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Thu 01/22/2026 22:57:08.65 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/22/2026 22:57:11.44 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Thu 01/22/2026 23:45:08.77 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Thu 01/22/2026 23:45:11.10 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 13:11:59.35 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Tue 02/03/2026 13:12:03.07 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 14:43:50.57 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 02/03/2026 14:43:53.80 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 15:14:37.48 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Tue 02/03/2026 15:14:40.73 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 15:42:44.14 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 02/03/2026 15:42:54.43 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 16:53:56.20 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 02/03/2026 16:53:58.92 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 17:09:18.17 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 02/03/2026 17:09:21.36 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 17:32:59.53 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Tue 02/03/2026 17:33:02.32 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 17:34:26.86 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 02/03/2026 17:34:29.29 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 17:36:35.94 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Tue 02/03/2026 17:36:39.41 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 19:00:25.78 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 02/03/2026 19:00:29.30 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 20:14:20.31 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-NO1ORCM 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Tue 02/03/2026 20:14:23.73 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+ 
+====================================================================== 
+  SESSION START: Tue 02/03/2026 23:18:21.78 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] EXPORT SELECTED 
+[INFO] Backing up existing SQL file... 
+[INFO] Exporting database to SQL file... 
+====================================== 
+  EXPORT SUCCESS  |  Tue 02/03/2026 23:18:24.13 
+====================================== 
+[INFO] User exited menu. 
+[INFO] Session closed normally. 
+[2026-02-04 04:52:25] [INFO] Checking MySQL server status...
+[2026-02-04 04:52:25] [INFO] MySQL is already running.
+[2026-02-04 04:52:28] [ACTION] IMPORT SELECTED
+[2026-02-04 04:52:28] [INFO] Dropping and recreating database...
+[2026-02-04 04:52:29] [INFO] Importing data from SQL file...
+[2026-02-04 04:52:29] [INFO] Database imported successfully!
+[2026-02-04 08:24:31] [ACTION] EXPORT SELECTED
+[2026-02-04 08:24:31] [INFO] Backing up existing SQL file...
+[2026-02-04 08:24:31] [INFO] Exporting database to SQL file...
+[2026-02-04 08:24:32] [INFO] Database exported successfully!
+[2026-02-04 18:20:32] [ACTION] EXPORT SELECTED
+[2026-02-04 18:20:32] [INFO] Backing up existing SQL file...
+[2026-02-04 18:20:32] [INFO] Exporting database to SQL file...
+[2026-02-04 18:20:33] [INFO] Database exported successfully!
+[2026-02-04 22:16:32] [INFO] Checking MySQL server status...
+[2026-02-04 22:16:32] [INFO] MySQL is already running.
+[2026-02-04 22:16:37] [ACTION] EXPORT SELECTED
+[2026-02-04 22:16:37] [INFO] Backing up existing SQL file...
+[2026-02-04 22:16:37] [INFO] Exporting database to SQL file...
+[2026-02-04 22:16:38] [INFO] Database exported successfully!
+[2026-02-05 01:54:41] [ACTION] EXPORT SELECTED
+[2026-02-05 01:54:41] [INFO] Backing up existing SQL file...
+[2026-02-05 01:54:41] [INFO] Exporting database to SQL file...
+[2026-02-05 01:54:42] [INFO] Database exported successfully!
+ 
+====================================================================== 
+  SESSION START: Fri 02/06/2026 17:33:08.03 
+  DATABASE: mazi_coffee  |  COMPUTER: DESKTOP-50R6OUE 
+====================================================================== 
+[INFO] Checking MySQL server status... 
+[INFO] MySQL is already running. 
+[ACTION] IMPORT SELECTED 
+[INFO] Dropping and recreating database... 
+[INFO] Importing data from SQL file... 
+====================================== 
+  IMPORT SUCCESS  |  Fri 02/06/2026 17:33:26.43 
 ====================================== 
 [INFO] User exited menu. 
 [INFO] Session closed normally. 

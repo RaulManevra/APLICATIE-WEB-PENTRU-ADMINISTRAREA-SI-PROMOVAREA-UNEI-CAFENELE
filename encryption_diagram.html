@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Encryption Scheme (RSA + AES)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg-pan-zoom/3.6.1/svg-pan-zoom.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #f8f9fa;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .controls button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+
+        .controls button:hover {
+            background: #2980b9;
+        }
+
+        #diagram-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            background: white;
+            border: 1px solid #ddd;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Mazi Coffee - Encryption Scheme (RSA + AES)</h1>
+        <div class="controls">
+            <button onclick="resetZoom()">Reset Zoom</button>
+            <button onclick="exportSVG()">Export SVG</button>
+            <button onclick="exportPNG()">Export PNG</button>
+        </div>
+    </header>
+    <div id="diagram-container">
+        <pre class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#e3f2fd', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#fff'}}}%%
+sequenceDiagram
+    participant Client as 🌐 Browser (Client)
+    participant Server as 🔒 Server (PHP/OpenSSL)
+    participant DB as 💾 Database
+
+    Note over Client, Server: 1. Handshake & Key Exchange
+    Client->>Server: Request RSA Public Key
+    Server-->>Client: Send RSA Public Key (PEM)
+
+    Note over Client: 2. Data Preparation
+    Client->>Client: Generate Random AES-GCM Key (256-bit)
+    Client->>Client: Generate Random IV (12 bytes)
+    Client->>Client: Collect Sensitive Data (Card Info)
+
+    Note over Client: 3. Encryption (Hybrid)
+    Client->>Client: Encrypt Data with AES Key + IV -> [Ciphertext]
+    Client->>Client: Encrypt AES Key with RSA Public Key -> [Encrypted Key]
+
+    Note over Client, Server: 4. Secure Transmission
+    Client->>Server: POST Order Data<br/>{Ciphertext, IV, Encrypted Key, AuthTag}
+
+    Note over Server: 5. Decryption
+    Server->>Server: Decrypt [Encrypted Key] using Server Private Key -> AES Key
+    Server->>Server: Decrypt [Ciphertext] using AES Key + IV -> Sensitive Data
+
+    Note over Server, DB: 6. Processing
+    Server->>DB: Check Stock / Save Order (Tokenized)
+    Server-->>Client: Success Response
+        </pre>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+
+        let panZoomInstance;
+
+        // Initialize pan-zoom after mermaid renders
+        const checkMermaidRender = setInterval(() => {
+            const svgElement = document.querySelector('#diagram-container svg');
+            if (svgElement) {
+                clearInterval(checkMermaidRender);
+                // Fix for Mermaid sometimes setting fixed width/height
+                svgElement.removeAttribute('style');
+                svgElement.setAttribute('width', '100%');
+                svgElement.setAttribute('height', '100%');
+
+                panZoomInstance = svgPanZoom(svgElement, {
+                    zoomEnabled: true,
+                    controlIconsEnabled: true,
+                    fit: true,
+                    center: true,
+                    minZoom: 0.5,
+                    maxZoom: 10
+                });
+            }
+        }, 100);
+
+        function resetZoom() {
+            if (panZoomInstance) {
+                panZoomInstance.reset();
+            }
+        }
+
+        function exportSVG() {
+            const svg = document.querySelector('#diagram-container svg');
+            if (!svg) return;
+
+            // Clone to modify for export without affecting display
+            const clone = svg.cloneNode(true);
+
+            // Reset transforms for export
+            clone.removeAttribute('style');
+            clone.setAttribute('width', '1000'); // Arbitrary high res
+            clone.setAttribute('height', '800');
+            const g = clone.querySelector('g.svg-pan-zoom_viewport');
+            if (g) g.setAttribute('transform', 'matrix(1,0,0,1,0,0)');
+
+            // Get original BBox logic roughly (or let browser handle via serialization)
+            const svgData = new XMLSerializer().serializeToString(clone);
+            const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'encryption_diagram.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function exportPNG() {
+            const svg = document.querySelector('#diagram-container svg');
+            if (!svg) return;
+
+            // Use the simplified logic to avoid pan-zoom artifacts
+            const serializer = new XMLSerializer();
+            const source = serializer.serializeToString(svg);
+
+            const img = new Image();
+            const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = function () {
+                const canvas = document.createElement("canvas");
+                // Use a high resolution
+                const scale = 2;
+                const bbox = svg.getBoundingClientRect();
+                canvas.width = bbox.width * scale;
+                canvas.height = bbox.height * scale;
+
+                const ctx = canvas.getContext("2d");
+                ctx.fillStyle = "white";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const pngUrl = canvas.toDataURL("image/png");
+                const a = document.createElement('a');
+                a.href = pngUrl;
+                a.download = 'encryption_diagram.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        }
+    </script>
+</body>
+
+</html>
